@@ -1,0 +1,79 @@
+# ============================================================================
+# Styles Directory - Enhanced Security .htaccess
+# ============================================================================
+# Protects CSS files and prevents unauthorized access
+# ============================================================================
+
+# 1. DISABLE DIRECTORY BROWSING
+Options -Indexes
+Options -MultiViews
+
+# 2. STOP CROSS-SITE CONTAMINATION
+Options -FollowSymLinks
+Options +SymLinksIfOwnerMatch
+
+# 3. ALLOW ONLY CSS FILES
+# Block execution of any non-CSS files
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi|exe|bat|cmd|com|pif|scr|vbs|js|jsx)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 4. SET CORRECT MIME TYPE FOR CSS
+<IfModule mod_mime.c>
+    AddType text/css .css
+</IfModule>
+
+# 5. BLOCK MALICIOUS PATTERNS IN QUERY STRINGS
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Block injection attempts
+    RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} (base64_encode|eval\(|gzinflate) [OR]
+    RewriteCond %{QUERY_STRING} (\.\./|\.\.\\|localhost|127\.0\.0\.1) [OR]
+    RewriteCond %{QUERY_STRING} (union.*select|insert.*into|delete.*from) [NC]
+    RewriteRule ^(.*)$ - [F,L]
+    
+    # Block access to hidden files
+    RewriteCond %{SCRIPT_FILENAME} -d [OR]
+    RewriteCond %{SCRIPT_FILENAME} -f
+    RewriteRule "(^|/)\." - [F]
+</IfModule>
+
+# 6. SECURITY HEADERS
+<IfModule mod_headers.c>
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # XSS Protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Set proper content type
+    <FilesMatch "\.css$">
+        Header set Content-Type "text/css; charset=UTF-8"
+    </FilesMatch>
+    
+    # Cache control for CSS files
+    <FilesMatch "\.css$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+</IfModule>
+
+# 7. PROTECT SENSITIVE FILES
+<FilesMatch "^(\.htaccess|\.htpasswd|config\.css|\.env|package\.json|package-lock\.json|yarn\.lock|webpack\.config\.js|\.sass-cache)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>

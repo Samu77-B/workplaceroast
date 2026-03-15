@@ -1,0 +1,154 @@
+# ============================================================================
+# Workplace Roast - Enhanced Security .htaccess
+# ============================================================================
+# This file provides comprehensive security protection against:
+# - Cross-site contamination via symlinks
+# - Directory browsing
+# - Malicious script injections
+# - File access exploitation
+# - Information disclosure
+# ============================================================================
+
+# 1. STOP CROSS-SITE CONTAMINATION (The "Jumping" Fix)
+# Prevents scripts in Site A from using symlinks to access Site B
+Options -FollowSymLinks
+Options +SymLinksIfOwnerMatch
+
+# 2. DISABLE DIRECTORY BROWSING
+# Prevents hackers from seeing your file structure
+Options -Indexes
+Options -MultiViews
+
+# 3. DISABLE SERVER SIGNATURE (Hides server version info)
+ServerSignature Off
+
+# 4. PROTECT SENSITIVE FILES AND DIRECTORIES
+# Block access to configuration files, logs, and sensitive data
+<FilesMatch "^(\.htaccess|\.htpasswd|\.env|\.git|\.gitignore|\.gitattributes|config\.php|config\.js|config\.json|php\.ini|error_log|\.log|composer\.json|composer\.lock|package\.json|package-lock\.json|yarn\.lock|webpack\.config\.js|\.DS_Store|Thumbs\.db)$">
+    <IfModule mod_authz_core.c>
+        # Apache 2.4+
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        # Apache 2.2
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Block access to backup files
+<FilesMatch "\.(bak|backup|old|orig|save|swp|tmp|temp)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 5. BLOCK MALICIOUS SCRIPT INJECTIONS AND ATTACK PATTERNS
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Block common injection patterns in query strings
+    RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} mosConfig(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} base64_encode.*\(.*\) [OR]
+    RewriteCond %{QUERY_STRING} (\<|%3C).*iframe.*(\>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} (boot\.ini|etc/passwd|self/environ) [OR]
+    RewriteCond %{QUERY_STRING} (eval\(|base64_decode|gzinflate|str_rot13) [OR]
+    RewriteCond %{QUERY_STRING} (\.\./|\.\.\\|\.\.%2F|\.\.%5C) [OR]
+    RewriteCond %{QUERY_STRING} (localhost|loopback|127\.0\.0\.1) [OR]
+    RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} (javascript:|vbscript:|onload=|onerror=) [NC,OR]
+    RewriteCond %{QUERY_STRING} (union.*select|insert.*into|delete.*from) [NC]
+    RewriteRule ^(.*)$ - [F,L]
+    
+    # Block suspicious user agents (only block clearly malicious patterns)
+    RewriteCond %{HTTP_USER_AGENT} ^$ [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^(-|\.|') [OR]
+    RewriteCond %{HTTP_USER_AGENT} (libwww-perl|nikto|scan|clshttp|loader|fetch|sqlmap|masscan) [NC]
+    RewriteRule ^(.*)$ - [F,L]
+    
+    # Block access to hidden files (except .well-known for SSL validation)
+    RewriteCond %{REQUEST_URI} !^/\.well-known/ [NC]
+    RewriteCond %{SCRIPT_FILENAME} -f
+    RewriteRule "(^|/)\." - [F,L]
+</IfModule>
+
+# 6. SECURITY HEADERS
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Enable XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Content Security Policy (allows all site resources to load safely)
+    Header always set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://api.web3forms.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; video-src 'self'; connect-src 'self' https://api.web3forms.com;"
+    
+    # Remove server information
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>
+
+# 7. FILE TYPE RESTRICTIONS
+# Block server-side script execution (HTML, CSS, JS, images, videos are still allowed)
+# Exception: Allow PHP in /pwa/api/ for PWA backend
+<IfModule mod_setenvif.c>
+    SetEnvIf Request_URI "^/pwa/" allow_php
+</IfModule>
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi)$">
+    <IfModule mod_authz_core.c>
+        Require env allow_php
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+        Allow from env=allow_php
+    </IfModule>
+</FilesMatch>
+
+# 8. PROTECT AGAINST HOTLINKING (optional - uncomment if needed)
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTP_REFERER} !^$
+#     RewriteCond %{HTTP_REFERER} !^https?://(www\.)?workplaceroast\.com [NC]
+#     RewriteRule \.(jpg|jpeg|png|gif|svg|mp4|webm)$ - [F]
+# </IfModule>
+
+# 9. FORCE HTTPS (uncomment when SSL is configured)
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# </IfModule>
+
+# 10. COMPRESSION (improves performance)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml
+</IfModule>
+
+# 11. BROWSER CACHING (improves performance)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType video/mp4 "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/html "access plus 0 seconds"
+</IfModule>

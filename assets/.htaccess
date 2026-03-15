@@ -1,0 +1,83 @@
+# ============================================================================
+# Assets Directory - Enhanced Security .htaccess
+# ============================================================================
+# Protects media files (images, videos) and prevents unauthorized access
+# ============================================================================
+
+# 1. DISABLE DIRECTORY BROWSING
+Options -Indexes
+Options -MultiViews
+
+# 2. STOP CROSS-SITE CONTAMINATION
+Options -FollowSymLinks
+Options +SymLinksIfOwnerMatch
+
+# 3. BLOCK EXECUTABLE FILES
+# Only allow image and video files - block scripts
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi|exe|bat|cmd|com|pif|scr|vbs|js|jsx)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 4. SET CORRECT MIME TYPES
+<IfModule mod_mime.c>
+    AddType image/jpeg .jpg .jpeg
+    AddType image/png .png
+    AddType image/gif .gif
+    AddType image/svg+xml .svg
+    AddType image/webp .webp
+    AddType image/x-icon .ico
+    AddType video/mp4 .mp4
+    AddType video/webm .webm
+    AddType video/ogg .ogv
+</IfModule>
+
+# 5. BLOCK MALICIOUS PATTERNS
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Block injection attempts in query strings
+    RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} (base64_encode|eval\(|gzinflate) [OR]
+    RewriteCond %{QUERY_STRING} (\.\./|\.\.\\|localhost|127\.0\.0\.1) [OR]
+    RewriteCond %{QUERY_STRING} (union.*select|insert.*into|delete.*from) [NC]
+    RewriteRule ^(.*)$ - [F,L]
+    
+    # Block access to hidden files
+    RewriteCond %{SCRIPT_FILENAME} -d [OR]
+    RewriteCond %{SCRIPT_FILENAME} -f
+    RewriteRule "(^|/)\." - [F]
+</IfModule>
+
+# 6. SECURITY HEADERS
+<IfModule mod_headers.c>
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Cache control for static assets
+    <FilesMatch "\.(jpg|jpeg|png|gif|svg|webp|ico|mp4|webm|ogv)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+# 7. PROTECT SENSITIVE FILES
+<FilesMatch "^(\.htaccess|\.htpasswd|\.env|\.git|\.DS_Store|Thumbs\.db)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 8. PROTECT SUBDIRECTORIES (images, videos)
+# This applies to all subdirectories within assets/
+# Note: File blocking is handled by section #3 above, no additional rewrite rules needed
