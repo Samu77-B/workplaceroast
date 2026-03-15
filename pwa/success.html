@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Successful - Workplace Roast</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="Brand/favicon.png">
+    <link rel="shortcut icon" type="image/png" href="Brand/favicon.png">
+    <link rel="apple-touch-icon" href="Brand/favicon.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #431c0d, #5a2e1a);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-out;
+        }
+
+        .success-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #431c0d;
+            margin-bottom: 15px;
+        }
+
+        .success-message {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .order-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #431c0d;
+        }
+
+        .order-info h3 {
+            color: #431c0d;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            color: #431c0d;
+        }
+
+        .btn {
+            background: #431c0d;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background: #5a6a4a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 122, 90, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .timer {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        .countdown {
+            font-weight: 600;
+            color: #431c0d;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            .success-title {
+                font-size: 1.5rem;
+            }
+            
+            .success-message {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        
+        <h1 class="success-title">Order Successful!</h1>
+        
+        <p class="success-message">
+            Thank you for your order! We've received your request and will prepare your items shortly.
+        </p>
+        
+        <div class="order-info">
+            <h3>Order Details</h3>
+            <div class="info-item">
+                <span>Order ID:</span>
+                <span id="orderId">#12345</span>
+            </div>
+            <div class="info-item">
+                <span>Chair:</span>
+                <span id="chairNumber">Chair One</span>
+            </div>
+            <div class="info-item">
+                <span>Total:</span>
+                <span id="orderTotal">£12.50</span>
+            </div>
+            <div class="info-item">
+                <span>Status:</span>
+                <span>Confirmed</span>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <a href="index.html" class="btn">Order Again</a>
+            <a href="#" class="btn btn-secondary" onclick="window.close()">Close</a>
+        </div>
+        
+        <div class="timer">
+            You will be redirected to the main page in <span class="countdown" id="countdown">10</span> seconds
+        </div>
+    </div>
+
+    <script>
+        // Get order details from URL parameters or localStorage
+        function getOrderDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId') || localStorage.getItem('lastOrderId') || '12345';
+            const chairNumber = urlParams.get('chairNumber') || localStorage.getItem('lastChairNumber') || '1';
+            const total = urlParams.get('total') || localStorage.getItem('lastOrderTotal') || '12.50';
+            
+            // Update display
+            document.getElementById('orderId').textContent = `#${orderId}`;
+            
+            const chairNames = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
+            document.getElementById('chairNumber').textContent = `Chair ${chairNames[chairNumber - 1] || 'Unknown'}`;
+            
+            document.getElementById('orderTotal').textContent = `£${parseFloat(total).toFixed(2)}`;
+            
+            // Clear stored data
+            localStorage.removeItem('lastOrderId');
+            localStorage.removeItem('lastChairNumber');
+            localStorage.removeItem('lastOrderTotal');
+        }
+
+        // Countdown timer
+        function startCountdown() {
+            let countdown = 10;
+            const countdownElement = document.getElementById('countdown');
+            
+            const timer = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    window.location.href = 'index.html';
+                }
+            }, 1000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            getOrderDetails();
+            startCountdown();
+        });
+    </script>
+    
+    <!-- Footer Component -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-copyright">
+                <p>&copy; <span id="currentYear"></span> Workplace Roast. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <style>
+        .app-footer {
+            /* Fallback for browsers that don't support color-mix */
+            background: var(--theme-primary);
+            /* Modern browsers with color-mix support */
+            background: color-mix(in srgb, var(--theme-primary) 90%, transparent);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-content {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .footer-copyright {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .footer-copyright p {
+            margin: 0;
+        }
+    </style>
+    
+    <script>
+        // Set current year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

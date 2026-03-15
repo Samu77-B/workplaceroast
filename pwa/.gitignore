@@ -1,0 +1,25 @@
+# System files
+.DS_Store
+Thumbs.db
+AppData/
+
+# Editor files
+.vscode/
+.idea/
+.windsurf/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Large files
+*.pdf
+
+# Local configuration files (contain sensitive credentials)
+config.local.js
+api/config.local.php
+*.local.js
+*.local.php

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Workplace Roast - Your neighbourhood coffee platform connecting local cafes and businesses with their communities through seamless digital ordering and targeted specials.">
+    <title>Workplace Roast - Your Neighbourhood Coffee Platform</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+</head>
+<body>
+    <!-- Header/Navigation -->
+    <header class="header" id="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <div class="nav__logo">
+                    <a href="#hero" class="nav__logo-link">
+                        <img src="assets/images/Workplace-Roast-Logo-V4.svg" alt="Workplace Roast" class="nav__logo-img">
+                    </a>
+                </div>
+                <div class="nav__right">
+                    <a href="https://workplaceroast.com/pwa/" target="_blank" rel="noopener noreferrer" class="nav__pwa-btn" aria-label="Partner Dashboard">Partner Dashboard</a>
+                    <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation">
+                        <img src="assets/images/Workplace-Roast-Cup-Menu-closed.svg" alt="Menu" class="nav__toggle-icon nav__toggle-icon--closed">
+                        <img src="assets/images/Workplace-Roast-Cup-Menu-opened.svg" alt="Close menu" class="nav__toggle-icon nav__toggle-icon--opened">
+                    </button>
+                    <ul class="nav__menu" id="navMenu">
+                        <li class="nav__item"><a href="#features" class="nav__link">Features</a></li>
+                        <li class="nav__item"><a href="#how-it-works" class="nav__link">How It Works</a></li>
+                        <li class="nav__item"><a href="#pricing" class="nav__link">Pricing</a></li>
+                        <li class="nav__item" style="display: none;"><a href="#testimonials" class="nav__link">Testimonials</a></li>
+                        <li class="nav__item"><a href="#faq" class="nav__link">FAQ</a></li>
+                        <li class="nav__item"><a href="#contact" class="nav__link nav__link--cta">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <video class="hero__video" autoplay muted loop playsinline>
+            <source src="assets/videos/WorkplaceRoastV12.mp4" type="video/mp4">
+        </video>
+        <div class="hero__overlay"></div>
+        <div class="hero__content">
+            <div class="hero__icon">
+                <img src="assets/images/Workplace-Roast-Logo-V4-Text.svg" alt="Workplace Roast" class="hero__logo">
+            </div>
+            <h1 class="hero__title">
+                Secure High-Volume Corporate Accounts. Effortlessly.
+            </h1>
+            <p class="hero__description">
+                Workplace Roast transforms your local cafe into a powerful B2B loyalty engine, allowing you to offer bespoke, hidden pricing and bulk ordering to nearby offices, workplaces, and residential blocks while keeping 99% of your profit.
+            </p>
+            <div class="hero__cta">
+                <a href="#contact" class="btn btn--primary">Get Started</a>
+                <a href="#features" class="btn btn--secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section__title">Platform Features</h2>
+            <p class="section__subtitle">Everything you need to grow your local business</p>
+            <div class="features__grid">
+                <div class="feature-card">
+                    <div class="feature-card__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12" y2="18"></line>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card__title">Digital Ordering</h3>
+                    <p class="feature-card__description">
+                        Seamless digital ordering system that makes it easy for customers to place orders 
+                        from their neighborhood cafes and businesses.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card__title">Corporate Account Manager (Bespoke Pricing)</h3>
+                    <p class="feature-card__description">
+                        Secure predictable, high-volume revenue by setting unique, hidden discount tiers and custom menus specifically for corporate clients or large residential blocks. Handle all B2B invoicing and bulk orders seamlessly.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card__title">Frictionless Local Logistics</h3>
+                    <p class="feature-card__description">
+                        Provide a 5-star experience with bespoke logistics like "Deliver to Desk" or "Collect at Chair"—managed entirely through the app—ensuring quick, accurate service for local customers.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card__title">Neighborhood Connections</h3>
+                    <p class="feature-card__description">
+                        Foster stronger connections within your neighborhood and build a loyal 
+                        community around your business.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card__title">Growth Analytics</h3>
+                    <p class="feature-card__description">
+                        Track your growth with comprehensive analytics and insights to make 
+                        data-driven decisions.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-card__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                            <line x1="1" y1="10" x2="23" y2="10"></line>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card__title">Payment Integration</h3>
+                    <p class="feature-card__description">
+                        Secure payment gateway integration for smooth and secure transactions 
+                        with every order.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section__title">How It Works</h2>
+            <p class="section__subtitle">Get started in three simple steps</p>
+            <div class="steps">
+                <div class="step">
+                    <div class="step__icon">
+                        <img src="assets/images/Workplace-Roast-01.png" alt="Sign Up Icon" class="step__icon-img">
+                    </div>
+                    <h3 class="step__title">Sign Up</h3>
+                    <p class="step__description">
+                        Create your account and choose your plan. We'll help you set up your profile 
+                        and connect your payment gateway.
+                    </p>
+                </div>
+                <div class="step">
+                    <div class="step__icon">
+                        <img src="assets/images/Workplace-Roast-02.png" alt="Add Menu Icon" class="step__icon-img">
+                    </div>
+                    <h3 class="step__title">Add Your Menu</h3>
+                    <p class="step__description">
+                        Input your menu items, set up your offerings, and customize your business 
+                        profile to attract local customers.
+                    </p>
+                </div>
+                <div class="step">
+                    <div class="step__icon">
+                        <img src="assets/images/Workplace-Roast-03.png" alt="Start Growing Icon" class="step__icon-img">
+                    </div>
+                    <h3 class="step__title">Start Growing</h3>
+                    <p class="step__description">
+                        Launch your digital presence and start receiving orders from your neighborhood 
+                        community. Watch your business grow!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Comparison Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <h2 class="section__title">Choose Your Plan</h2>
+            <p class="section__subtitle">Select the plan that fits your business needs</p>
+            <div class="pricing__comparison">
+                <div class="pricing-card">
+                    <div class="pricing-card__header">
+                        <h3 class="pricing-card__title">Basic Plan</h3>
+                        <p class="pricing-card__subtitle">Perfect for getting started</p>
+                    </div>
+                    <div class="pricing-card__body">
+                        <div class="pricing-item">
+                            <span class="pricing-item__label">One-Time Setup Fee</span>
+                            <span class="pricing-item__value">£249</span>
+                            <p class="pricing-item__description">Account creation, basic menu input (up to 50 items), and PayPal/Stripe payment gateway linking.</p>
+                        </div>
+                        <div class="pricing-item">
+                            <span class="pricing-item__label">Monthly Subscription</span>
+                            <span class="pricing-item__value">£49/month</span>
+                            <p class="pricing-item__description">Access to the platform, Basic Admin, and app updates.</p>
+                        </div>
+                        <div class="pricing-item pricing-item--highlight">
+                            <span class="pricing-item__label">Transaction Fee</span>
+                            <span class="pricing-item__value">8%</span>
+                            <p class="pricing-item__description">Fee charged per order processed through the app.</p>
+                        </div>
+                        <p class="pricing-item__description" style="margin-top: 1rem; font-style: italic; color: #666;"><strong>Note:</strong> Basic Plan is limited to standard public pricing and global discounts only.</p>
+                    </div>
+                    <div class="pricing-card__footer">
+                        <a href="#contact" class="btn btn--outline" data-plan="basic">Choose Basic</a>
+                    </div>
+                </div>
+                <div class="pricing-card pricing-card--featured">
+                    <div class="pricing-card__badge">POPULAR</div>
+                    <div class="pricing-card__header">
+                        <h3 class="pricing-card__title">Premium Plan</h3>
+                        <p class="pricing-card__subtitle">For growing businesses</p>
+                    </div>
+                    <div class="pricing-card__body">
+                        <div class="pricing-item">
+                            <span class="pricing-item__label">One-Time Setup Fee</span>
+                            <span class="pricing-item__value">£499</span>
+                            <p class="pricing-item__description">Full branding, unlimited menu input, advanced feature training, QR code design, and PayPal/Stripe payment gateway linking.</p>
+                        </div>
+                        <div class="pricing-item">
+                            <span class="pricing-item__label">Monthly Subscription</span>
+                            <span class="pricing-item__value">£129/month</span>
+                            <p class="pricing-item__description">Full platform access, Advanced Admin, unlimited push notifications, and analytics dashboard. <strong>Includes Exclusive Corporate Account Management (Bespoke B2B Pricing) and Bulk Order Processing Mode.</strong></p>
+                        </div>
+                        <div class="pricing-item pricing-item--highlight">
+                            <span class="pricing-item__label">Transaction Fee</span>
+                            <span class="pricing-item__value">1%</span>
+                            <p class="pricing-item__description">Fee charged per order processed through the app.</p>
+                        </div>
+                    </div>
+                    <div class="pricing-card__footer">
+                        <a href="#contact" class="btn btn--primary" data-plan="premium">Choose Premium</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials" style="display: none;">
+        <div class="container">
+            <h2 class="section__title">What Our Customers Say</h2>
+            <p class="section__subtitle">Join local businesses growing with Workplace Roast</p>
+            <div class="testimonials__carousel">
+                <div class="testimonial active" data-testimonial="0">
+                    <div class="testimonial__stars">★★★★★</div>
+                    <p class="testimonial__quote">
+                        "We secured three large office contracts last month because of the bespoke pricing tool. Our revenue is now predictable!"
+                    </p>
+                    <div class="testimonial__author">
+                        <strong>Sarah Johnson</strong>
+                        <span>Cafe Owner, The Corner Brew</span>
+                    </div>
+                </div>
+                <div class="testimonial" data-testimonial="1">
+                    <div class="testimonial__stars">★★★★★</div>
+                    <p class="testimonial__quote">
+                        "The targeted specials feature has been a game-changer. We can now reach 
+                        our customers directly and see real results from our promotions."
+                    </p>
+                    <div class="testimonial__author">
+                        <strong>Michael Chen</strong>
+                        <span>Business Owner, Morning Delight Bakery</span>
+                    </div>
+                </div>
+                <div class="testimonial" data-testimonial="2">
+                    <div class="testimonial__stars">★★★★★</div>
+                    <p class="testimonial__quote">
+                        "Easy to set up, great support, and the analytics dashboard helps us 
+                        understand our customers better. Highly recommend!"
+                    </p>
+                    <div class="testimonial__author">
+                        <strong>Emma Williams</strong>
+                        <span>Manager, The Local Roastery</span>
+                    </div>
+                </div>
+                <div class="testimonials__controls">
+                    <button class="testimonials__btn testimonials__btn--prev" aria-label="Previous testimonial">‹</button>
+                    <div class="testimonials__dots">
+                        <span class="testimonials__dot active" data-dot="0"></span>
+                        <span class="testimonials__dot" data-dot="1"></span>
+                        <span class="testimonials__dot" data-dot="2"></span>
+                    </div>
+                    <button class="testimonials__btn testimonials__btn--next" aria-label="Next testimonial">›</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2 class="section__title">Frequently Asked Questions</h2>
+            <p class="section__subtitle">Everything you need to know</p>
+            <div class="faq__list">
+                <div class="faq__item">
+                    <button class="faq__question" aria-expanded="false">
+                        <span>What features are included in the Basic Plan?</span>
+                        <span class="faq__icon">+</span>
+                    </button>
+                    <div class="faq__answer">
+                        <p>The Basic Plan includes account creation, basic menu input (up to 50 items), 
+                        payment gateway linking, access to the platform, Basic Admin features, and 
+                        app updates. Transaction fees are 8% per order.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__question" aria-expanded="false">
+                        <span>What's the difference between Basic and Premium plans?</span>
+                        <span class="faq__icon">+</span>
+                    </button>
+                    <div class="faq__answer">
+                        <p>The Premium Plan includes everything in Basic plus full branding services, 
+                        unlimited menu items, advanced feature training, custom QR code design, 
+                        Advanced Admin features, unlimited push notifications, and an analytics 
+                        dashboard.</p>
+                        <p><strong>Key Differences:</strong></p>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li><strong>Transaction Fee:</strong> Premium charges 1% per order vs. Basic's 8%</li>
+                            <li><strong>Pricing Model:</strong> Premium includes exclusive <strong>Bespoke B2B Pricing</strong> (Corporate Account Management with hidden discount tiers and custom menus) vs. Basic's standard public pricing and global discounts only</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__question" aria-expanded="false">
+                        <span>How long does setup take?</span>
+                        <span class="faq__icon">+</span>
+                    </button>
+                    <div class="faq__answer">
+                        <p>For Basic Plan, setup typically takes 1-2 business days after account 
+                        creation. Premium Plan setup, including branding and training, usually takes 
+                        7 to 10 days. Our team will guide you through every step.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__question" aria-expanded="false">
+                        <span>How are transaction fees calculated?</span>
+                        <span class="faq__icon">+</span>
+                    </button>
+                    <div class="faq__answer">
+                        <p>Transaction fees are calculated as a percentage of each order value processed 
+                        through the app. Basic Plan charges 8% per order, while Premium Plan charges 
+                        only 1% per order. Fees are automatically deducted from each transaction and 
+                        sent to Workplace Roast, while the remaining amount goes directly to your 
+                        connected payment account. Note: Standard payment gateway processing fees 
+                        (typically 2.9-3.4% + transaction fee) apply separately and are handled by 
+                        your payment provider.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__question" aria-expanded="false">
+                        <span>Can I upgrade or downgrade my plan later?</span>
+                        <span class="faq__icon">+</span>
+                    </button>
+                    <div class="faq__answer">
+                        <p>Yes! You can upgrade or downgrade your plan at any time. When upgrading, 
+                        you'll gain access to Premium features immediately. When downgrading, changes 
+                        take effect at the start of your next billing cycle.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__question" aria-expanded="false">
+                        <span>What payment methods do you support?</span>
+                        <span class="faq__icon">+</span>
+                    </button>
+                    <div class="faq__answer">
+                        <p>Our platform includes standard integration with PayPal and Stripe, which 
+                        support all major credit cards, debit cards, and digital wallets. Payment 
+                        gateway linking is included in both plans during setup. For businesses using 
+                        alternative payment systems like Square POS, custom integration options are 
+                        available - please contact us for details and pricing.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__question" aria-expanded="false">
+                        <span>Can I connect my existing payment system or POS?</span>
+                        <span class="faq__icon">+</span>
+                    </button>
+                    <div class="faq__answer">
+                        <p>Yes! If you're already using a payment system like Square POS, Shopify Payments, 
+                        or another provider, we can develop a custom integration for your business. 
+                        Custom integrations are available at an additional one-time setup fee starting 
+                        from £299, depending on the complexity of your payment system. Contact us to 
+                        discuss your specific requirements.</p>
+                    </div>
+                </div>
+                <div class="faq__item">
+                    <button class="faq__question" aria-expanded="false">
+                        <span>Is there customer support available?</span>
+                        <span class="faq__icon">+</span>
+                    </button>
+                    <div class="faq__answer">
+                        <p>Yes! All plans include customer support. Premium Plan customers receive 
+                        priority support and advanced feature training. You can reach us through the 
+                        contact form or email support.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <h2 class="section__title">Get In Touch</h2>
+            <p class="section__subtitle">Ready to grow your business? Let's talk!</p>
+            <form class="contact__form" id="contactForm">
+                <div class="form__group">
+                    <label for="name" class="form__label">Name *</label>
+                    <input type="text" id="name" name="name" class="form__input" required>
+                    <span class="form__error" id="nameError"></span>
+                </div>
+                <div class="form__group">
+                    <label for="email" class="form__label">Email *</label>
+                    <input type="email" id="email" name="email" class="form__input" required>
+                    <span class="form__error" id="emailError"></span>
+                </div>
+                <div class="form__group">
+                    <label for="business" class="form__label">Business Name</label>
+                    <input type="text" id="business" name="business" class="form__input">
+                </div>
+                <div class="form__group">
+                    <label for="plan" class="form__label">Plan Interest</label>
+                    <select id="plan" name="plan" class="form__select">
+                        <option value="">Select a plan</option>
+                        <option value="basic">Basic Plan</option>
+                        <option value="premium">Premium Plan</option>
+                        <option value="both">Both - Need More Info</option>
+                    </select>
+                </div>
+                <div class="form__group">
+                    <label for="message" class="form__label">Message *</label>
+                    <textarea id="message" name="message" class="form__textarea" rows="5" required></textarea>
+                    <span class="form__error" id="messageError"></span>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full">Send Message</button>
+                <div class="form__message" id="formMessage"></div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__content">
+                <div class="footer__section">
+                    <img src="assets/images/Workplace-Roast-Logo-V4.svg" alt="Workplace Roast" class="footer__logo">
+                    <p class="footer__description">
+                        Your neighbourhood coffee platform connecting local cafes and businesses 
+                        with their communities.
+                    </p>
+                </div>
+                <div class="footer__section">
+                    <h4 class="footer__heading">Quick Links</h4>
+                    <ul class="footer__links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li style="display: none;"><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer__section">
+                    <h4 class="footer__heading">Contact</h4>
+                    <ul class="footer__links">
+                        <li><a href="#contact">Get In Touch</a></li>
+                        <li><a href="mailto:info@workplaceroast.com">info@workplaceroast.com</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p class="footer__copyright">
+                    &copy; 2026 Workplace Roast. All rights reserved.
+                </p>
+                <p class="footer__credit">
+                    Another amazing project by <a href="https://paradigmstudio.net/" target="_blank" rel="noopener noreferrer">the Paradigm Studio</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="scripts/main.js"></script>
+    <script src="scripts/form-handler.js"></script>
+</body>
+</html>
+

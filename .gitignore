@@ -1,0 +1,39 @@
+# Sensitive config
+pwa/api/config.php
+
+# Environment files
+.env
+pwa/.env
+
+# Git internals (PWA had its own repo)
+pwa/.git/
+pwa/objects/
+pwa/hooks/
+pwa/logs/
+pwa/refs/
+pwa/info/
+pwa/cursor/
+pwa/COMMIT_EDITMSG
+pwa/FETCH_HEAD
+pwa/HEAD
+pwa/ORIG_HEAD
+pwa/config
+pwa/description
+pwa/index
+
+# Dependencies
+pwa/node_modules/
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
