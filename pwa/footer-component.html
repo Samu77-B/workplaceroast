@@ -1,0 +1,307 @@
+<!-- Footer Component -->
+<footer class="app-footer">
+    <div class="footer-content">
+        <!-- PWA Install Button -->
+        <div class="pwa-install-container" id="pwaInstallContainer" style="display: none;">
+            <button id="pwaInstallButton" class="pwa-install-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Install App</span>
+            </button>
+        </div>
+        
+        <!-- Copyright -->
+        <div class="footer-copyright">
+            <p>&copy; <span id="currentYear"></span> Workplace Roast. All rights reserved.</p>
+        </div>
+        
+        <!-- Paradigm Studio Credit -->
+        <div class="footer-credit">
+            <p>Another amazing project by <a href="https://paradigmstudio.net/" target="_blank" rel="noopener noreferrer" class="footer-credit-link">Paradigm Studio</a></p>
+            <p style="margin-top: 5px;"><a href="cafe-admin.html" class="footer-credit-link" style="font-size: 0.75rem; opacity: 0.6;">Cafe Owner Login</a></p>
+        </div>
+    </div>
+</footer>
+
+<style>
+.app-footer {
+    /* Fallback for browsers that don't support color-mix */
+    background: var(--theme-primary);
+    /* Modern browsers with color-mix support - gradient with theme primary color */
+    background: linear-gradient(135deg, color-mix(in srgb, var(--theme-primary) 95%, transparent), color-mix(in srgb, var(--theme-primary) 85%, transparent));
+    color: white;
+    padding: 20px;
+    text-align: center;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 50;
+    transform: translateY(0);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.app-footer.footer-hidden {
+    transform: translateY(100%);
+}
+
+.app-footer.footer-visible {
+    transform: translateY(0);
+}
+
+.footer-content {
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.pwa-install-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.pwa-install-btn {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.pwa-install-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.pwa-install-btn:active {
+    transform: translateY(0);
+}
+
+.pwa-install-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.footer-copyright {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-copyright p {
+    margin: 0;
+}
+
+.footer-credit {
+    font-size: 0.8rem;
+    opacity: 0.85;
+    color: rgba(255, 255, 255, 0.75);
+    margin-top: 5px;
+}
+
+.footer-credit p {
+    margin: 0;
+}
+
+.footer-credit-link {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.footer-credit-link:hover {
+    color: white;
+    text-decoration-color: rgba(255, 255, 255, 0.8);
+    opacity: 1;
+}
+
+/* Mobile optimizations */
+@media (max-width: 374px) {
+    .app-footer {
+        padding: 12px;
+    }
+    
+    .pwa-install-btn {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+    }
+    
+    .footer-copyright {
+        font-size: 0.8rem;
+    }
+    
+    .footer-credit {
+        font-size: 0.75rem;
+    }
+}
+
+@media (min-width: 375px) and (max-width: 479px) {
+    .app-footer {
+        padding: 15px;
+    }
+    
+    .pwa-install-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 480px) {
+    .app-footer {
+        padding: 20px;
+    }
+}
+
+/* Ensure footer appears on corporate login page */
+#corporateLoginPage .app-footer {
+    position: fixed;
+    bottom: 0;
+    z-index: 1001;
+}
+</style>
+
+<script>
+// Set current year
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+// PWA Install Button Functionality
+let deferredPrompt;
+const installButton = document.getElementById('pwaInstallButton');
+const installContainer = document.getElementById('pwaInstallContainer');
+
+// Listen for the beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+    // Show the install button
+    installContainer.style.display = 'flex';
+});
+
+// Handle install button click
+installButton.addEventListener('click', async () => {
+    if (!deferredPrompt) {
+        // If the prompt isn't available, show instructions
+        showInstallInstructions();
+        return;
+    }
+    
+    // Show the install prompt
+    deferredPrompt.prompt();
+    
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+        installButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Installed!</span>';
+        installButton.disabled = true;
+    } else {
+        console.log('User dismissed the install prompt');
+    }
+    
+    // Clear the deferredPrompt
+    deferredPrompt = null;
+    installContainer.style.display = 'none';
+});
+
+// Hide install button if app is already installed
+window.addEventListener('appinstalled', () => {
+    console.log('PWA was installed');
+    installContainer.style.display = 'none';
+    deferredPrompt = null;
+});
+
+// Check if app is already installed (standalone mode)
+if (window.matchMedia('(display-mode: standalone)').matches || 
+    window.navigator.standalone === true) {
+    installContainer.style.display = 'none';
+}
+
+// Show install instructions for iOS
+function showInstallInstructions() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isIOS) {
+        alert('To install this app on your iOS device:\n\n1. Tap the Share button\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
+    } else {
+        alert('To install this app:\n\nLook for the install icon in your browser\'s address bar, or use the browser menu to "Install App".');
+    }
+}
+
+// Footer Scroll Behavior - Pin to bottom until user scrolls
+(function() {
+    const footer = document.querySelector('.app-footer');
+    if (!footer) return;
+    
+    let lastScrollTop = 0;
+    let scrollThreshold = 50; // Pixels to scroll before hiding footer
+    let ticking = false;
+    
+    function updateFooterVisibility() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Check if we're at the bottom of the page
+        const isAtBottom = scrollTop + windowHeight >= documentHeight - 10;
+        
+        // Show footer if:
+        // 1. User is at the top of the page (scrollTop < threshold)
+        // 2. User is at the bottom of the page
+        // 3. User is scrolling up
+        if (scrollTop < scrollThreshold || isAtBottom || scrollTop < lastScrollTop) {
+            footer.classList.remove('footer-hidden');
+            footer.classList.add('footer-visible');
+        } else if (scrollTop > lastScrollTop && scrollTop > scrollThreshold && !isAtBottom) {
+            // Hide footer when scrolling down
+            footer.classList.remove('footer-visible');
+            footer.classList.add('footer-hidden');
+        }
+        
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        ticking = false;
+    }
+    
+    function requestTick() {
+        if (!ticking) {
+            window.requestAnimationFrame(updateFooterVisibility);
+            ticking = true;
+        }
+    }
+    
+    // Listen for scroll events
+    window.addEventListener('scroll', requestTick, { passive: true });
+    
+    // Initial check
+    updateFooterVisibility();
+    
+    // Also check on resize
+    window.addEventListener('resize', updateFooterVisibility, { passive: true });
+})();
+</script>

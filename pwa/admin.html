@@ -1,0 +1,2725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workplace Roast - Admin Dashboard</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="Brand/favicon.png">
+    <link rel="shortcut icon" type="image/png" href="Brand/favicon.png">
+    <link rel="apple-touch-icon" href="Brand/favicon.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #431c0d, #5a2e1a);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(107, 122, 90, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: white;
+            border: 2px solid #431c0d;
+            color: #431c0d;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: #431c0d;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(107, 122, 90, 0.3);
+        }
+
+        .admin-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #431c0d;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #431c0d;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #431c0d;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            background: #431c0d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: #5a6b4a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(107, 122, 90, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .category-card {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .category-card:hover {
+            border-color: #431c0d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(107, 122, 90, 0.1);
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .category-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #431c0d;
+            margin-bottom: 8px;
+        }
+
+        .category-slug {
+            background: #431c0d;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .category-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+
+        .category-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .category-stat {
+            text-align: center;
+        }
+
+        .category-stat-number {
+            font-weight: 600;
+            color: #431c0d;
+        }
+
+        .category-stat-label {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .category-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .product-card {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            border-color: #431c0d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(107, 122, 90, 0.1);
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #431c0d;
+            margin-bottom: 10px;
+        }
+
+        .product-category {
+            background: #431c0d;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .product-prices {
+            margin-bottom: 15px;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .discounts-list {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .discount-card {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .discount-info h4 {
+            color: #431c0d;
+            margin-bottom: 5px;
+        }
+
+        .discount-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .orders-list {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .order-card {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: #431c0d;
+        }
+
+        .order-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .order-items {
+            margin-bottom: 15px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .order-total {
+            font-weight: 600;
+            color: #431c0d;
+            font-size: 1.1rem;
+        }
+
+        .notification-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .notification-popup.show {
+            display: block;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Responsive login form */
+        @media (max-width: 768px) {
+            .login-form {
+                max-width: 90%;
+                margin: 50px auto;
+                padding: 30px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .login-form {
+                margin: 30px auto;
+                padding: 25px 15px;
+            }
+        }
+
+        .login-form h2 {
+            text-align: center;
+            color: #431c0d;
+            margin-bottom: 30px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #431c0d;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #431c0d;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Tablet and smaller laptop styles */
+        @media (max-width: 1024px) {
+            .admin-container {
+                max-width: 100%;
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .admin-nav {
+                gap: 10px;
+            }
+            
+            .nav-btn {
+                padding: 10px 18px;
+                font-size: 14px;
+                min-height: 44px; /* Better touch target for tablets */
+            }
+            
+            .admin-section {
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .categories-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .discounts-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .orders-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .btn {
+                min-height: 44px; /* Better touch target for tablets */
+                padding: 12px 20px;
+            }
+            
+            .product-card,
+            .category-card,
+            .discount-card,
+            .order-card {
+                padding: 18px;
+            }
+            
+            .modal-content {
+                max-width: 85%;
+                padding: 25px;
+            }
+        }
+        
+        /* Tablet portrait and smaller */
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .admin-nav {
+                justify-content: center;
+                gap: 8px;
+            }
+            
+            .nav-btn {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+            
+            .admin-section {
+                padding: 15px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-card,
+            .category-card,
+            .discount-card {
+                padding: 15px;
+            }
+            
+            .modal-content {
+                max-width: 95%;
+                padding: 20px;
+            }
+        }
+        
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .nav-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            .admin-section {
+                padding: 12px;
+            }
+            
+            .btn {
+                padding: 10px 18px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Large screens - optimize for laptop/desktop */
+        @media (min-width: 1025px) and (max-width: 1440px) {
+            .admin-container {
+                max-width: 1400px;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* Extra large screens */
+        @media (min-width: 1441px) {
+            .admin-container {
+                max-width: 1600px;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginForm" class="login-form">
+        <h2>Admin Login</h2>
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Login</button>
+        </form>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="admin-container hidden">
+        <div class="header">
+            <h1>Workplace Roast Admin Dashboard</h1>
+            <p>Manage your cafe operations efficiently</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="admin-nav">
+            <button class="nav-btn active" onclick="showSection('overview')">Overview</button>
+            <button class="nav-btn" onclick="showSection('categories')">Categories</button>
+            <button class="nav-btn" onclick="showSection('products')">Products</button>
+            <button class="nav-btn" onclick="showSection('discounts')">Discounts</button>
+            <button class="nav-btn" onclick="showSection('corporate-clients')">Corporate Clients</button>
+            <button class="nav-btn" onclick="showSection('orders')">Orders</button>
+            <button class="nav-btn" onclick="showSection('notifications')">Notifications</button>
+            <button class="nav-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview" class="admin-section active">
+            <h2 class="section-title">Dashboard Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalProducts">0</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalOrders">0</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingOrders">0</div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalRevenue">£0</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Section -->
+        <div id="categories" class="admin-section">
+            <h2 class="section-title">Category Management</h2>
+            
+            <div class="form-group">
+                <button class="btn btn-success" onclick="showAddCategoryForm()">Add New Category</button>
+            </div>
+
+            <!-- Add/Edit Category Form -->
+            <div id="categoryForm" class="hidden">
+                <h3>Add/Edit Category</h3>
+                <form onsubmit="saveCategory(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoryName">Category Name</label>
+                            <input type="text" id="categoryName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="categorySlug">Category Slug (URL-friendly)</label>
+                            <input type="text" id="categorySlug" required pattern="[a-z0-9-]+" title="Use lowercase letters, numbers, and hyphens only">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryDescription">Description</label>
+                        <textarea id="categoryDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="categorySubtitle">Subtitle (shown on storefront)</label>
+                        <input type="text" id="categorySubtitle" placeholder="e.g., Premium matcha, freshly whisked">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryIcon">Icon (emoji or text)</label>
+                        <input type="text" id="categoryIcon" placeholder="e.g., ☕ or 🍵" maxlength="2">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryOrder">Display Order</label>
+                        <input type="number" id="categoryOrder" min="1" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="categoryActive" checked> Active (visible to customers)
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn">Save Category</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideCategoryForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Categories List -->
+            <div id="categoriesList" class="categories-grid">
+                <!-- Categories will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div id="products" class="admin-section">
+            <h2 class="section-title">Product Management</h2>
+            
+            <div class="form-group">
+                <button class="btn btn-success" onclick="showAddProductForm()">Add New Product</button>
+                <button class="btn btn-secondary" onclick="testBackendConnection()">Test Backend</button>
+                <button class="btn btn-secondary" onclick="loadData()">Reload Data</button>
+                <button class="btn btn-secondary" onclick="refreshStorefront()">Refresh Storefront</button>
+            </div>
+
+            <!-- Add/Edit Product Form -->
+            <div id="productForm" class="hidden">
+                <h3>Add/Edit Product</h3>
+                <form onsubmit="saveProduct(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productName">Product Name</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productCategory">Category</label>
+                            <select id="productCategory" required onchange="updateSubcategoryDropdown()">
+                                <!-- Categories will be loaded dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productSubcategory">Subcategory (Optional)</label>
+                            <select id="productSubcategory">
+                                <option value="">No subcategory</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="productType">Product Type</label>
+                            <select id="productType" required>
+                                <option value="tea">Tea</option>
+                                <option value="coffee">Coffee</option>
+                                <option value="matcha">Matcha</option>
+                                <option value="specialty">Specialty</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="regularPrice">Regular Price (£)</label>
+                            <input type="number" id="regularPrice" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="largePrice">Large Price (£)</label>
+                            <input type="number" id="largePrice" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="productType">Product Type</label>
+                        <select id="productType" required>
+                            <option value="tea">Tea</option>
+                            <option value="coffee">Coffee</option>
+                            <option value="matcha">Matcha</option>
+                            <option value="specialty">Specialty</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Description (Optional)</label>
+                        <textarea id="productDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn">Save Product</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideProductForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Products List -->
+            <div id="productsList" class="products-grid">
+                <!-- Products will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- Discounts Section -->
+        <div id="discounts" class="admin-section">
+            <h2 class="section-title">Discount Management</h2>
+            
+            <!-- Checkout Auto-Apply Discount Settings -->
+            <div style="background: linear-gradient(135deg, #431c0d 0%, #5a2e1a 100%); padding: 25px; border-radius: 15px; margin-bottom: 30px; color: white;">
+                <h3 style="margin: 0 0 20px 0; font-size: 1.3rem;">🎫 Checkout Auto-Apply Discount</h3>
+                <p style="opacity: 0.9; margin-bottom: 20px; font-size: 0.95rem;">This discount is automatically applied and displayed to customers at checkout.</p>
+                
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; backdrop-filter: blur(10px);">
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="checkoutDiscountCode" style="color: white; margin-bottom: 8px;">Discount Code Name:</label>
+                            <input type="text" id="checkoutDiscountCode" placeholder="e.g., MATESRATES, SUMMER20" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3); font-size: 1rem; text-transform: uppercase;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="checkoutDiscountPercentage" style="color: white; margin-bottom: 8px;">Discount Percentage:</label>
+                            <input type="number" id="checkoutDiscountPercentage" min="0" max="100" placeholder="e.g., 10" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3); font-size: 1rem;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn btn-success" onclick="saveCheckoutDiscount()" style="flex: 1;">💾 Save Checkout Discount</button>
+                        <button class="btn btn-secondary" onclick="loadCheckoutDiscount()" style="background: rgba(255,255,255,0.2); border: 2px solid white;">🔄 Reload Current</button>
+                    </div>
+                    <div id="checkoutDiscountStatus" style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 8px; display: none;">
+                        <strong>Current Active:</strong> <span id="currentDiscountDisplay"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add/Edit Discount Form -->
+            <div id="discountForm" class="hidden">
+                <h3>Add/Edit Discount</h3>
+                <form onsubmit="saveDiscount(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="discountName">Discount Name</label>
+                            <input type="text" id="discountName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="discountCode">Discount Code</label>
+                            <input type="text" id="discountCode" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="discountType">Discount Type</label>
+                            <select id="discountType" required>
+                                <option value="percentage">Percentage</option>
+                                <option value="fixed">Fixed Amount</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="discountValue">Discount Value</label>
+                            <input type="number" id="discountValue" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="minOrderAmount">Minimum Order Amount (£)</label>
+                            <input type="number" id="minOrderAmount" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="maxUses">Maximum Uses</label>
+                            <input type="number" id="maxUses" min="1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="discountDescription">Description</label>
+                        <textarea id="discountDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn">Save Discount</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideDiscountForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Discounts List -->
+            <div id="discountsList" class="discounts-list">
+                <!-- Discounts will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- Corporate Clients Section -->
+        <div id="corporate-clients" class="admin-section">
+            <h2 class="section-title">Corporate Clients Management</h2>
+            
+            <!-- Add/Edit Client Form -->
+            <div id="corporateClientForm" class="hidden" style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px; color: #431c0d;">Add/Edit Corporate Client</h3>
+                <form onsubmit="saveCorporateClient(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clientName">Client Name *</label>
+                            <input type="text" id="clientName" placeholder="e.g., Acme Corp" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clientAccessCode">Access Code</label>
+                            <input type="text" id="clientAccessCode" readonly style="background: #e9ecef; font-family: monospace; font-weight: 600;">
+                            <small style="color: #666; font-size: 0.85rem;">Auto-generated unique code</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="clientIsActive" checked style="width: auto;">
+                            <span>Active (Client can use access code)</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn">Save Client</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideCorporateClientForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Add New Client Button -->
+            <div class="form-group">
+                <button class="btn" onclick="showAddCorporateClientForm()">+ Add New Corporate Client</button>
+            </div>
+
+            <!-- Corporate Clients List -->
+            <div id="corporateClientsList" class="products-grid" style="margin-top: 20px;">
+                <!-- Clients will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="orders" class="admin-section">
+            <h2 class="section-title">Order Management</h2>
+            
+            <div class="form-group">
+                <button class="btn" onclick="refreshOrders()">Refresh Orders</button>
+                <button class="btn btn-success" onclick="markAllCompleted()">Mark All as Completed</button>
+            </div>
+
+            <!-- Orders List -->
+            <div id="ordersList" class="orders-list">
+                <!-- Orders will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notifications" class="admin-section">
+            <h2 class="section-title">Notification Settings</h2>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="enableNotifications" checked> Enable Order Notifications
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label for="notificationSound">Notification Sound</label>
+                <select id="notificationSound">
+                    <option value="default">Default</option>
+                    <option value="chime">Chime</option>
+                    <option value="bell">Bell</option>
+                    <option value="none">None</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="notificationDuration">Notification Duration (seconds)</label>
+                <input type="number" id="notificationDuration" value="5" min="1" max="30">
+            </div>
+            
+            <div class="form-group">
+                <button class="btn" onclick="testNotification()">Test Notification</button>
+                <button class="btn btn-success" onclick="saveNotificationSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notificationPopup" class="notification-popup">
+        <div id="notificationContent"></div>
+    </div>
+
+    <!-- Discount Link Modal -->
+    <div id="discountLinkModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #431c0d;">Link Discount to Client</h3>
+                <button onclick="closeDiscountLinkModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            <div id="discountLinkModalContent">
+                <!-- Content will be dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration -->
+    <script src="config.js"></script>
+    
+    <script>
+        // Admin Authentication
+        const ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'WorkplaceRoast2024' // Admin password
+        };
+
+        let currentUser = null;
+        let products = [];
+        let discounts = [];
+        let orders = [];
+        let categories = [];
+        let notificationSettings = {
+            enabled: true,
+            sound: 'default',
+            duration: 5
+        };
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadCheckoutDiscount(); // Load current checkout discount settings
+        });
+
+        function checkAuth() {
+            const savedUser = localStorage.getItem('adminUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                currentUser = { username, loginTime: new Date() };
+                localStorage.setItem('adminUser', JSON.stringify(currentUser));
+                showDashboard();
+                showNotification('Login successful!', 'success');
+            } else {
+                showNotification('Invalid credentials!', 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminUser');
+            currentUser = null;
+            showLogin();
+            showNotification('Logged out successfully', 'info');
+        }
+
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            updateOverview();
+        }
+
+        // Section Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.admin-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Load section-specific data
+            switch(sectionName) {
+                case 'categories':
+                    loadCategoriesFromDatabase();
+                    break;
+                case 'products':
+                    loadData(); // Load from database
+                    break;
+                case 'discounts':
+                    loadCheckoutDiscount(); // Load checkout discount settings
+                    loadDiscounts();
+                    break;
+                case 'orders':
+                    loadOrders();
+                    break;
+                case 'corporate-clients':
+                    loadCorporateClients();
+                    break;
+            }
+        }
+
+        // Data Management
+        function loadData() {
+            try {
+                // Load categories from localStorage or initialize with default data
+                const savedCategories = localStorage.getItem('adminCategories');
+                if (savedCategories) {
+                    categories = JSON.parse(savedCategories);
+                } else {
+                    initializeDefaultCategories();
+                }
+
+                // Load products from localStorage or initialize with default data
+                const savedProducts = localStorage.getItem('adminProducts');
+                if (savedProducts) {
+                    products = JSON.parse(savedProducts);
+                } else {
+                    initializeDefaultProducts();
+                }
+
+                // Load discounts
+                const savedDiscounts = localStorage.getItem('adminDiscounts');
+                if (savedDiscounts) {
+                    discounts = JSON.parse(savedDiscounts);
+                }
+
+                // Load orders
+                const savedOrders = localStorage.getItem('adminOrders');
+                if (savedOrders) {
+                    orders = JSON.parse(savedOrders);
+                }
+
+                // Load notification settings
+                const savedSettings = localStorage.getItem('notificationSettings');
+                if (savedSettings) {
+                    notificationSettings = JSON.parse(savedSettings);
+                    updateNotificationSettingsUI();
+                }
+                
+                console.log('Admin data loaded successfully');
+            } catch (error) {
+                console.error('Error loading admin data:', error);
+                // Initialize with default data if there's an error
+                initializeDefaultCategories();
+                initializeDefaultProducts();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('adminCategories', JSON.stringify(categories));
+            localStorage.setItem('adminProducts', JSON.stringify(products));
+            localStorage.setItem('adminDiscounts', JSON.stringify(discounts));
+            localStorage.setItem('adminOrders', JSON.stringify(orders));
+            localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings));
+        }
+
+        // Ensure products persist reliably
+        function persistProducts() {
+            try {
+                localStorage.setItem('adminProducts', JSON.stringify(products));
+                const stored = localStorage.getItem('adminProducts');
+                const parsed = stored ? JSON.parse(stored) : [];
+                if (!Array.isArray(parsed)) {
+                    throw new Error('Stored products is not an array');
+                }
+            } catch (error) {
+                console.error('Failed to persist products:', error);
+                showNotification('Could not save products to this browser. Check storage settings.', 'error');
+            }
+        }
+
+        function initializeDefaultCategories() {
+            categories = [
+                {
+                    id: 1,
+                    name: 'Hot Drinks',
+                    slug: 'hot-drinks',
+                    description: 'Traditional teas and hot coffees',
+                    icon: '☕',
+                    order: 1,
+                    active: true,
+                    productCount: 0
+                },
+                {
+                    id: 2,
+                    name: 'Cold Drinks',
+                    slug: 'cold-drinks',
+                    description: 'Iced and cold beverages',
+                    icon: '🧊',
+                    order: 2,
+                    active: true,
+                    productCount: 0
+                },
+                {
+                    id: 3,
+                    name: 'Loose Leaf Tea',
+                    slug: 'everyday-teas',
+                    description: 'Premium tea selections',
+                    subtitle: 'Premium loose leaf teas from around the world',
+                    icon: '🍵',
+                    order: 3,
+                    active: true,
+                    productCount: 0
+                },
+                {
+                    id: 4,
+                    name: 'Matcha',
+                    slug: 'matcha-teas',
+                    description: 'Matcha-based drinks',
+                    subtitle: 'Premium matcha, freshly whisked',
+                    icon: '🫖',
+                    order: 4,
+                    active: true,
+                    productCount: 0,
+                    subcategories: {
+                        'Matcha Specials': 'matcha-specials'
+                    }
+                },
+                {
+                    id: 5,
+                    name: 'Coffee',
+                    slug: 'coffees',
+                    description: 'Espresso and coffee drinks',
+                    subtitle: 'Climpson & Sons Specialty Coffee beans from Brazil',
+                    icon: '☕',
+                    order: 5,
+                    active: true,
+                    productCount: 0
+                },
+                {
+                    id: 6,
+                    name: 'Specials',
+                    slug: 'specialties',
+                    description: 'Specialty and unique beverages',
+                    subtitle: 'Limited time specials',
+                    icon: '✨',
+                    order: 6,
+                    active: true,
+                    productCount: 0
+                },
+                {
+                    id: 7,
+                    name: 'Chocolate',
+                    slug: 'chocolate',
+                    description: 'Chocolate drinks and specialties',
+                    subtitle: 'Specialty chocolate by Mörk',
+                    icon: '🍫',
+                    order: 7,
+                    active: true,
+                    productCount: 0
+                },
+                {
+                    id: 8,
+                    name: 'Chai',
+                    slug: 'chai',
+                    description: 'Chai and specialty lattes',
+                    subtitle: 'Award-winning Pomban Chai',
+                    icon: '☕',
+                    order: 8,
+                    active: true,
+                    productCount: 0
+                }
+            ];
+            saveData();
+        }
+
+        function initializeDefaultProducts() {
+            products = [
+                {
+                    id: 1,
+                    name: 'Breakfast Tea',
+                    category: 'hot-drinks',
+                    regularPrice: 2.72,
+                    largePrice: 3.84,
+                    type: 'tea',
+                    description: 'Classic English breakfast tea'
+                },
+                {
+                    id: 2,
+                    name: 'Earl Grey',
+                    category: 'hot-drinks',
+                    regularPrice: 2.88,
+                    largePrice: 4.0,
+                    type: 'tea',
+                    description: 'Bergamot-scented black tea'
+                },
+                {
+                    id: 3,
+                    name: 'Flat White',
+                    category: 'hot-drinks',
+                    regularPrice: 2.72,
+                    largePrice: 3.84,
+                    type: 'coffee',
+                    description: 'Smooth coffee with microfoam'
+                },
+                {
+                    id: 4,
+                    name: 'Pistachio Latte',
+                    category: 'cold-drinks',
+                    regularPrice: 3.36,
+                    largePrice: 4.48,
+                    type: 'coffee',
+                    description: 'Creamy pistachio-flavored latte'
+                },
+                {
+                    id: 5,
+                    name: 'Milk Oolong',
+                    category: 'everyday-teas',
+                    regularPrice: 3.2,
+                    largePrice: 4.32,
+                    type: 'tea',
+                    description: 'Creamy and smooth oolong tea'
+                },
+                {
+                    id: 6,
+                    name: 'Classic Matcha Latte',
+                    category: 'matcha-teas',
+                    regularPrice: 3.36,
+                    largePrice: 4.48,
+                    type: 'matcha',
+                    description: 'Traditional matcha with steamed milk'
+                },
+                {
+                    id: 7,
+                    name: 'Espresso',
+                    category: 'coffees',
+                    regularPrice: 2.24,
+                    largePrice: 3.36,
+                    type: 'coffee',
+                    description: 'Rich and intense espresso shot'
+                },
+                {
+                    id: 8,
+                    name: 'Mork 70% Chocolate',
+                    category: 'specialties',
+                    regularPrice: 3.04,
+                    largePrice: 4.16,
+                    type: 'specialty',
+                    description: 'Premium dark chocolate drink'
+                }
+            ];
+            saveData();
+        }
+
+        // Overview Functions
+        function updateOverview() {
+            document.getElementById('totalProducts').textContent = products.length;
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('pendingOrders').textContent = orders.filter(order => order.status === 'pending').length;
+            
+            const totalRevenue = orders
+                .filter(order => order.status === 'completed')
+                .reduce((sum, order) => sum + order.total, 0);
+            document.getElementById('totalRevenue').textContent = `£${totalRevenue.toFixed(2)}`;
+        }
+
+        // Category Management
+        function loadCategories() {
+            const categoriesList = document.getElementById('categoriesList');
+            categoriesList.innerHTML = '';
+
+            console.log('Loading categories:', categories); // Debug log
+
+            if (categories.length === 0) {
+                categoriesList.innerHTML = '<p>No categories available. Add your first category!</p>';
+                return;
+            }
+
+            // Update product counts for each category
+            updateCategoryProductCounts();
+
+            // Sort categories by order
+            const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
+
+            sortedCategories.forEach(category => {
+                const categoryCard = document.createElement('div');
+                categoryCard.className = 'category-card';
+                categoryCard.innerHTML = `
+                    <div class="category-icon">${category.icon || '📁'}</div>
+                    <div class="category-name">${category.name}</div>
+                    <div class="category-slug">${category.slug}</div>
+                    <div class="category-description">${category.description || 'No description'}</div>
+                    <div class="category-stats">
+                        <div class="category-stat">
+                            <div class="category-stat-number">${category.productCount}</div>
+                            <div class="category-stat-label">Products</div>
+                        </div>
+                        <div class="category-stat">
+                            <div class="category-stat-number">${category.order}</div>
+                            <div class="category-stat-label">Order</div>
+                        </div>
+                    </div>
+                    <div class="category-status ${category.active ? 'status-active' : 'status-inactive'}">
+                        ${category.active ? 'Active' : 'Inactive'}
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn btn-small" onclick="editCategory(${category.id})">Edit</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteCategory(${category.id})">Delete</button>
+                    </div>
+                `;
+                categoriesList.appendChild(categoryCard);
+            });
+        }
+
+        function updateCategoryProductCounts() {
+            categories.forEach(category => {
+                category.productCount = products.filter(product => product.category === category.slug).length;
+            });
+        }
+
+        function showAddCategoryForm() {
+            document.getElementById('categoryForm').classList.remove('hidden');
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categorySlug').value = '';
+            document.getElementById('categoryDescription').value = '';
+            document.getElementById('categorySubtitle').value = '';
+            document.getElementById('categoryIcon').value = '';
+            document.getElementById('categoryOrder').value = categories.length + 1;
+            document.getElementById('categoryActive').checked = true;
+            
+            // Remove edit ID
+            document.getElementById('categoryForm').removeAttribute('data-edit-id');
+        }
+
+        function hideCategoryForm() {
+            document.getElementById('categoryForm').classList.add('hidden');
+        }
+
+        function editCategory(id) {
+            const category = categories.find(c => c.id === id);
+            if (category) {
+                document.getElementById('categoryForm').classList.remove('hidden');
+                document.getElementById('categoryName').value = category.name;
+                document.getElementById('categorySlug').value = category.slug;
+                document.getElementById('categoryDescription').value = category.description || '';
+                document.getElementById('categorySubtitle').value = category.subtitle || '';
+                document.getElementById('categoryIcon').value = category.icon || '';
+                document.getElementById('categoryOrder').value = category.order;
+                document.getElementById('categoryActive').checked = category.active;
+                
+                // Store the category ID for editing
+                document.getElementById('categoryForm').setAttribute('data-edit-id', id);
+            }
+        }
+
+        async function saveCategory(event) {
+            event.preventDefault();
+            
+            const editId = document.getElementById('categoryForm').getAttribute('data-edit-id');
+            const categoryData = {
+                name: document.getElementById('categoryName').value,
+                slug: document.getElementById('categorySlug').value,
+                description: document.getElementById('categoryDescription').value,
+                subtitle: document.getElementById('categorySubtitle').value,
+                icon: document.getElementById('categoryIcon').value,
+                order: parseInt(document.getElementById('categoryOrder').value),
+                active: document.getElementById('categoryActive').checked
+            };
+
+            // Validate slug format
+            if (!/^[a-z0-9-]+$/.test(categoryData.slug)) {
+                showNotification('Category slug must contain only lowercase letters, numbers, and hyphens', 'error');
+                return;
+            }
+
+            try {
+                let response;
+                if (editId) {
+                    // Update existing category
+                    response = await fetch(`${CONFIG.API_BASE_URL}/categories.php?id=${editId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                        },
+                        body: JSON.stringify(categoryData)
+                    });
+                } else {
+                    // Create new category
+                    response = await fetch(`${CONFIG.API_BASE_URL}/categories.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                        },
+                        body: JSON.stringify(categoryData)
+                    });
+                }
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showNotification(editId ? 'Category updated successfully!' : 'Category added successfully!', 'success');
+                    hideCategoryForm();
+                    loadCategoriesFromDatabase(); // Reload categories from database
+                } else {
+                    showNotification('Error saving category: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error saving category:', error);
+                showNotification('Error saving category: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteCategory(id) {
+            const category = categories.find(c => c.id === id);
+            if (!category) return;
+
+            if (confirm(`Are you sure you want to delete the category "${category.name}"?`)) {
+                try {
+                    const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php?id=${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                        }
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        showNotification('Category deleted successfully!', 'success');
+                        loadCategoriesFromDatabase(); // Reload categories from database
+                    } else {
+                        showNotification('Error deleting category: ' + (result.error || 'Unknown error'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting category:', error);
+                    showNotification('Error deleting category: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Product Management
+        function loadProducts() {
+            const productsList = document.getElementById('productsList');
+            productsList.innerHTML = '';
+
+            console.log('Loading products:', products); // Debug log
+
+            if (products.length === 0) {
+                productsList.innerHTML = '<p>No products available. Add your first product!</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                const category = categories.find(cat => cat.slug === product.category);
+                const categoryDisplay = category ? `${category.icon || '📁'} ${category.name}` : product.category.replace(/-/g, ' ').toUpperCase();
+                
+                const subcategoryDisplay = product.subcategory ? ` - ${product.subcategory}` : '';
+                productCard.innerHTML = `
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-category">${categoryDisplay}${subcategoryDisplay}</div>
+                    <div class="product-prices">
+                        <div class="price-item">
+                            <span>Regular:</span>
+                            <span>£${parseFloat(product.regular_price || product.regularPrice || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="price-item">
+                            <span>Large:</span>
+                            <span>£${parseFloat(product.large_price || product.largePrice || 0).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn btn-small" onclick="editProduct(${product.id})">Edit</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteProduct(${product.id})">Delete</button>
+                    </div>
+                `;
+                productsList.appendChild(productCard);
+            });
+        }
+
+        function showAddProductForm() {
+            document.getElementById('productForm').classList.remove('hidden');
+            document.getElementById('productName').value = '';
+            populateCategoryDropdown();
+            document.getElementById('productCategory').value = categories.length > 0 ? categories[0].slug : '';
+            document.getElementById('regularPrice').value = '';
+            document.getElementById('largePrice').value = '';
+            document.getElementById('productType').value = 'tea';
+            document.getElementById('productDescription').value = '';
+        }
+
+        function populateCategoryDropdown() {
+            const categorySelect = document.getElementById('productCategory');
+            categorySelect.innerHTML = '';
+            
+            // Sort categories by order and filter active ones
+            const activeCategories = categories
+                .filter(cat => cat.active)
+                .sort((a, b) => a.order - b.order);
+            
+            activeCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.slug;
+                option.textContent = `${category.icon || '📁'} ${category.name}`;
+                categorySelect.appendChild(option);
+            });
+            
+            // Update subcategory dropdown
+            updateSubcategoryDropdown();
+        }
+        
+        function updateSubcategoryDropdown() {
+            const categorySelect = document.getElementById('productCategory');
+            const subcategorySelect = document.getElementById('productSubcategory');
+            const selectedCategory = categories.find(cat => cat.slug === categorySelect.value);
+            
+            console.log('Updating subcategory dropdown for category:', categorySelect.value);
+            console.log('Selected category:', selectedCategory);
+            console.log('Subcategories:', selectedCategory?.subcategories);
+            
+            subcategorySelect.innerHTML = '<option value="">No subcategory</option>';
+            
+            if (selectedCategory && selectedCategory.subcategories) {
+                Object.keys(selectedCategory.subcategories).forEach(subcatName => {
+                    console.log('Adding subcategory option:', subcatName);
+                    const option = document.createElement('option');
+                    option.value = subcatName;
+                    option.textContent = subcatName;
+                    subcategorySelect.appendChild(option);
+                });
+            }
+        }
+
+        function hideProductForm() {
+            document.getElementById('productForm').classList.add('hidden');
+            // Clear the edit ID attribute
+            document.getElementById('productForm').removeAttribute('data-edit-id');
+        }
+
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (product) {
+                document.getElementById('productForm').classList.remove('hidden');
+                document.getElementById('productName').value = product.name;
+                populateCategoryDropdown();
+                document.getElementById('productCategory').value = product.category;
+                // Update subcategory dropdown after setting category
+                updateSubcategoryDropdown();
+                document.getElementById('productSubcategory').value = product.subcategory || '';
+                document.getElementById('regularPrice').value = product.regular_price || product.regularPrice || '';
+                document.getElementById('largePrice').value = product.large_price || product.largePrice || '';
+                document.getElementById('productType').value = product.type;
+                document.getElementById('productDescription').value = product.description || '';
+                
+                // Store the product ID for editing
+                document.getElementById('productForm').setAttribute('data-edit-id', id);
+            }
+        }
+
+        // saveProduct function moved to database integration section below
+
+        function deleteProduct(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                products = products.filter(p => p.id !== id);
+                persistProducts();
+                saveData();
+                loadProducts();
+                updateOverview();
+                showNotification('Product deleted successfully!', 'success');
+            }
+        }
+
+        // Persist before window unload to avoid accidental data loss
+        window.addEventListener('beforeunload', () => {
+            try {
+                persistProducts();
+            } catch (e) {
+                // no-op
+            }
+        });
+
+        // Checkout Discount Management (Auto-apply at checkout)
+        function loadCheckoutDiscount() {
+            const discountCode = localStorage.getItem('discountCode') || 'MATESRATES';
+            const discountPercentage = localStorage.getItem('discountPercentage') || '10';
+            
+            document.getElementById('checkoutDiscountCode').value = discountCode;
+            document.getElementById('checkoutDiscountPercentage').value = discountPercentage;
+            
+            // Show current active discount
+            const statusDiv = document.getElementById('checkoutDiscountStatus');
+            const displaySpan = document.getElementById('currentDiscountDisplay');
+            displaySpan.textContent = `${discountCode} (${discountPercentage}% off)`;
+            statusDiv.style.display = 'block';
+        }
+
+        function saveCheckoutDiscount() {
+            const discountCode = document.getElementById('checkoutDiscountCode').value.trim().toUpperCase();
+            const discountPercentage = parseInt(document.getElementById('checkoutDiscountPercentage').value);
+            
+            // Validate inputs
+            if (!discountCode) {
+                showNotification('Please enter a discount code name', 'error');
+                return;
+            }
+            
+            if (isNaN(discountPercentage) || discountPercentage < 0 || discountPercentage > 100) {
+                showNotification('Please enter a valid discount percentage (0-100)', 'error');
+                return;
+            }
+            
+            // Save to localStorage (shared with the ordering app)
+            localStorage.setItem('discountCode', discountCode);
+            localStorage.setItem('discountPercentage', discountPercentage);
+            
+            // Update display
+            loadCheckoutDiscount();
+            
+            // Show success message
+            showNotification(`✅ Checkout discount saved! "${discountCode}" at ${discountPercentage}% off will now be automatically applied at checkout.`, 'success');
+        }
+
+        // Discount Management
+        function loadDiscounts() {
+            const discountsList = document.getElementById('discountsList');
+            discountsList.innerHTML = '';
+
+            if (discounts.length === 0) {
+                return;
+            }
+
+            discounts.forEach(discount => {
+                const discountCard = document.createElement('div');
+                discountCard.className = 'discount-card';
+                discountCard.innerHTML = `
+                    <div class="discount-info">
+                        <h4>${discount.name}</h4>
+                        <p>Code: ${discount.code} | ${discount.type === 'percentage' ? discount.value + '%' : '£' + discount.value} off</p>
+                        <p>Min Order: £${discount.minOrderAmount || 0} | Uses: ${discount.usedCount || 0}/${discount.maxUses || 'Unlimited'}</p>
+                    </div>
+                    <div class="product-actions">
+                        <button class="btn btn-small" onclick="editDiscount(${discount.id})">Edit</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteDiscount(${discount.id})">Delete</button>
+                    </div>
+                `;
+                discountsList.appendChild(discountCard);
+            });
+        }
+
+        function showAddDiscountForm() {
+            document.getElementById('discountForm').classList.remove('hidden');
+            document.getElementById('discountName').value = '';
+            document.getElementById('discountCode').value = '';
+            document.getElementById('discountType').value = 'percentage';
+            document.getElementById('discountValue').value = '';
+            document.getElementById('minOrderAmount').value = '';
+            document.getElementById('maxUses').value = '';
+            document.getElementById('discountDescription').value = '';
+        }
+
+        function hideDiscountForm() {
+            document.getElementById('discountForm').classList.add('hidden');
+        }
+
+        function editDiscount(id) {
+            const discount = discounts.find(d => d.id === id);
+            if (discount) {
+                document.getElementById('discountForm').classList.remove('hidden');
+                document.getElementById('discountName').value = discount.name;
+                document.getElementById('discountCode').value = discount.code;
+                document.getElementById('discountType').value = discount.type;
+                document.getElementById('discountValue').value = discount.value;
+                document.getElementById('minOrderAmount').value = discount.minOrderAmount || '';
+                document.getElementById('maxUses').value = discount.maxUses || '';
+                document.getElementById('discountDescription').value = discount.description || '';
+                
+                document.getElementById('discountForm').setAttribute('data-edit-id', id);
+            }
+        }
+
+        function saveDiscount(event) {
+            event.preventDefault();
+            
+            const editId = document.getElementById('discountForm').getAttribute('data-edit-id');
+            const discountData = {
+                name: document.getElementById('discountName').value,
+                code: document.getElementById('discountCode').value,
+                type: document.getElementById('discountType').value,
+                value: parseFloat(document.getElementById('discountValue').value),
+                minOrderAmount: parseFloat(document.getElementById('minOrderAmount').value) || 0,
+                maxUses: parseInt(document.getElementById('maxUses').value) || null,
+                description: document.getElementById('discountDescription').value,
+                usedCount: 0
+            };
+
+            if (editId) {
+                const discountIndex = discounts.findIndex(d => d.id === parseInt(editId));
+                if (discountIndex !== -1) {
+                    discounts[discountIndex] = { ...discounts[discountIndex], ...discountData };
+                    showNotification('Discount updated successfully!', 'success');
+                }
+            } else {
+                const newId = Math.max(...discounts.map(d => d.id), 0) + 1;
+                discounts.push({ id: newId, ...discountData });
+                showNotification('Discount added successfully!', 'success');
+            }
+
+            saveData();
+            loadDiscounts();
+            hideDiscountForm();
+        }
+
+        function deleteDiscount(id) {
+            if (confirm('Are you sure you want to delete this discount?')) {
+                discounts = discounts.filter(d => d.id !== id);
+                saveData();
+                loadDiscounts();
+                showNotification('Discount deleted successfully!', 'success');
+            }
+        }
+
+        // Corporate Clients Management
+        let corporateClients = [];
+
+        async function loadCorporateClients() {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/admin/corporate_clients.php`, {
+                    headers: {
+                        'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load corporate clients');
+                }
+                
+                corporateClients = await response.json();
+                displayCorporateClients();
+            } catch (error) {
+                console.error('Error loading corporate clients:', error);
+                showNotification('Error loading corporate clients: ' + error.message, 'error');
+                corporateClients = [];
+                displayCorporateClients();
+            }
+        }
+
+        function displayCorporateClients() {
+            const clientsList = document.getElementById('corporateClientsList');
+            clientsList.innerHTML = '';
+
+            if (corporateClients.length === 0) {
+                clientsList.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No corporate clients yet. Add your first client!</p>';
+                return;
+            }
+
+            corporateClients.forEach(client => {
+                const clientCard = document.createElement('div');
+                clientCard.className = 'product-card';
+                clientCard.style.cssText = 'background: white; border: 2px solid #e1e5e9; border-radius: 12px; padding: 20px; transition: all 0.3s ease;';
+                clientCard.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 10px 0; color: #431c0d; font-size: 1.2rem;">${escapeHtml(client.name)}</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <strong style="color: #666; min-width: 100px;">Access Code:</strong>
+                                <code style="background: #f8f9fa; padding: 6px 12px; border-radius: 6px; font-family: monospace; font-weight: 600; color: #431c0d; font-size: 1.1rem;">${escapeHtml(client.access_code)}</code>
+                                <button onclick="copyAccessCode('${client.access_code}')" class="btn btn-small" style="padding: 4px 12px; font-size: 0.85rem;">Copy</button>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <strong style="color: #666; min-width: 100px;">Status:</strong>
+                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; ${client.is_active ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;'}">
+                                    ${client.is_active ? '✓ Active' : '✗ Inactive'}
+                                </span>
+                            </div>
+                            ${client.linked_discounts_count > 0 ? `
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <strong style="color: #666; min-width: 100px;">Linked Discounts:</strong>
+                                <span style="color: #431c0d; font-weight: 600;">${client.linked_discounts_count}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-small" onclick="editCorporateClient(${client.id})">Edit</button>
+                        <button class="btn btn-small" onclick="linkDiscountToClient(${client.id})" style="background: #17a2b8;">Link Discount</button>
+                        ${client.linked_discounts_count === 0 ? `
+                        <button class="btn btn-small btn-danger" onclick="deleteCorporateClient(${client.id})">Delete</button>
+                        ` : ''}
+                    </div>
+                `;
+                clientsList.appendChild(clientCard);
+            });
+        }
+
+        function showAddCorporateClientForm() {
+            document.getElementById('corporateClientForm').classList.remove('hidden');
+            document.getElementById('clientName').value = '';
+            document.getElementById('clientAccessCode').value = '';
+            document.getElementById('clientIsActive').checked = true;
+            document.getElementById('corporateClientForm').removeAttribute('data-edit-id');
+        }
+
+        function hideCorporateClientForm() {
+            document.getElementById('corporateClientForm').classList.add('hidden');
+        }
+
+        function editCorporateClient(id) {
+            const client = corporateClients.find(c => c.id === id);
+            if (client) {
+                document.getElementById('corporateClientForm').classList.remove('hidden');
+                document.getElementById('clientName').value = client.name;
+                document.getElementById('clientAccessCode').value = client.access_code;
+                document.getElementById('clientIsActive').checked = client.is_active == 1;
+                document.getElementById('corporateClientForm').setAttribute('data-edit-id', id);
+            }
+        }
+
+        async function saveCorporateClient(event) {
+            event.preventDefault();
+            
+            const editId = document.getElementById('corporateClientForm').getAttribute('data-edit-id');
+            const clientData = {
+                name: document.getElementById('clientName').value.trim(),
+                is_active: document.getElementById('clientIsActive').checked ? 1 : 0
+            };
+
+            if (!clientData.name) {
+                showNotification('Please enter a client name', 'error');
+                return;
+            }
+
+            try {
+                const url = editId 
+                    ? `${CONFIG.API_BASE_URL}/admin/corporate_clients.php?id=${editId}`
+                    : `${CONFIG.API_BASE_URL}/admin/corporate_clients.php`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                    },
+                    body: JSON.stringify(clientData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showNotification(editId ? 'Client updated successfully!' : 'Client added successfully!', 'success');
+                    
+                    if (!editId && result.access_code) {
+                        // Show the generated access code
+                        document.getElementById('clientAccessCode').value = result.access_code;
+                        setTimeout(() => {
+                            hideCorporateClientForm();
+                            loadCorporateClients();
+                        }, 2000);
+                    } else {
+                        hideCorporateClientForm();
+                        loadCorporateClients();
+                    }
+                } else {
+                    showNotification('Error saving client: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error saving client:', error);
+                showNotification('Error saving client: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteCorporateClient(id) {
+            const client = corporateClients.find(c => c.id === id);
+            if (!client) return;
+
+            if (confirm(`Are you sure you want to delete "${client.name}"? This action cannot be undone.`)) {
+                try {
+                    const response = await fetch(`${CONFIG.API_BASE_URL}/admin/corporate_clients.php?id=${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showNotification('Client deleted successfully!', 'success');
+                        loadCorporateClients();
+                    } else {
+                        showNotification('Error deleting client: ' + (result.error || 'Unknown error'), 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting client:', error);
+                    showNotification('Error deleting client: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function copyAccessCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('Access code copied to clipboard!', 'success');
+            }).catch(() => {
+                showNotification('Failed to copy access code', 'error');
+            });
+        }
+
+        let currentLinkingClientId = null;
+
+        async function linkDiscountToClient(clientId) {
+            currentLinkingClientId = clientId;
+            const client = corporateClients.find(c => c.id === clientId);
+            
+            // First, load available discounts
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/admin/discounts.php`, {
+                    headers: {
+                        'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load discounts');
+                }
+                
+                const allDiscounts = await response.json();
+                // Show all discounts, but highlight already linked ones
+                const availableDiscounts = allDiscounts;
+
+                if (availableDiscounts.length === 0) {
+                    showNotification('No discounts available. Create a discount first.', 'error');
+                    return;
+                }
+
+                // Build modal content
+                let modalHTML = `
+                    <p style="margin-bottom: 20px; color: #666;">Select a discount to link to <strong>${escapeHtml(client.name)}</strong>:</p>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                `;
+
+                availableDiscounts.forEach(discount => {
+                    const isLinked = discount.corporate_client_id == clientId;
+                    const isPublic = discount.is_public == 1;
+                    const isLinkedToOther = discount.corporate_client_id && discount.corporate_client_id != clientId;
+                    
+                    modalHTML += `
+                        <div style="border: 2px solid ${isLinked ? '#28a745' : '#e1e5e9'}; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: ${isLinked ? '#d4edda' : 'white'};">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <h4 style="margin: 0 0 5px 0; color: #431c0d;">${escapeHtml(discount.name)}</h4>
+                                    <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                                        Code: <strong>${escapeHtml(discount.code)}</strong> | 
+                                        ${discount.type === 'percentage' ? discount.value + '%' : '£' + discount.value} off
+                                    </p>
+                                    ${discount.description ? `<p style="margin: 5px 0 0 0; color: #666; font-size: 0.85rem;">${escapeHtml(discount.description)}</p>` : ''}
+                                    <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                        ${isLinked ? '<span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">✓ Linked</span>' : ''}
+                                        ${isPublic && !isLinked ? '<span style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">Public</span>' : ''}
+                                        ${!isPublic && !isLinked ? '<span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">Private</span>' : ''}
+                                        ${isLinkedToOther ? '<span style="background: #ffc107; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">Linked to Other</span>' : ''}
+                                    </div>
+                                </div>
+                                <div>
+                                    ${isLinked ? 
+                                        `<button onclick="unlinkDiscount(${discount.id})" class="btn btn-small btn-danger" style="padding: 6px 12px;">Unlink</button>` :
+                                        `<button onclick="linkSelectedDiscount(${discount.id})" class="btn btn-small" style="padding: 6px 12px;" ${isLinkedToOther ? 'disabled title="Already linked to another client"' : ''}>Link</button>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                modalHTML += `</div>`;
+                modalHTML += `<div style="margin-top: 20px; text-align: right;"><button onclick="closeDiscountLinkModal()" class="btn btn-secondary">Close</button></div>`;
+
+                document.getElementById('discountLinkModalContent').innerHTML = modalHTML;
+                document.getElementById('discountLinkModal').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading discounts:', error);
+                showNotification('Error loading discounts: ' + error.message, 'error');
+            }
+        }
+
+        function closeDiscountLinkModal() {
+            document.getElementById('discountLinkModal').style.display = 'none';
+            currentLinkingClientId = null;
+        }
+
+        async function linkSelectedDiscount(discountId) {
+            if (!currentLinkingClientId) return;
+            
+            if (confirm('Link this discount to the client? It will become non-public.')) {
+                await updateDiscountLink(discountId, currentLinkingClientId);
+                closeDiscountLinkModal();
+            }
+        }
+
+        async function unlinkDiscount(discountId) {
+            if (confirm('Unlink this discount from the client?')) {
+                await updateDiscountLink(discountId, null);
+                if (currentLinkingClientId) {
+                    linkDiscountToClient(currentLinkingClientId); // Refresh the modal
+                }
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('discountLinkModal');
+            if (event.target == modal) {
+                closeDiscountLinkModal();
+            }
+        }
+
+        async function updateDiscountLink(discountId, clientId) {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/admin/discounts.php?id=${discountId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        corporate_client_id: clientId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showNotification(clientId ? 'Discount linked successfully!' : 'Discount unlinked successfully!', 'success');
+                    loadCorporateClients();
+                } else {
+                    showNotification('Error updating discount link: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error updating discount link:', error);
+                showNotification('Error updating discount link: ' + error.message, 'error');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Order Management
+        function loadOrders() {
+            const ordersList = document.getElementById('ordersList');
+            ordersList.innerHTML = '';
+
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p>No orders available.</p>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                orderCard.innerHTML = `
+                    <div class="order-header">
+                        <div class="order-id">Order #${order.id}</div>
+                        <div class="order-status status-${order.status}">${order.status.toUpperCase()}</div>
+                    </div>
+                    <div class="order-info" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <strong>Chair:</strong>
+                            <span style="color: #431c0d; font-weight: 600;">${order.chairNumber || 'Not specified'}</span>
+                        </div>
+                        ${order.deliveryOption ? `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <strong>Delivery:</strong>
+                            <span style="color: #FF8C42; font-weight: 600;">${order.deliveryOption}</span>
+                        </div>
+                        ` : ''}
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #666;">
+                            <span>Ordered:</span>
+                            <span>${new Date(order.createdAt).toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <div class="order-items">
+                        ${order.items.map(item => `
+                            <div class="order-item">
+                                <span>${item.name} x${item.quantity}</span>
+                                <span>£${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-total">Total: £${order.total.toFixed(2)}</div>
+                    <div class="product-actions" style="margin-top: 15px;">
+                        ${order.status === 'pending' ? 
+                            `<button class="btn btn-small btn-success" onclick="completeOrder(${order.id})">Mark Complete</button>` : 
+                            `<button class="btn btn-small btn-secondary" onclick="reopenOrder(${order.id})">Reopen</button>`
+                        }
+                        <button class="btn btn-small btn-danger" onclick="deleteOrder(${order.id})">Delete</button>
+                    </div>
+                `;
+                ordersList.appendChild(orderCard);
+            });
+        }
+
+        function refreshOrders() {
+            // In a real app, this would fetch from your backend
+            showNotification('Orders refreshed!', 'info');
+            loadOrders();
+        }
+
+        function completeOrder(id) {
+            const orderIndex = orders.findIndex(o => o.id === id);
+            if (orderIndex !== -1) {
+                orders[orderIndex].status = 'completed';
+                orders[orderIndex].completedAt = new Date();
+                saveData();
+                loadOrders();
+                updateOverview();
+                showNotification('Order marked as completed!', 'success');
+            }
+        }
+
+        function reopenOrder(id) {
+            const orderIndex = orders.findIndex(o => o.id === id);
+            if (orderIndex !== -1) {
+                orders[orderIndex].status = 'pending';
+                delete orders[orderIndex].completedAt;
+                saveData();
+                loadOrders();
+                updateOverview();
+                showNotification('Order reopened!', 'info');
+            }
+        }
+
+        function deleteOrder(id) {
+            if (confirm('Are you sure you want to delete this order?')) {
+                orders = orders.filter(o => o.id !== id);
+                saveData();
+                loadOrders();
+                updateOverview();
+                showNotification('Order deleted successfully!', 'success');
+            }
+        }
+
+        function markAllCompleted() {
+            if (confirm('Mark all pending orders as completed?')) {
+                orders.forEach(order => {
+                    if (order.status === 'pending') {
+                        order.status = 'completed';
+                        order.completedAt = new Date();
+                    }
+                });
+                saveData();
+                loadOrders();
+                updateOverview();
+                showNotification('All orders marked as completed!', 'success');
+            }
+        }
+
+        // Notification System
+        function updateNotificationSettingsUI() {
+            document.getElementById('enableNotifications').checked = notificationSettings.enabled;
+            document.getElementById('notificationSound').value = notificationSettings.sound;
+            document.getElementById('notificationDuration').value = notificationSettings.duration;
+        }
+
+        function saveNotificationSettings() {
+            notificationSettings = {
+                enabled: document.getElementById('enableNotifications').checked,
+                sound: document.getElementById('notificationSound').value,
+                duration: parseInt(document.getElementById('notificationDuration').value)
+            };
+            saveData();
+            showNotification('Notification settings saved!', 'success');
+        }
+
+        function testNotification() {
+            showOrderNotification({
+                id: 'TEST',
+                chairNumber: 'Chair Five',
+                items: [{ name: 'Test Order', quantity: 1, price: 3.50 }],
+                total: 3.50
+            });
+        }
+
+        function showOrderNotification(order) {
+            if (!notificationSettings.enabled) return;
+
+            const popup = document.getElementById('notificationPopup');
+            const content = document.getElementById('notificationContent');
+            
+            content.innerHTML = `
+                <h4>🛎️ New Order Received!</h4>
+                <div style="margin: 10px 0;">
+                    <strong>Order #${order.id}</strong>
+                </div>
+                <div style="margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.2); border-radius: 5px;">
+                    <strong>🪑 ${order.chairNumber || 'Chair Not specified'}</strong>
+                </div>
+                <div style="margin: 10px 0;">
+                    <strong>Total: £${order.total.toFixed(2)}</strong>
+                </div>
+                <div style="margin: 10px 0;">
+                    Items: ${order.items.length}
+                </div>
+            `;
+            
+            popup.classList.add('show');
+            
+            // Play notification sound
+            if (notificationSettings.sound !== 'none') {
+                playNotificationSound();
+            }
+            
+            // Auto-hide after specified duration
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, notificationSettings.duration * 1000);
+        }
+
+        function playNotificationSound() {
+            // Create a simple notification sound
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        function showNotification(message, type = 'info') {
+            const popup = document.getElementById('notificationPopup');
+            const content = document.getElementById('notificationContent');
+            
+            content.innerHTML = `<p>${message}</p>`;
+            popup.className = `notification-popup show ${type}`;
+            
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+
+        async function testBackendConnection() {
+            try {
+                const apiUrl = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : 'http://localhost:3001';
+                const response = await fetch(`${apiUrl}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    showNotification('Backend is running! Status: ' + data.status, 'success');
+                } else {
+                    showNotification('Backend responded with error: ' + response.status, 'error');
+                }
+            } catch (error) {
+                showNotification('Cannot connect to backend: ' + error.message, 'error');
+                console.error('Backend connection test failed:', error);
+            }
+        }
+
+        function refreshStorefront() {
+            // Open the storefront in a new window/tab
+            const storefrontWindow = window.open('/ndo-fabhair/index.html', '_blank');
+            
+            // Wait for the window to load, then trigger product refresh
+            if (storefrontWindow) {
+                storefrontWindow.addEventListener('load', function() {
+                    setTimeout(() => {
+                        if (storefrontWindow.refreshStorefrontProducts) {
+                            storefrontWindow.refreshStorefrontProducts();
+                            showNotification('Storefront refreshed!', 'success');
+                        } else {
+                            showNotification('Storefront refresh function not available', 'warning');
+                        }
+                    }, 2000);
+                });
+            } else {
+                showNotification('Could not open storefront window', 'error');
+            }
+        }
+
+        // Simulate new orders (for testing)
+        function simulateNewOrder() {
+            const orderId = Math.max(...orders.map(o => o.id), 0) + 1;
+            const chairNumbers = ['Chair One', 'Chair Two', 'Chair Three', 'Chair Four', 'Chair Five', 'Chair Six', 'Chair Seven', 'Chair Eight'];
+            const randomChair = chairNumbers[Math.floor(Math.random() * chairNumbers.length)];
+            
+            const newOrder = {
+                id: orderId,
+                chairNumber: randomChair,
+                items: [
+                    { name: 'Flat White', quantity: 1, price: 2.72 },
+                    { name: 'Croissant', quantity: 2, price: 1.50 }
+                ],
+                total: 5.72,
+                status: 'pending',
+                createdAt: new Date()
+            };
+            
+            orders.push(newOrder);
+            saveData();
+            showOrderNotification(newOrder);
+            updateOverview();
+        }
+
+        // Add a test button for simulating orders (remove in production)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                const testBtn = document.createElement('button');
+                testBtn.textContent = 'Simulate Order';
+                testBtn.className = 'btn btn-secondary';
+                testBtn.style.position = 'fixed';
+                testBtn.style.bottom = '20px';
+                testBtn.style.right = '20px';
+                testBtn.style.zIndex = '1000';
+                testBtn.onclick = simulateNewOrder;
+                document.body.appendChild(testBtn);
+            }
+        });
+    </script>
+    
+    <!-- Simple Database Integration Script -->
+    <script>
+        // Load categories from database
+        async function loadCategoriesFromDatabase() {
+            try {
+                console.log('Loading categories from database...');
+                const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php`, {
+                    headers: {
+                        'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.categories) {
+                    categories = data.categories;
+                    console.log('Categories loaded:', categories.length, 'categories');
+                    loadCategories(); // Update the UI
+                } else {
+                    console.error('Failed to load categories:', data);
+                    showNotification('Failed to load categories from database: ' + (data.error || 'Unknown error'), 'error');
+                    // Fallback to default categories
+                    initializeDefaultCategories();
+                    loadCategories();
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                showNotification('Error connecting to categories database: ' + error.message, 'error');
+                // Fallback to default categories
+                initializeDefaultCategories();
+                loadCategories();
+            }
+        }
+
+        // Override the original functions with simple database calls
+        window.loadData = async function() {
+            try {
+                console.log('Loading products from database...');
+                const response = await fetch(`${CONFIG.API_BASE_URL}/products.php`);
+                const data = await response.json();
+                
+                if (data.success && data.products) {
+                    products = data.products;
+                    console.log('Products loaded:', products.length, 'products');
+                    
+                    // Update the UI
+                    // Also load categories for the product form
+                    await loadCategoriesFromDatabase();
+                    
+                    if (typeof loadProducts === 'function') {
+                        loadProducts();
+                    }
+                    if (typeof updateOverview === 'function') {
+                        updateOverview();
+                    }
+                } else {
+                    console.error('Failed to load products:', data);
+                    showNotification('Failed to load products from database: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showNotification('Error connecting to database: ' + error.message, 'error');
+            }
+        };
+        
+        // Override saveProduct with database-backed version
+        window.saveProduct = async function(event) {
+            event.preventDefault();
+            
+            const editId = document.getElementById('productForm').getAttribute('data-edit-id');
+            const productData = {
+                name: document.getElementById('productName').value,
+                category: document.getElementById('productCategory').value,
+                subcategory: document.getElementById('productSubcategory').value || null,
+                regular_price: parseFloat(document.getElementById('regularPrice').value),
+                large_price: parseFloat(document.getElementById('largePrice').value),
+                type: document.getElementById('productType').value,
+                description: document.getElementById('productDescription').value
+            };
+
+            try {
+                let response;
+                if (editId) {
+                    // Update existing product
+                    response = await fetch(`${CONFIG.API_BASE_URL}/products.php`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                        },
+                        body: JSON.stringify({ id: parseInt(editId), ...productData })
+                    });
+                } else {
+                    // Create new product
+                    response = await fetch(`${CONFIG.API_BASE_URL}/products.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                        },
+                        body: JSON.stringify(productData)
+                    });
+                }
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showNotification(editId ? 'Product updated successfully!' : 'Product added successfully!', 'success');
+                    hideProductForm();
+                    loadData(); // Reload products
+                } else {
+                    showNotification('Error saving product: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error saving product:', error);
+                showNotification('Error saving product: ' + error.message, 'error');
+            }
+        };
+        
+        window.deleteProduct = async function(id) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/products.php`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                    },
+                    body: JSON.stringify({ id: id })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showNotification('Product deleted successfully!', 'success');
+                    loadData(); // Reload products
+                } else {
+                    showNotification('Error deleting product: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showNotification('Error deleting product: ' + error.message, 'error');
+            }
+        };
+    </script>
+    
+    <!-- Footer Component -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-copyright">
+                <p>&copy; <span id="currentYear"></span> Workplace Roast. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <style>
+        .app-footer {
+            /* Fallback for browsers that don't support color-mix */
+            background: var(--theme-primary);
+            /* Modern browsers with color-mix support */
+            background: linear-gradient(135deg, color-mix(in srgb, var(--theme-primary) 95%, transparent), color-mix(in srgb, var(--theme-primary) 85%, transparent));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-copyright {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .footer-copyright p {
+            margin: 0;
+        }
+    </style>
+    
+    <script>
+        // Set current year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate QR Codes for Chairs</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6B7A5A 0%, #A8B896 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #6B7A5A;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .qr-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .qr-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .qr-card h3 {
+            color: #6B7A5A;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .qr-code-container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        .qr-url {
+            font-size: 0.85rem;
+            color: #666;
+            word-break: break-all;
+            margin-top: 10px;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+        }
+        
+        .print-btn {
+            display: block;
+            width: 200px;
+            margin: 40px auto;
+            padding: 15px 30px;
+            background: #6B7A5A;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            box-shadow: 0 4px 15px rgba(107, 122, 90, 0.3);
+        }
+        
+        .print-btn:hover {
+            background: #5a6750;
+        }
+        
+        .instructions {
+            background: #e8f5e9;
+            border-left: 4px solid #6B7A5A;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        
+        .instructions h2 {
+            color: #6B7A5A;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 20px;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            
+            .print-btn {
+                display: none;
+            }
+            
+            .qr-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .instructions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 QR Codes for All Chairs</h1>
+        <p class="subtitle">Teas & C's Ordering System</p>
+        
+        <div class="instructions">
+            <h2>📋 Instructions</h2>
+            <ul>
+                <li>Each QR code below is ready to print</li>
+                <li>Click "Print All QR Codes" to print this page</li>
+                <li>Cut out each QR code and place at the corresponding chair</li>
+                <li>Consider laminating for durability</li>
+                <li>Test by scanning one QR code with your phone first</li>
+            </ul>
+        </div>
+        
+        <div class="qr-grid" id="qrGrid">
+            <!-- QR codes will be generated here -->
+        </div>
+        
+        <button class="print-btn" onclick="window.print()">🖨️ Print All QR Codes</button>
+    </div>
+    
+    <script>
+        const baseUrl = 'https://teasandcs.com/ordering/';
+        const chairs = [
+            { number: 1, name: 'One' },
+            { number: 2, name: 'Two' },
+            { number: 3, name: 'Three' },
+            { number: 4, name: 'Four' },
+            { number: 5, name: 'Five' },
+            { number: 6, name: 'Six' },
+            { number: 7, name: 'Seven' },
+            { number: 8, name: 'Eight' }
+        ];
+        
+        const qrGrid = document.getElementById('qrGrid');
+        
+        chairs.forEach(chair => {
+            const url = `${baseUrl}?chair=${chair.number}`;
+            
+            // Create card
+            const card = document.createElement('div');
+            card.className = 'qr-card';
+            
+            // Create title
+            const title = document.createElement('h3');
+            title.textContent = `Chair ${chair.name}`;
+            card.appendChild(title);
+            
+            // Create QR code container
+            const qrContainer = document.createElement('div');
+            qrContainer.className = 'qr-code-container';
+            qrContainer.id = `qr-${chair.number}`;
+            card.appendChild(qrContainer);
+            
+            // Create URL display
+            const urlDisplay = document.createElement('div');
+            urlDisplay.className = 'qr-url';
+            urlDisplay.textContent = url;
+            card.appendChild(urlDisplay);
+            
+            qrGrid.appendChild(card);
+            
+            // Generate QR code
+            setTimeout(() => {
+                new QRCode(qrContainer, {
+                    text: url,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#6B7A5A',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }, 100 * chair.number);
+        });
+    </script>
+</body>
+</html>
+
