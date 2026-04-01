@@ -43,8 +43,12 @@ function initNavigation() {
     const header = document.getElementById('header');
     
     window.addEventListener('scroll', function() {
+        if (document.body.classList.contains('page-partner')) {
+            header.classList.add('scrolled');
+            return;
+        }
         const currentScroll = window.pageYOffset;
-        
+
         if (currentScroll > 100) {
             header.classList.add('scrolled');
         } else {
@@ -86,10 +90,12 @@ function initSmoothScroll() {
 // Testimonials Carousel
 function initTestimonials() {
     const testimonials = document.querySelectorAll('.testimonial');
+    if (!testimonials.length) return;
+
     const dots = document.querySelectorAll('.testimonials__dot');
     const prevBtn = document.querySelector('.testimonials__btn--prev');
     const nextBtn = document.querySelector('.testimonials__btn--next');
-    
+
     let currentTestimonial = 0;
     
     function showTestimonial(index) {

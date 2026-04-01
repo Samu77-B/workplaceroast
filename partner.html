@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Partner sign in and account requests for Workplace Roast — your neighbourhood coffee platform.">
+    <title>Partner Dashboard — Workplace Roast</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+</head>
+<body class="page-partner">
+    <header class="header" id="header">
+        <nav class="nav">
+            <div class="nav__container">
+                <div class="nav__logo">
+                    <a href="index.html" class="nav__logo-link">
+                        <img src="assets/images/Workplace-Roast-Logo-V4.svg" alt="Workplace Roast" class="nav__logo-img">
+                    </a>
+                </div>
+                <div class="nav__right">
+                    <span class="nav__pwa-btn nav__pwa-btn--current" aria-current="page">Partner portal</span>
+                    <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation">
+                        <img src="assets/images/Workplace-Roast-Cup-Menu-closed.svg" alt="Menu" class="nav__toggle-icon nav__toggle-icon--closed">
+                        <img src="assets/images/Workplace-Roast-Cup-Menu-opened.svg" alt="Close menu" class="nav__toggle-icon nav__toggle-icon--opened">
+                    </button>
+                    <ul class="nav__menu" id="navMenu">
+                        <li class="nav__item"><a href="index.html#features" class="nav__link">Features</a></li>
+                        <li class="nav__item"><a href="index.html#how-it-works" class="nav__link">How It Works</a></li>
+                        <li class="nav__item"><a href="index.html#pricing" class="nav__link">Pricing</a></li>
+                        <li class="nav__item"><a href="index.html#faq" class="nav__link">FAQ</a></li>
+                        <li class="nav__item"><a href="index.html#contact" class="nav__link nav__link--cta">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="partner" id="main">
+        <div class="container">
+            <h1 class="partner__title">Partner dashboard</h1>
+            <p class="partner__intro">Sign in to manage your cafe, or request a partner account if you are new.</p>
+
+            <div class="partner__card contact__form">
+                <div class="partner__tabs" role="tablist" aria-label="Partner options">
+                    <button type="button" class="partner__tab partner__tab--active" role="tab" id="tab-signin" aria-selected="true" aria-controls="panel-signin" data-panel="signin">Sign in</button>
+                    <button type="button" class="partner__tab" role="tab" id="tab-request" aria-selected="false" aria-controls="panel-request" data-panel="request">Request account</button>
+                </div>
+
+                <div class="partner__panels">
+                    <div class="partner__panel partner__panel--active" id="panel-signin" role="tabpanel" aria-labelledby="tab-signin">
+                        <p class="partner__lead">Use your partner email on the secure dashboard to sign in. We will open the partner app in this window.</p>
+                        <form class="partner__form" id="signInForm" novalidate>
+                            <div class="form__group">
+                                <label for="signin_email" class="form__label">Work email</label>
+                                <input type="email" id="signin_email" name="signin_email" class="form__input" autocomplete="email" placeholder="you@cafe.com">
+                                <span class="form__error" id="signin_emailError"></span>
+                            </div>
+                            <button type="submit" class="btn btn--primary btn--full">Continue to partner dashboard</button>
+                        </form>
+                    </div>
+
+                    <div class="partner__panel" id="panel-request" role="tabpanel" aria-labelledby="tab-request" hidden>
+                        <p class="partner__lead">Tell us about your business. We will review your request and get back to you shortly.</p>
+                        <form class="partner__form" id="requestAccountForm" novalidate>
+                            <div class="form__group">
+                                <label for="req_name" class="form__label">Name *</label>
+                                <input type="text" id="req_name" name="name" class="form__input" required autocomplete="name">
+                                <span class="form__error" id="req_nameError"></span>
+                            </div>
+                            <div class="form__group">
+                                <label for="req_email" class="form__label">Email *</label>
+                                <input type="email" id="req_email" name="email" class="form__input" required autocomplete="email">
+                                <span class="form__error" id="req_emailError"></span>
+                            </div>
+                            <div class="form__group">
+                                <label for="req_business" class="form__label">Business name *</label>
+                                <input type="text" id="req_business" name="business" class="form__input" required autocomplete="organization">
+                                <span class="form__error" id="req_businessError"></span>
+                            </div>
+                            <div class="form__group">
+                                <label for="req_phone" class="form__label">Phone</label>
+                                <input type="tel" id="req_phone" name="phone" class="form__input" autocomplete="tel">
+                                <span class="form__error" id="req_phoneError"></span>
+                            </div>
+                            <div class="form__group">
+                                <label for="req_plan" class="form__label">Plan interest</label>
+                                <select id="req_plan" name="plan" class="form__select">
+                                    <option value="">Select a plan</option>
+                                    <option value="basic">Basic Plan</option>
+                                    <option value="premium">Premium Plan</option>
+                                    <option value="unsure">Not sure yet</option>
+                                </select>
+                            </div>
+                            <div class="form__group">
+                                <label for="req_message" class="form__label">Message *</label>
+                                <textarea id="req_message" name="message" class="form__textarea" rows="4" required placeholder="Location, approximate order volume, or anything else we should know"></textarea>
+                                <span class="form__error" id="req_messageError"></span>
+                            </div>
+                            <button type="submit" class="btn btn--primary btn--full">Submit request</button>
+                            <div class="form__message" id="requestFormMessage"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <p class="partner__back"><a href="index.html">← Back to homepage</a></p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__content">
+                <div class="footer__section">
+                    <img src="assets/images/Workplace-Roast-Logo-V4.svg" alt="Workplace Roast" class="footer__logo">
+                    <p class="footer__description">
+                        Your neighbourhood coffee platform connecting local cafes and businesses
+                        with their communities.
+                    </p>
+                </div>
+                <div class="footer__section">
+                    <h4 class="footer__heading">Quick Links</h4>
+                    <ul class="footer__links">
+                        <li><a href="index.html#features">Features</a></li>
+                        <li><a href="index.html#pricing">Pricing</a></li>
+                        <li><a href="index.html#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer__section">
+                    <h4 class="footer__heading">Contact</h4>
+                    <ul class="footer__links">
+                        <li><a href="index.html#contact">Get In Touch</a></li>
+                        <li><a href="mailto:info@workplaceroast.com">info@workplaceroast.com</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p class="footer__copyright">&copy; 2026 Workplace Roast. All rights reserved.</p>
+                <p class="footer__credit">
+                    Another amazing project by <a href="https://paradigmstudio.net/" target="_blank" rel="noopener noreferrer">the Paradigm Studio</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/partner.js"></script>
+</body>
+</html>

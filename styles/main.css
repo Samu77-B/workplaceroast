@@ -1031,3 +1031,114 @@ a {
     transform: translateY(0);
 }
 
+/* Partner portal page */
+.page-partner .header {
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.page-partner .nav__logo-img {
+    filter: none;
+}
+
+.page-partner .nav__toggle-icon {
+    filter: none;
+}
+
+.nav__pwa-btn--current {
+    cursor: default;
+    opacity: 0.92;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+.partner {
+    padding: calc(5.5rem + var(--spacing-lg)) 0 var(--spacing-xl);
+    min-height: 60vh;
+}
+
+.partner__title {
+    text-align: center;
+    font-size: 2.25rem;
+    color: var(--color-roast-brown);
+    margin-bottom: var(--spacing-xs);
+}
+
+.partner__intro {
+    text-align: center;
+    color: var(--color-roast-brown);
+    opacity: 0.9;
+    max-width: 36rem;
+    margin: 0 auto var(--spacing-lg);
+}
+
+.partner__card {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.partner__tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 2px solid rgba(74, 55, 40, 0.15);
+}
+
+.partner__tab {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-roast-brown);
+    background: var(--color-foam-cream);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.partner__tab:hover:not(.partner__tab--active) {
+    background: rgba(217, 124, 46, 0.12);
+}
+
+.partner__tab--active {
+    background-color: var(--color-energy-orange);
+    color: var(--color-white);
+}
+
+.partner__panel {
+    display: none;
+}
+
+.partner__panel--active {
+    display: block;
+}
+
+.partner__lead {
+    font-size: 0.9375rem;
+    color: var(--color-roast-brown);
+    opacity: 0.88;
+    margin-bottom: var(--spacing-md);
+    line-height: 1.55;
+}
+
+.partner__back {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+}
+
+.partner__back a {
+    color: var(--color-energy-orange);
+    font-weight: 600;
+}
+
+.partner__back a:hover {
+    color: var(--color-roast-brown);
+    text-decoration: underline;
+}
+
