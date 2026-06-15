@@ -998,6 +998,33 @@ a {
     color: var(--color-energy-orange);
 }
 
+.footer__staff {
+    margin-top: var(--spacing-sm);
+    font-size: 0.7rem;
+    opacity: 0.35;
+    transition: opacity var(--transition);
+}
+
+.footer__staff:hover {
+    opacity: 0.75;
+}
+
+.footer__staff-link {
+    color: var(--color-white);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.footer__staff-link:hover {
+    color: var(--color-energy-orange);
+    text-decoration: underline;
+}
+
+.footer__staff-sep {
+    margin: 0 0.35rem;
+    opacity: 0.6;
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {
@@ -1140,5 +1167,24 @@ a {
 .partner__back a:hover {
     color: var(--color-roast-brown);
     text-decoration: underline;
+}
+
+.partner__admin-link {
+    margin-top: var(--spacing-md);
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-roast-brown);
+    opacity: 0.75;
+}
+
+.partner__admin-link a {
+    color: var(--color-roast-brown);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.partner__admin-link a:hover {
+    color: var(--color-energy-orange);
 }
 
