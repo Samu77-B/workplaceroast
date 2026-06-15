@@ -998,31 +998,34 @@ a {
     color: var(--color-energy-orange);
 }
 
-.footer__staff {
+.footer__admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     margin-top: var(--spacing-sm);
+    padding: 0.3rem 0.65rem;
     font-size: 0.7rem;
-    opacity: 0.35;
-    transition: opacity var(--transition);
-}
-
-.footer__staff:hover {
-    opacity: 0.75;
-}
-
-.footer__staff-link {
-    color: var(--color-white);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.45);
     text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.15);
     transition: var(--transition);
 }
 
-.footer__staff-link:hover {
-    color: var(--color-energy-orange);
-    text-decoration: underline;
+.footer__admin-btn:hover {
+    color: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(0, 0, 0, 0.25);
 }
 
-.footer__staff-sep {
-    margin: 0 0.35rem;
-    opacity: 0.6;
+.footer__admin-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    flex-shrink: 0;
+    opacity: 0.8;
 }
 
 /* Animations */
