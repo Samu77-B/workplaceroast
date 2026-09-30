@@ -4,11 +4,14 @@ This document outlines what needs to be verified and tested before showcasing th
 
 ## 📋 Overview
 
-The platform has **3 main interfaces** that need to be working:
+The platform has **4 main interfaces** that need to be working:
 
-1. **Master Admin Dashboard** (`admin.html`) - Platform-wide management
-2. **Cafe Admin Dashboard** (`cafe-admin.html`) - Individual cafe management
-3. **Cafe Client Interface** (`index.html`) - Customer ordering experience
+1. **Super Dashboard** (`super-admin.html`) - Platform owner: add/edit cafes, health monitoring
+2. **Master Admin Dashboard** (`admin.html`) - Catalog, discounts, orders
+3. **Cafe Admin Dashboard** (`cafe-admin.html`) - Individual cafe management
+4. **Cafe Client Interface** (`index.html`) - Customer ordering experience
+
+See [docs/super-dashboard.md](docs/super-dashboard.md) for Super Dashboard setup and health statuses.
 
 **Dummy Companies for Demo:**
 - **Acme Hair Salon** (ID: 1, Basic Tier) - Path: `/pwa/acmehairsalon`
@@ -16,7 +19,23 @@ The platform has **3 main interfaces** that need to be working:
 
 ---
 
-## ✅ 1. Master Admin Dashboard (`admin.html`)
+## ✅ 1. Super Dashboard (`super-admin.html`)
+
+### Access Information
+- **URL:** `https://workplaceroast.com/pwa/super-admin.html`
+- **Login:** same as Master Admin (`admin` / `WorkplaceRoast2024`)
+
+### Features to Verify:
+- [ ] Cafe list loads from API (no error banner)
+- [ ] **Update database** migration runs once on production
+- [ ] Create cafe (name, slug, tier, contact)
+- [ ] Edit / delete cafe
+- [ ] Health filters (healthy, attention, at risk, setup, inactive)
+- [ ] Customer URL `/pwa/{slug}` opens correct menu after slug API works
+
+---
+
+## ✅ 2. Master Admin Dashboard (`admin.html`)
 
 ### Access Information
 - **URL:** `https://workplaceroast.com/pwa/admin.html`
@@ -81,7 +100,7 @@ The platform has **3 main interfaces** that need to be working:
 
 ---
 
-## ✅ 2. Cafe Admin Dashboard (`cafe-admin.html`)
+## ✅ 3. Cafe Admin Dashboard (`cafe-admin.html`)
 
 ### Access Information
 - **URL:** `https://workplaceroast.com/pwa/cafe-admin.html`
@@ -132,7 +151,7 @@ The platform has **3 main interfaces** that need to be working:
 
 ---
 
-## ✅ 3. Cafe Client Interface (`index.html`)
+## ✅ 4. Cafe Client Interface (`index.html`)
 
 ### Access Information
 - **Direct URLs:**
@@ -304,7 +323,12 @@ The platform has **3 main interfaces** that need to be working:
 
 ### Login Credentials Summary:
 
-**Master Admin:**
+**Super Dashboard (cafes + health):**
+- URL: `https://workplaceroast.com/pwa/super-admin.html`
+- Username: `admin`
+- Password: `WorkplaceRoast2024`
+
+**Master Admin (catalog):**
 - URL: `https://workplaceroast.com/pwa/admin.html`
 - Username: `admin`
 - Password: `WorkplaceRoast2024`

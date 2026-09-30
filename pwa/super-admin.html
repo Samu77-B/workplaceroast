@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workplace Roast — Super Dashboard</title>
+    <link rel="icon" type="image/png" href="Brand/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brown: #431c0d;
+            --brown-2: #5a2e1a;
+            --accent: #d97c2e;
+            --bg: #f4efe9;
+            --card: #fff;
+            --muted: #6b625c;
+            --line: #e8dfd6;
+            --healthy: #1b7a4e;
+            --healthy-bg: #e6f6ee;
+            --attention: #9a6b12;
+            --attention-bg: #fff4d6;
+            --risk: #b42318;
+            --risk-bg: #fde8e6;
+            --inactive: #5c5c5c;
+            --inactive-bg: #ececec;
+            --setup: #175cd3;
+            --setup-bg: #e8f1ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Inter, system-ui, sans-serif;
+            background: var(--bg);
+            color: #2b211c;
+            min-height: 100vh;
+        }
+        .hidden { display: none !important; }
+        .login-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card);
+            padding: 36px;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(67, 28, 13, 0.12);
+        }
+        .login-card h1 { font-size: 1.4rem; color: var(--brown); margin-bottom: 6px; }
+        .login-card p { color: var(--muted); margin-bottom: 22px; font-size: 0.95rem; }
+        label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            font: inherit;
+            margin-bottom: 14px;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--brown);
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        .btn {
+            background: var(--brown);
+            color: #fff;
+            border: 0;
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .btn:hover { background: var(--brown-2); }
+        .btn-secondary { background: #6c757d; }
+        .btn-ghost {
+            background: transparent;
+            color: var(--brown);
+            border: 1.5px solid var(--brown);
+        }
+        .btn-danger { background: #b42318; }
+        .btn-small { padding: 7px 12px; font-size: 0.82rem; }
+        .top {
+            background: linear-gradient(135deg, var(--brown), var(--brown-2));
+            color: #fff;
+            padding: 22px 28px;
+        }
+        .top-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .top h1 { font-size: 1.45rem; }
+        .top p { opacity: 0.85; font-size: 0.92rem; margin-top: 4px; }
+        .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .top-actions a, .top-actions button {
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.12);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+        .kpi {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--line);
+        }
+        .kpi .n { font-size: 1.6rem; font-weight: 700; color: var(--brown); }
+        .kpi .l { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .chip {
+            border: 1px solid var(--line);
+            background: #fff;
+            padding: 6px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+        .chip.active { background: var(--brown); color: #fff; border-color: var(--brown); }
+        .banner {
+            background: #fff4d6;
+            border: 1px solid #efd48a;
+            color: #5c4308;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+        .banner.error { background: var(--risk-bg); border-color: #f0b4ae; color: #7a1c16; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 14px;
+        }
+        .cafe {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .cafe-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+        .cafe h3 { font-size: 1.05rem; color: var(--brown); }
+        .pill {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        .st-healthy { background: var(--healthy-bg); color: var(--healthy); }
+        .st-attention { background: var(--attention-bg); color: var(--attention); }
+        .st-at_risk { background: var(--risk-bg); color: var(--risk); }
+        .st-inactive { background: var(--inactive-bg); color: var(--inactive); }
+        .st-setup { background: var(--setup-bg); color: var(--setup); }
+        .meta { font-size: 0.85rem; color: var(--muted); display: grid; gap: 4px; }
+        .meta code {
+            background: #f6f1ec;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--brown);
+            font-weight: 600;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            font-size: 0.78rem;
+        }
+        .stats-row div {
+            background: #faf7f4;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+        }
+        .stats-row strong { display: block; color: var(--brown); font-size: 0.95rem; }
+        .reasons { font-size: 0.8rem; color: var(--muted); }
+        .score-bar {
+            height: 6px;
+            background: #ece6df;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .score-bar span {
+            display: block;
+            height: 100%;
+            border-radius: 999px;
+            background: var(--healthy);
+        }
+        .score-bar.attention span { background: var(--attention); }
+        .score-bar.at_risk span, .score-bar.inactive span { background: var(--risk); }
+        .score-bar.setup span { background: var(--setup); }
+        .cafe-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 16, 8, 0.45);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 16px;
+            overflow: auto;
+            z-index: 20;
+        }
+        .drawer {
+            background: #fff;
+            width: min(560px, 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+        .drawer h2 { color: var(--brown); margin-bottom: 16px; font-size: 1.2rem; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 640px) {
+            .row { grid-template-columns: 1fr; }
+        }
+        .hint { font-size: 0.78rem; color: var(--muted); margin: -8px 0 12px; }
+        .reset-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        .reset-check input { width: auto; margin: 0; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--brown);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            z-index: 40;
+            max-width: 320px;
+        }
+        .toast.error { background: #b42318; }
+    </style>
+</head>
+<body>
+    <div id="loginForm" class="login-wrap">
+        <form class="login-card" onsubmit="handleLogin(event)">
+            <h1>Super Dashboard</h1>
+            <p>Create cafes, edit clients, and watch venue health.</p>
+            <label for="username">Username</label>
+            <input id="username" autocomplete="username" required>
+            <label for="password">Password</label>
+            <input id="password" type="password" autocomplete="current-password" required>
+            <button class="btn" type="submit" style="width:100%">Sign in</button>
+        </form>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <header class="top">
+            <div class="top-inner">
+                <div>
+                    <h1>Super Dashboard</h1>
+                    <p>Platform owner view — every cafe, setup, and trading health</p>
+                </div>
+                <div class="top-actions">
+                    <a href="admin.html">Catalog admin</a>
+                    <a href="cafe-admin.html">Cafe owner login</a>
+                    <button type="button" onclick="runMigration()">Update database</button>
+                    <button type="button" onclick="logout()">Log out</button>
+                </div>
+            </div>
+        </header>
+        <main class="wrap">
+            <div id="apiBanner" class="banner hidden"></div>
+            <div class="kpis">
+                <div class="kpi"><div class="n" id="kpiTotal">0</div><div class="l">Cafes</div></div>
+                <div class="kpi"><div class="n" id="kpiHealthy">0</div><div class="l">Healthy</div></div>
+                <div class="kpi"><div class="n" id="kpiWatch">0</div><div class="l">Need attention</div></div>
+                <div class="kpi"><div class="n" id="kpiSetup">0</div><div class="l">Setup incomplete</div></div>
+                <div class="kpi"><div class="n" id="kpiOrders">0</div><div class="l">Orders (7 days)</div></div>
+            </div>
+            <div class="toolbar">
+                <div class="filters" id="filters">
+                    <button type="button" class="chip active" data-filter="all">All</button>
+                    <button type="button" class="chip" data-filter="healthy">Healthy</button>
+                    <button type="button" class="chip" data-filter="attention">Attention</button>
+                    <button type="button" class="chip" data-filter="at_risk">At risk</button>
+                    <button type="button" class="chip" data-filter="setup">Setup</button>
+                    <button type="button" class="chip" data-filter="inactive">Inactive</button>
+                </div>
+                <button type="button" class="btn" onclick="openEditor()">+ New cafe</button>
+            </div>
+            <div id="cafeGrid" class="grid"></div>
+        </main>
+    </div>
+
+    <div id="editor" class="overlay hidden" onclick="backdropClose(event)">
+        <form class="drawer" onsubmit="saveClient(event)">
+            <h2 id="editorTitle">New cafe</h2>
+            <input type="hidden" id="editId">
+            <label for="clientName">Cafe / client name *</label>
+            <input id="clientName" required placeholder="e.g. Bench Cafe">
+            <div class="row">
+                <div>
+                    <label for="clientSlug">URL slug</label>
+                    <input id="clientSlug" placeholder="bench-cafe">
+                    <p class="hint">Customers can use /pwa/your-slug after deploy.</p>
+                </div>
+                <div>
+                    <label for="clientTier">Plan</label>
+                    <select id="clientTier">
+                        <option value="basic">Basic</option>
+                        <option value="premium">Premium</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <label for="contactName">Owner / contact name</label>
+                    <input id="contactName">
+                </div>
+                <div>
+                    <label for="contactEmail">Contact email</label>
+                    <input id="contactEmail" type="email">
+                </div>
+            </div>
+            <label for="clientNotes">Internal notes</label>
+            <textarea id="clientNotes" placeholder="Hours, machine type, anything useful"></textarea>
+            <label style="display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:12px;">
+                <input id="clientActive" type="checkbox" checked style="width:auto;margin:0;">
+                Active (can take orders)
+            </label>
+            <div id="accessCodeRow" class="hidden">
+                <label>Access code</label>
+                <p><code id="shownAccessCode"></code>
+                    <button type="button" class="btn btn-small btn-ghost" onclick="copyShownCode()">Copy</button>
+                </p>
+                <label style="display:flex;align-items:center;gap:8px;font-weight:500;">
+                    <input id="regenCode" type="checkbox" style="width:auto;margin:0;">
+                    Generate a new access code
+                </label>
+            </div>
+            <label for="ownerPassword">Cafe owner password</label>
+            <input id="ownerPassword" type="password" placeholder="Leave blank to keep / use default">
+            <p class="hint" id="passwordHint">New cafes default to CafeOwner2024 unless you set one here.</p>
+            <label id="resetPasswordRow" class="hidden reset-check">
+                <input id="resetOwnerPassword" type="checkbox" style="width:auto;margin:0;">
+                Reset owner password to default (CafeOwner2024)
+            </label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                <button type="submit" class="btn">Save cafe</button>
+                <button type="button" class="btn btn-secondary" onclick="closeEditor()">Cancel</button>
+                <button type="button" id="deleteBtn" class="btn btn-danger hidden" onclick="deleteClient()">Delete</button>
+            </div>
+        </form>
+    </div>
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="config.js?v=9"></script>
+    <script>
+        const ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'WorkplaceRoast2024'
+        };
+
+        let clients = [];
+        let filter = 'all';
+        let editing = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('#filters .chip').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filter = btn.dataset.filter;
+                    document.querySelectorAll('#filters .chip').forEach(c => c.classList.toggle('active', c === btn));
+                    render();
+                });
+            });
+            const saved = localStorage.getItem('adminUser');
+            if (saved) {
+                showDash();
+            }
+        });
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                localStorage.setItem('adminUser', JSON.stringify({ username, loginTime: new Date() }));
+                showDash();
+            } else {
+                toast('Wrong username or password', true);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminUser');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        function showDash() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            loadClients();
+        }
+
+        function apiHeaders() {
+            const token = (typeof CONFIG !== 'undefined' && CONFIG.ADMIN_TOKEN) ? CONFIG.ADMIN_TOKEN : '';
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            };
+        }
+
+        function apiUrl(path) {
+            const base = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
+                ? CONFIG.API_BASE_URL
+                : (window.location.origin + '/pwa/api');
+            return base + path;
+        }
+
+        async function loadClients() {
+            const banner = document.getElementById('apiBanner');
+            try {
+                const res = await fetch(apiUrl('/admin/corporate_clients.php'), { headers: apiHeaders() });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || ('HTTP ' + res.status));
+                }
+                clients = Array.isArray(data) ? data : [];
+                banner.classList.add('hidden');
+                render();
+            } catch (err) {
+                clients = [];
+                banner.className = 'banner error';
+                banner.textContent = 'Could not load cafes from the API. Deploy the new files in pwa/api/ (including config.php) then click Update database. ' + err.message;
+                banner.classList.remove('hidden');
+                render();
+            }
+        }
+
+        async function runMigration() {
+            try {
+                const res = await fetch(apiUrl('/migrate_super_dashboard.php'), { headers: apiHeaders() });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Migration failed');
+                toast(data.message || 'Database updated');
+                loadClients();
+            } catch (err) {
+                toast(err.message, true);
+            }
+        }
+
+        function render() {
+            const list = filter === 'all'
+                ? clients
+                : clients.filter(c => (c.health && c.health.status) === filter);
+            const watch = clients.filter(c => ['attention', 'at_risk'].includes(c.health && c.health.status));
+            document.getElementById('kpiTotal').textContent = clients.length;
+            document.getElementById('kpiHealthy').textContent = clients.filter(c => c.health && c.health.status === 'healthy').length;
+            document.getElementById('kpiWatch').textContent = watch.length;
+            document.getElementById('kpiSetup').textContent = clients.filter(c => c.health && c.health.status === 'setup').length;
+            document.getElementById('kpiOrders').textContent = clients.reduce((sum, c) => sum + ((c.health && c.health.orders_7d) || 0), 0);
+
+            const grid = document.getElementById('cafeGrid');
+            if (!list.length) {
+                grid.innerHTML = '<p style="color:#6b625c">No cafes in this view. Add a cafe to get started.</p>';
+                return;
+            }
+            grid.innerHTML = list.map(c => {
+                const h = c.health || {};
+                const status = h.status || 'setup';
+                const score = h.score != null ? h.score : 0;
+                const last = h.last_order_at
+                    ? new Date(h.last_order_at).toLocaleDateString()
+                    : 'Never';
+                const url = c.slug ? `/pwa/${c.slug}` : '';
+                const reasons = (h.reasons || []).map(r => escapeHtml(r)).join(' · ');
+                return `
+                <article class="cafe" data-id="${c.id}">
+                    <div class="cafe-head">
+                        <h3>${escapeHtml(c.name)}</h3>
+                        <span class="pill st-${status}">${labelFor(status)} · ${score}</span>
+                    </div>
+                    <div class="score-bar ${status}"><span style="width:${Math.min(100, score)}%"></span></div>
+                    <div class="meta">
+                        <div>Access code <code>${escapeHtml(c.access_code || '—')}</code>
+                            <button type="button" class="btn btn-small btn-ghost" data-copy="${escapeAttr(c.access_code || '')}">Copy</button>
+                        </div>
+                        ${url ? `<div>Customer URL <a href="${url}" target="_blank" rel="noopener"><code>${url}</code></a></div>` : ''}
+                        <div>${c.tier ? escapeHtml(c.tier) : 'basic'} · ${c.is_active ? 'Active' : 'Inactive'}${c.contact_email ? ' · ' + escapeHtml(c.contact_email) : ''}</div>
+                    </div>
+                    <div class="stats-row">
+                        <div><strong>${h.orders_7d || 0}</strong>7d orders</div>
+                        <div><strong>${h.orders_30d || 0}</strong>30d orders</div>
+                        <div><strong>£${Number(h.revenue_30d || 0).toFixed(0)}</strong>30d revenue</div>
+                    </div>
+                    <div class="reasons">Last order: ${last}${reasons ? ' · ' + reasons : ''}</div>
+                    <div class="cafe-actions">
+                        <button type="button" class="btn btn-small" data-edit="${c.id}">Edit</button>
+                    </div>
+                </article>`;
+            }).join('');
+            grid.querySelectorAll('[data-copy]').forEach(btn => {
+                btn.addEventListener('click', () => copyText(btn.getAttribute('data-copy')));
+            });
+            grid.querySelectorAll('[data-edit]').forEach(btn => {
+                btn.addEventListener('click', () => openEditor(parseInt(btn.getAttribute('data-edit'), 10)));
+            });
+        }
+
+        function labelFor(status) {
+            return ({
+                healthy: 'Healthy',
+                attention: 'Attention',
+                at_risk: 'At risk',
+                setup: 'Setup',
+                inactive: 'Inactive'
+            })[status] || status;
+        }
+
+        function openEditor(id) {
+            editing = id ? clients.find(c => c.id === id) : null;
+            document.getElementById('editorTitle').textContent = editing ? 'Edit cafe' : 'New cafe';
+            document.getElementById('editId').value = editing ? editing.id : '';
+            document.getElementById('clientName').value = editing ? editing.name : '';
+            const slugEl = document.getElementById('clientSlug');
+            slugEl.value = editing ? (editing.slug || '') : '';
+            delete slugEl.dataset.touched;
+            document.getElementById('clientTier').value = editing ? (editing.tier || 'basic') : 'basic';
+            document.getElementById('contactName').value = editing ? (editing.contact_name || '') : '';
+            document.getElementById('contactEmail').value = editing ? (editing.contact_email || '') : '';
+            document.getElementById('clientNotes').value = editing ? (editing.notes || '') : '';
+            document.getElementById('clientActive').checked = editing ? !!editing.is_active : true;
+            document.getElementById('ownerPassword').value = '';
+            document.getElementById('regenCode').checked = false;
+            document.getElementById('resetOwnerPassword').checked = false;
+            document.getElementById('passwordHint').textContent = editing
+                ? 'Leave blank to keep the current password. Enter a value to change it.'
+                : 'New cafes default to CafeOwner2024 unless you set one here.';
+            if (editing) {
+                document.getElementById('accessCodeRow').classList.remove('hidden');
+                document.getElementById('resetPasswordRow').classList.remove('hidden');
+                document.getElementById('shownAccessCode').textContent = editing.access_code || '';
+                document.getElementById('deleteBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('accessCodeRow').classList.add('hidden');
+                document.getElementById('resetPasswordRow').classList.add('hidden');
+                document.getElementById('deleteBtn').classList.add('hidden');
+            }
+            document.getElementById('editor').classList.remove('hidden');
+        }
+
+        function closeEditor() {
+            document.getElementById('editor').classList.add('hidden');
+        }
+
+        function backdropClose(event) {
+            if (event.target.id === 'editor') closeEditor();
+        }
+
+        async function saveClient(event) {
+            event.preventDefault();
+            const id = document.getElementById('editId').value;
+            const payload = {
+                name: document.getElementById('clientName').value.trim(),
+                slug: document.getElementById('clientSlug').value.trim(),
+                tier: document.getElementById('clientTier').value,
+                contact_name: document.getElementById('contactName').value.trim(),
+                contact_email: document.getElementById('contactEmail').value.trim(),
+                notes: document.getElementById('clientNotes').value.trim(),
+                is_active: document.getElementById('clientActive').checked ? 1 : 0
+            };
+            const password = document.getElementById('ownerPassword').value;
+            if (password) payload.owner_password = password;
+            if (id && document.getElementById('regenCode').checked) payload.regenerate_access_code = true;
+            if (id && document.getElementById('resetOwnerPassword').checked) payload.reset_owner_password = true;
+            try {
+                const url = apiUrl('/admin/corporate_clients.php' + (id ? '?id=' + encodeURIComponent(id) : ''));
+                const res = await fetch(url, { method: 'POST', headers: apiHeaders(), body: JSON.stringify(payload) });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Save failed');
+                closeEditor();
+                let msg = id ? 'Cafe updated' : 'Cafe created';
+                if (data.access_code) msg += ' · access code ' + data.access_code;
+                if (data.default_owner_password) msg += ' · owner password ' + data.default_owner_password;
+                toast(msg);
+                loadClients();
+            } catch (err) {
+                toast(err.message, true);
+            }
+        }
+
+        async function deleteClient() {
+            const id = document.getElementById('editId').value;
+            if (!id || !confirm('Delete this cafe? This cannot be undone.')) return;
+            try {
+                const res = await fetch(apiUrl('/admin/corporate_clients.php?id=' + encodeURIComponent(id)), {
+                    method: 'DELETE',
+                    headers: apiHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Delete failed');
+                closeEditor();
+                toast('Cafe deleted');
+                loadClients();
+            } catch (err) {
+                toast(err.message, true);
+            }
+        }
+
+        function copyShownCode() {
+            copyText(document.getElementById('shownAccessCode').textContent);
+        }
+
+        function copyText(text) {
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => toast('Copied')).catch(() => toast('Copy failed', true));
+        }
+
+        function toast(message, isError) {
+            const el = document.getElementById('toast');
+            el.textContent = message;
+            el.className = 'toast' + (isError ? ' error' : '');
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 4000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text == null ? '' : String(text);
+            return div.innerHTML;
+        }
+
+        function escapeAttr(text) {
+            return String(text == null ? '' : text)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;');
+        }
+
+        document.getElementById('clientName').addEventListener('input', () => {
+            const slugEl = document.getElementById('clientSlug');
+            if (!document.getElementById('editId').value && !slugEl.dataset.touched) {
+                slugEl.value = slugifyName(document.getElementById('clientName').value);
+            }
+        });
+        document.getElementById('clientSlug').addEventListener('input', () => {
+            document.getElementById('clientSlug').dataset.touched = '1';
+        });
+
+        function slugifyName(name) {
+            return String(name || '').toLowerCase().trim()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '')
+                .slice(0, 80);
+        }
+    </script>
+</body>
+</html>

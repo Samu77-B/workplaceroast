@@ -34,7 +34,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <!-- Configuration -->
-    <script src="config.js?v=8"></script>
+    <script src="config.js?v=9"></script>
     
     <!-- Theme Applier - Must load early to set CSS variables -->
     <script src="theme-applier.js"></script>
@@ -3442,15 +3442,14 @@
         // EmailJS Configuration - Official format from documentation
         console.log('Initializing EmailJS with key: 0-zOlPcY__7KuMFMa');
         emailjs.init({
-            publicKey: "0-zOlPcY__7KuMFMa",
+            publicKey: CONFIG.EMAILJS_PUBLIC_KEY || "0-zOlPcY__7KuMFMa",
             limitRate: {
                 id: 'app',
                 throttle: 10000
             }
         });
-        const EMAILJS_SERVICE_ID = "service_ob58ovs";
-        const CAFE_TEMPLATE_ID = "template_j08h25k";
-        const CUSTOMER_TEMPLATE_ID = "template_ha8jne4";
+        const EMAILJS_SERVICE_ID = CONFIG.EMAILJS_SERVICE_ID || "service_ob58ovs";
+        const CAFE_TEMPLATE_ID = CONFIG.EMAILJS_CAFE_ORDER_TEMPLATE_ID || "template_j08h25k";
         let selectedOptions = {
             size: 'regular',
             milk: 'whole',
@@ -3484,7 +3483,10 @@
             }
             
             // Wait a moment for CONFIG to load (config.js might load after DOMContentLoaded)
-            setTimeout(function() {
+            setTimeout(async function() {
+                if (typeof hydrateCafeFromSlug === 'function') {
+                    await hydrateCafeFromSlug();
+                }
                 // Check if no cafe_id detected and no corporate client in localStorage
                 // If so, show Corporate Login page instead of main menu
                 const cafeId = typeof CONFIG !== 'undefined' && CONFIG.CAFE_ID ? CONFIG.CAFE_ID : null;
@@ -4548,7 +4550,14 @@
                 chairNumberText = 'Chair ' + document.getElementById('chairNumber').textContent;
             }
             
-            // Prepare data for both templates - using common variable names
+            const cafeId = parseInt(localStorage.getItem('cafe_id') || CONFIG.CAFE_ID, 10);
+            const venueName = (cafeId && CONFIG.CAFE_NAMES && CONFIG.CAFE_NAMES[cafeId])
+                || localStorage.getItem('cafe_name')
+                || 'Workplace Roast';
+            const orderNotifyEmail = typeof getOrderNotificationEmail === 'function'
+                ? getOrderNotificationEmail()
+                : (CONFIG.ORDER_NOTIFICATION_EMAIL || 'info@workplaceroast.com');
+
             const templateData = {
                 order_time: orderDetails.timestamp,
                 order_date: orderDetails.timestamp,
@@ -4565,9 +4574,11 @@
                 customer_name: customerName || 'Customer',
                 user_name: customerName || 'Customer',
                 customer_phone: customerPhone || 'No phone provided',
-                to_name: 'Paul',
-                to_email: 'paul@paul-banning.com',
-                from_name: 'Workplace Roast'
+                venue_name: venueName,
+                to_name: venueName,
+                to_email: orderNotifyEmail,
+                from_name: 'Workplace Roast',
+                name: 'Workplace Roast Orders'
             };
             
             // Send cafe notification email
@@ -4591,37 +4602,6 @@
                     // Store locally as backup
                     storeOrderLocally(orderDetails);
                 });
-            
-            // Send customer confirmation email if email provided
-            console.log('Customer email input value:', customerEmail);
-            console.log('Customer name input value:', customerName);
-            console.log('Customer email validation:', customerEmail && customerEmail.includes('@'));
-            console.log('Customer template ID:', CUSTOMER_TEMPLATE_ID);
-            
-            if (customerEmail && customerEmail.includes('@')) {
-                const customerData = {
-                    ...templateData,
-                    customer_email: customerEmail,
-                    to_email: customerEmail,
-                    to_name: customerName || 'Valued Customer'
-                };
-                
-                console.log('Sending customer confirmation with data:', customerData);
-                
-                emailjs.send(EMAILJS_SERVICE_ID, CUSTOMER_TEMPLATE_ID, customerData)
-                    .then(function(response) {
-                        console.log('Customer confirmation sent successfully:', response);
-                        showNotification(`Confirmation sent to ${customerEmail}`);
-                    })
-                    .catch(function(error) {
-                        console.error('Customer email failed - Full details:', error);
-                        console.error('Customer email error status:', error.status);
-                        console.error('Customer email error text:', error.text);
-                        showNotification(`Customer email failed: ${error.text || error.message}`);
-                    });
-            } else {
-                console.log('Customer email not provided or invalid');
-            }
             
             // Store order locally for backup
             storeOrderLocally(orderDetails);

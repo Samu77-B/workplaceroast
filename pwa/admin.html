@@ -739,7 +739,7 @@
     <div id="adminDashboard" class="admin-container hidden">
         <div class="header">
             <h1>Workplace Roast Admin Dashboard</h1>
-            <p>Manage your cafe operations efficiently</p>
+            <p>Manage your cafe operations efficiently · <a href="super-admin.html" style="color:#fff;">Super Dashboard</a></p>
         </div>
 
         <!-- Navigation -->
@@ -749,6 +749,7 @@
             <button class="nav-btn" onclick="showSection('products')">Products</button>
             <button class="nav-btn" onclick="showSection('discounts')">Discounts</button>
             <button class="nav-btn" onclick="showSection('corporate-clients')">Corporate Clients</button>
+            <a class="nav-btn" href="super-admin.html">Super Dashboard</a>
             <button class="nav-btn" onclick="showSection('orders')">Orders</button>
             <button class="nav-btn" onclick="showSection('notifications')">Notifications</button>
             <button class="nav-btn" onclick="logout()">Logout</button>
@@ -1106,7 +1107,7 @@
     </div>
 
     <!-- Configuration -->
-    <script src="config.js"></script>
+    <script src="config.js?v=9"></script>
     
     <script>
         // Admin Authentication

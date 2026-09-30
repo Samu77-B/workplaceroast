@@ -17,6 +17,12 @@ RewriteRule ^acmehairsalon(/.*)?$ index.html?cafe_id=1 [QSA,L]
 RewriteCond %{REQUEST_URI} ^/pwa/acmelawfirm(/.*)?$ [NC]
 RewriteRule ^acmelawfirm(/.*)?$ index.html?cafe_id=2 [QSA,L]
 
+# Super Dashboard slugs: /pwa/bench-cafe → index.html?cafe_slug=bench-cafe
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/pwa/api/
+RewriteRule ^([A-Za-z0-9_-]+)/?$ index.html?cafe_slug=$1 [QSA,L]
+
 # Handle API requests from cafe paths
 RewriteCond %{REQUEST_URI} ^/pwa/(acmehairsalon|acmelawfirm)/api/(.*)$ [NC]
 RewriteRule ^(acmehairsalon|acmelawfirm)/api/(.*)$ api/$2 [L]

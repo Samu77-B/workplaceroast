@@ -1,6 +1,16 @@
 // Contact Form Handler
 
+// EmailJS — thank-you email to enquirers after Web3Forms succeeds (template_ha8jne4).
+// Edit template in EmailJS — see docs/emailjs-customer-template.md (enquiry auto reply)
+const EMAILJS_PUBLIC_KEY = '0-zOlPcY__7KuMFMa';
+const EMAILJS_SERVICE_ID = 'service_ob58ovs';
+const EMAILJS_CONTACT_CONFIRM_TEMPLATE_ID = 'template_ha8jne4';
+
 document.addEventListener('DOMContentLoaded', function() {
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+    }
+
     const contactForm = document.getElementById('contactForm');
     
     if (contactForm) {
@@ -59,9 +69,14 @@ function handleFormSubmit(e) {
     
     // Send email via your chosen method
     sendEmail(formObject)
-        .then(() => {
-            // Show success message
-            showFormMessage('Thank you! Your message has been sent. We\'ll get back to you soon.', 'success');
+        .then(({ confirmationSent }) => {
+            const confirmationNote = confirmationSent
+                ? ' A confirmation email has been sent to your inbox.'
+                : '';
+            showFormMessage(
+                'Thank you! Your message has been sent. We\'ll get back to you soon.' + confirmationNote,
+                'success'
+            );
             
             // Reset form
             form.reset();
@@ -212,7 +227,55 @@ async function sendEmail(formData) {
     if (!result.success) {
         throw new Error(result.message || 'Failed to send email');
     }
-    
-    return result;
+
+    let confirmationSent = false;
+    try {
+        confirmationSent = await sendContactConfirmationEmail(formData);
+    } catch (confirmationError) {
+        console.warn('Contact confirmation email failed (enquiry was still received):', confirmationError);
+    }
+
+    return { ...result, confirmationSent };
+}
+
+async function sendContactConfirmationEmail(formData) {
+    if (typeof emailjs === 'undefined') {
+        throw new Error('EmailJS not loaded');
+    }
+
+    if (!EMAILJS_CONTACT_CONFIRM_TEMPLATE_ID) {
+        console.warn(
+            'Set EMAILJS_CONTACT_CONFIRM_TEMPLATE_ID in scripts/form-handler.js to enable confirmation emails.'
+        );
+        return false;
+    }
+
+    const recipientEmail = String(formData.email || '').trim();
+    if (!recipientEmail || !isValidEmail(recipientEmail)) {
+        return false;
+    }
+
+    const planLabels = {
+        basic: 'Basic Plan',
+        premium: 'Premium Plan',
+        both: 'Both — need more info'
+    };
+    const planKey = formData.plan || '';
+    const planLabel = planLabels[planKey] || (planKey || 'Not specified');
+
+    const enquirySummary = [
+        `Plan interest: ${planLabel}`,
+        `Business: ${formData.business || 'Not provided'}`
+    ].join('\n');
+
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_CONTACT_CONFIRM_TEMPLATE_ID, {
+        customer_email: recipientEmail,
+        customer_name: formData.name || 'Valued Customer',
+        name: 'Workplace Roast',
+        message: formData.message || '',
+        enquiry_details: enquirySummary
+    });
+
+    return true;
 }
 
