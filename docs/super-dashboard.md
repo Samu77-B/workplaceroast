@@ -41,8 +41,10 @@ Filter chips narrow the grid by status.
 
 ## First-time server setup
 
-1. Upload `pwa/super-admin.html`, `pwa/api/_bootstrap.php`, `pwa/api/admin/corporate_clients.php`, `pwa/api/cafe-by-slug.php`, `pwa/api/migrate_super_dashboard.php`, and updated `pwa/.htaccess` + `pwa/config.js`.
-2. Copy `pwa/api/config.example.php` → `pwa/api/config.php` with Hostinger DB credentials.
+**Step-by-step Hostinger guide:** [hostinger-api-setup.md](hostinger-api-setup.md)
+
+1. Upload `pwa/super-admin.html`, `pwa/api/_bootstrap.php`, `pwa/api/admin/corporate_clients.php`, `pwa/api/cafe-by-slug.php`, `pwa/api/migrate_super_dashboard.php`, `pwa/api/health.php`, and updated `pwa/.htaccess` + `pwa/config.js`.
+2. Create **`pwa/api/config.php`** on the server (not in Git) — copy from `config.example.php` and add Hostinger MySQL credentials. Test with `/pwa/api/health.php`.
 3. Ensure `$ADMIN_TOKEN` in `config.php` matches `CONFIG.ADMIN_TOKEN` in `pwa/config.js` (production: `teas2024` today).
 4. Sign in to Super Dashboard → **Update database** (adds `slug`, `tier`, `contact_email`, `contact_name`, `notes` on `corporate_clients`).
 5. Reload the page — cafe list should load from the API.
