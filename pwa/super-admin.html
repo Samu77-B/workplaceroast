@@ -618,7 +618,8 @@
             const token = (typeof CONFIG !== 'undefined' && CONFIG.ADMIN_TOKEN) ? CONFIG.ADMIN_TOKEN : '';
             return {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
+                'Authorization': 'Bearer ' + token,
+                'X-Admin-Token': token
             };
         }
 

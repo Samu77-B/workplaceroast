@@ -1,0 +1,6 @@
+# Hostinger runs PHP as CGI and drops Authorization unless we pass it through.
+CGIPassAuth On
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

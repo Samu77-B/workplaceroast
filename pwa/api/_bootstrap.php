@@ -37,13 +37,19 @@ function json_input(): array
 function require_admin(): void
 {
     global $ADMIN_TOKEN;
-    $expected = isset($ADMIN_TOKEN) ? (string) $ADMIN_TOKEN : '';
-    $header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    $expected = isset($ADMIN_TOKEN) ? trim((string) $ADMIN_TOKEN) : '';
+    $header = $_SERVER['HTTP_AUTHORIZATION']
+        ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+        ?? $_SERVER['HTTP_X_ADMIN_TOKEN']
+        ?? $_SERVER['REDIRECT_HTTP_X_ADMIN_TOKEN']
+        ?? '';
     $token = '';
     if (preg_match('/Bearer\s+(\S+)/i', $header, $m)) {
         $token = $m[1];
+    } elseif ($header !== '') {
+        $token = trim($header);
     } elseif (!empty($_GET['token'])) {
-        $token = (string) $_GET['token'];
+        $token = trim((string) $_GET['token']);
     }
     if ($expected === '' || !hash_equals($expected, $token)) {
         http_response_code(401);
