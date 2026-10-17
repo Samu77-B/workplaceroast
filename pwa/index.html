@@ -4037,12 +4037,12 @@
         let currentProductId = null;
         let availableAddons = [];
         
-        async function openCustomizeModal(name, regularPrice, largePrice, type, productId = null) {
+        async function openCustomizeModal(name, regularPrice, largeSizePrice, type, productId = null) {
             triggerHapticFeedback();
             currentItem = { name, type };
             currentProductId = productId;
-            basePrice = regularPrice;
-            this.largePrice = largePrice;
+            basePrice = Number(regularPrice) || 0;
+            largePrice = Number(largeSizePrice) > 0 ? Number(largeSizePrice) : 0;
             selectedOptions = {};
             quantity = 1;
             
@@ -4080,9 +4080,14 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if (data.success && data.addons) {
+                if (data.success && Array.isArray(data.addons)) {
                     availableAddons = data.addons;
-                    renderAddons(data.addons);
+                    let extras = data.addons.filter(addon => addon.is_available != 0);
+                    const hasSize = extras.some(addon => addon.type === 'size');
+                    if (!hasSize) {
+                        extras = sizeChoices().concat(extras);
+                    }
+                    renderAddons(extras);
                     updateModalPrice();
                 } else {
                     // Fallback to default add-ons if none found
@@ -4156,16 +4161,21 @@
             });
         }
         
+        function sizeChoices() {
+            const sizes = [{ type: 'size', name: 'Regular', price: 0 }];
+            if (largePrice > 0) {
+                sizes.push({ type: 'size', name: 'Large', price: 0 });
+            }
+            return sizes;
+        }
+
         function renderDefaultAddons() {
-            // Fallback default add-ons if API fails
-            const defaultAddons = [
-                { type: 'size', name: 'Regular', price: 0 },
-                { type: 'size', name: 'Large', price: 1.4 },
+            const defaultAddons = sizeChoices().concat([
                 { type: 'milk', name: 'Whole', price: 0 },
                 { type: 'milk', name: 'Oat', price: 0.3 },
                 { type: 'sweetener', name: 'None', price: 0 },
                 { type: 'sweetener', name: 'Sugar', price: 0 }
-            ];
+            ]);
             renderAddons(defaultAddons);
         }
         
@@ -4210,7 +4220,7 @@
             
             // Calculate size price
             const sizeBtn = document.querySelector('.option-group:has([data-size]) .option-btn.selected');
-            if (sizeBtn && sizeBtn.dataset.size === 'large') {
+            if (sizeBtn && sizeBtn.dataset.size === 'large' && largePrice > 0) {
                 total = largePrice;
             }
             

@@ -62,7 +62,9 @@ $productFields = static function (array $body, callable $hasCol, ?array $cafe) {
         'type' => trim((string) ($body['type'] ?? '')),
         'description' => trim((string) ($body['description'] ?? '')),
         'regular_price' => (float) ($body['regular_price'] ?? 0),
-        'large_price' => (float) ($body['large_price'] ?? 0),
+        'large_price' => ($body['large_price'] === null || $body['large_price'] === ''
+            ? 0.0
+            : (float) ($body['large_price'] ?? 0)),
     ];
     if ($hasCol('is_available')) {
         $fields['is_available'] = array_key_exists('is_available', $body) ? (!empty($body['is_available']) ? 1 : 0) : 1;

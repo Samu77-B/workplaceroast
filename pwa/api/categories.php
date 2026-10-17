@@ -44,7 +44,7 @@ if ($method === 'GET') {
     exit;
 }
 
-require_admin();
+require_admin_or_cafe();
 $body = json_input();
 
 if ($method === 'POST' || $method === 'PUT') {

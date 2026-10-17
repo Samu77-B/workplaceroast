@@ -895,8 +895,8 @@
                             <input type="number" id="regularPrice" step="0.01" min="0" required>
                         </div>
                         <div class="form-group">
-                            <label for="largePrice">Large Price (£)</label>
-                            <input type="number" id="largePrice" step="0.01" min="0" required>
+                            <label for="largePrice">Large Price (£) <span style="font-weight:400;opacity:.7">(optional)</span></label>
+                            <input type="number" id="largePrice" step="0.01" min="0" placeholder="Leave blank if no large size">
                         </div>
                     </div>
                     <div class="form-group">
@@ -1132,6 +1132,30 @@
         let discounts = [];
         let orders = [];
         let categories = [];
+
+        async function readJsonResponse(response) {
+            const raw = await response.text();
+            if (!raw || /^\s*</.test(raw)) {
+                throw new Error('Server returned a page instead of data. The API may not be deployed yet.');
+            }
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                throw new Error('Server returned invalid data');
+            }
+        }
+
+        function optionalPriceFromInput(id) {
+            const raw = document.getElementById(id).value;
+            if (raw === '' || raw == null) return 0;
+            const n = parseFloat(raw);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        function productLargePrice(product) {
+            const n = parseFloat(product && (product.large_price ?? product.largePrice));
+            return Number.isFinite(n) ? n : 0;
+        }
         let notificationSettings = {
             enabled: true,
             sound: 'default',
@@ -1699,10 +1723,10 @@
                             <span>Regular:</span>
                             <span>£${parseFloat(product.regular_price || product.regularPrice || 0).toFixed(2)}</span>
                         </div>
-                        <div class="price-item">
+                        ${productLargePrice(product) > 0 ? `<div class="price-item">
                             <span>Large:</span>
-                            <span>£${parseFloat(product.large_price || product.largePrice || 0).toFixed(2)}</span>
-                        </div>
+                            <span>£${productLargePrice(product).toFixed(2)}</span>
+                        </div>` : ''}
                     </div>
                     <div class="product-actions">
                         <button class="btn btn-small" onclick="editProduct(${product.id})">Edit</button>
@@ -1783,7 +1807,8 @@
                 updateSubcategoryDropdown();
                 document.getElementById('productSubcategory').value = product.subcategory || '';
                 document.getElementById('regularPrice').value = product.regular_price || product.regularPrice || '';
-                document.getElementById('largePrice').value = product.large_price || product.largePrice || '';
+                const largeVal = productLargePrice(product);
+                document.getElementById('largePrice').value = largeVal > 0 ? largeVal : '';
                 document.getElementById('productType').value = product.type;
                 document.getElementById('productDescription').value = product.description || '';
                 
@@ -2632,8 +2657,8 @@
                 name: document.getElementById('productName').value,
                 category: document.getElementById('productCategory').value,
                 subcategory: document.getElementById('productSubcategory').value || null,
-                regular_price: parseFloat(document.getElementById('regularPrice').value),
-                large_price: parseFloat(document.getElementById('largePrice').value),
+                regular_price: optionalPriceFromInput('regularPrice'),
+                large_price: optionalPriceFromInput('largePrice'),
                 type: document.getElementById('productType').value,
                 description: document.getElementById('productDescription').value
             };
@@ -2662,7 +2687,7 @@
                     });
                 }
 
-                const result = await response.json();
+                const result = await readJsonResponse(response);
                 
                 if (response.ok && result.success) {
                     showNotification(editId ? 'Product updated successfully!' : 'Product added successfully!', 'success');

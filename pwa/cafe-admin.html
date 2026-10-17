@@ -895,8 +895,8 @@
                             <input type="number" id="regularPrice" step="0.01" min="0" required>
                         </div>
                         <div class="form-group">
-                            <label for="largePrice">Large Price (£)</label>
-                            <input type="number" id="largePrice" step="0.01" min="0" required>
+                            <label for="largePrice">Large Price (£) <span style="font-weight:400;opacity:.7">(optional)</span></label>
+                            <input type="number" id="largePrice" step="0.01" min="0" placeholder="Leave blank if no large size">
                         </div>
                     </div>
                     <div class="form-group">
@@ -1181,6 +1181,30 @@
         let products = [];
         let orders = [];
         let categories = [];
+
+        async function readJsonResponse(response) {
+            const raw = await response.text();
+            if (!raw || /^\s*</.test(raw)) {
+                throw new Error('Server returned a page instead of data. The API may not be deployed yet.');
+            }
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                throw new Error('Server returned invalid data');
+            }
+        }
+
+        function optionalPriceFromInput(id) {
+            const raw = document.getElementById(id).value;
+            if (raw === '' || raw == null) return 0;
+            const n = parseFloat(raw);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        function productLargePrice(product) {
+            const n = parseFloat(product && (product.large_price ?? product.largePrice));
+            return Number.isFinite(n) ? n : 0;
+        }
 
         // Initialize the app
         const THEME_KEY = 'superDashTheme';
@@ -1745,25 +1769,19 @@
                     // Update existing category
                     response = await fetch(`${CONFIG.API_BASE_URL}/categories.php?id=${editId}`, {
                         method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
-                        },
+                        headers: getAuthHeaders(),
                         body: JSON.stringify(categoryData)
                     });
                 } else {
                     // Create new category
                     response = await fetch(`${CONFIG.API_BASE_URL}/categories.php`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
-                        },
+                        headers: getAuthHeaders(),
                         body: JSON.stringify(categoryData)
                     });
                 }
 
-                const result = await response.json();
+                const result = await readJsonResponse(response);
                 
                 if (response.ok && result.success) {
                     showNotification(editId ? 'Category updated successfully!' : 'Category added successfully!', 'success');
@@ -1786,13 +1804,10 @@
                 try {
                     const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php?id=${id}`, {
                         method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
-                        }
+                        headers: getAuthHeaders()
                     });
 
-                    const result = await response.json();
+                    const result = await readJsonResponse(response);
                     
                     if (response.ok && result.success) {
                         showNotification('Category deleted successfully!', 'success');
@@ -1834,10 +1849,10 @@
                             <span>Regular:</span>
                             <span>£${parseFloat(product.regular_price || product.regularPrice || 0).toFixed(2)}</span>
                         </div>
-                        <div class="price-item">
+                        ${productLargePrice(product) > 0 ? `<div class="price-item">
                             <span>Large:</span>
-                            <span>£${parseFloat(product.large_price || product.largePrice || 0).toFixed(2)}</span>
-                        </div>
+                            <span>£${productLargePrice(product).toFixed(2)}</span>
+                        </div>` : ''}
                     </div>
                     <div class="product-actions">
                         <button class="btn btn-small" onclick="editProduct(${product.id})">Edit</button>
@@ -1920,7 +1935,8 @@
                 updateSubcategoryDropdown();
                 document.getElementById('productSubcategory').value = product.subcategory || '';
                 document.getElementById('regularPrice').value = product.regular_price || product.regularPrice || '';
-                document.getElementById('largePrice').value = product.large_price || product.largePrice || '';
+                const largeVal = productLargePrice(product);
+                document.getElementById('largePrice').value = largeVal > 0 ? largeVal : '';
                 document.getElementById('productType').value = product.type;
                 document.getElementById('productDescription').value = product.description || '';
                 
@@ -1945,16 +1961,16 @@
                 const response = await fetch(`${CONFIG.API_BASE_URL}/addons.php?cafe_id=${cafeId}`, {
                     headers: getAuthHeaders()
                 });
-                const data = await response.json();
+                const data = await readJsonResponse(response);
                 
-                if (data.success && data.addons) {
+                if (data.success && data.addons && data.addons.length) {
                     // Load selected add-ons for this product if editing
                     let selectedAddonIds = [];
                     if (productId) {
                         const productAddonsResponse = await fetch(`${CONFIG.API_BASE_URL}/addons.php?product_id=${productId}`, {
                             headers: getAuthHeaders()
                         });
-                        const productAddonsData = await productAddonsResponse.json();
+                        const productAddonsData = await readJsonResponse(productAddonsResponse);
                         if (productAddonsData.success && productAddonsData.addons) {
                             selectedAddonIds = productAddonsData.addons.map(a => a.id);
                         }
@@ -1962,11 +1978,11 @@
                     
                     renderProductAddons(data.addons, selectedAddonIds);
                 } else {
-                    container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No add-ons available. Create add-ons first!</div>';
+                    container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No add-ons yet. Save this drink now, or create extras in Add-ons first.</div>';
                 }
             } catch (error) {
                 console.error('Error loading add-ons:', error);
-                container.innerHTML = '<div style="text-align: center; color: #d32f2f; padding: 20px;">Error loading add-ons</div>';
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Add-ons could not be loaded. You can still save this drink.</div>';
             }
         }
         
@@ -2790,11 +2806,9 @@
             try {
                 console.log('Loading categories from database...');
                 const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php`, {
-                    headers: {
-                        'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
-                    }
+                    headers: getAuthHeaders()
                 });
-                const data = await response.json();
+                const data = await readJsonResponse(response);
                 
                 if (data.success && data.categories) {
                     categories = data.categories;
@@ -2822,7 +2836,7 @@
                 if (!currentUser) return;
                 console.log('Loading products from database for cafe:', currentUser.id);
                 const response = await fetch(`${CONFIG.API_BASE_URL}/products.php?cafe_id=${currentUser.id}`);
-                const data = await response.json();
+                const data = await readJsonResponse(response);
                 
                 if (data.success && data.products) {
                     // Filter to show only products owned by this cafe
@@ -2867,40 +2881,34 @@
                 name: document.getElementById('productName').value,
                 category: document.getElementById('productCategory').value,
                 subcategory: document.getElementById('productSubcategory').value || null,
-                regular_price: parseFloat(document.getElementById('regularPrice').value),
-                large_price: parseFloat(document.getElementById('largePrice').value),
+                regular_price: optionalPriceFromInput('regularPrice'),
+                large_price: optionalPriceFromInput('largePrice'),
                 type: document.getElementById('productType').value,
                 description: document.getElementById('productDescription').value
             };
 
             try {
-                let productId;
+                let productId = editId ? parseInt(editId) : null;
                 let response;
                 if (editId) {
-                    // Update existing product
                     response = await fetch(`${CONFIG.API_BASE_URL}/products.php`, {
                         method: 'PUT',
                         headers: getAuthHeaders(),
                         body: JSON.stringify({ id: parseInt(editId), ...productData })
                     });
-                    productId = parseInt(editId);
                 } else {
-                    // Create new product
                     response = await fetch(`${CONFIG.API_BASE_URL}/products.php`, {
                         method: 'POST',
                         headers: getAuthHeaders(),
                         body: JSON.stringify(productData)
                     });
-                    const result = await response.json();
-                    if (result.success && result.product_id) {
-                        productId = result.product_id;
-                    }
                 }
 
-                const result = await response.json();
+                const result = await readJsonResponse(response);
+                if (result.product_id) productId = result.product_id;
+                else if (result.id) productId = result.id;
                 
                 if (response.ok && result.success) {
-                    // Save add-on assignments
                     if (productId) {
                         const selectedAddons = Array.from(document.querySelectorAll('#productAddonsContainer input[type="checkbox"]:checked'))
                             .map(cb => parseInt(cb.value));
@@ -2914,13 +2922,12 @@
                             })
                         }).catch(err => {
                             console.error('Error saving add-on assignments:', err);
-                            // Don't fail the whole operation if add-ons fail
                         });
                     }
                     
                     showNotification(editId ? 'Product updated successfully!' : 'Product added successfully!', 'success');
                     hideProductForm();
-                    loadData(); // Reload products
+                    loadData();
                 } else {
                     showNotification('Error saving product: ' + (result.error || 'Unknown error'), 'error');
                 }
@@ -2940,7 +2947,7 @@
                     body: JSON.stringify({ id: id })
                 });
 
-                const result = await response.json();
+                const result = await readJsonResponse(response);
                 
                 if (response.ok && result.success) {
                     showNotification('Product deleted successfully!', 'success');
@@ -2966,11 +2973,7 @@
                 const response = await fetch(`${CONFIG.API_BASE_URL}/addons.php?cafe_id=${cafeId}`, {
                     headers: getAuthHeaders()
                 });
-                const raw = await response.text();
-                if (!raw || /^\s*</.test(raw)) {
-                    throw new Error('Add-ons API is missing on the server. Deploy pwa/api/addons.php then try again.');
-                }
-                const data = JSON.parse(raw);
+                const data = await readJsonResponse(response);
                 
                 if (data.success && data.addons) {
                     addons = data.addons;
@@ -3083,7 +3086,7 @@
                     });
                 }
                 
-                const result = await response.json();
+                const result = await readJsonResponse(response);
                 
                 if (response.ok && result.success) {
                     showNotification(editingAddonId ? 'Add-on updated successfully!' : 'Add-on added successfully!', 'success');
@@ -3108,7 +3111,7 @@
                     body: JSON.stringify({ id: id })
                 });
                 
-                const result = await response.json();
+                const result = await readJsonResponse(response);
                 
                 if (response.ok && result.success) {
                     showNotification('Add-on deleted successfully!', 'success');
