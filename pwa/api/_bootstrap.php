@@ -40,7 +40,7 @@ function json_input(): array
     return is_array($data) ? $data : [];
 }
 
-function require_admin(): void
+function admin_token_ok(): bool
 {
     global $ADMIN_TOKEN;
     $expected = isset($ADMIN_TOKEN) ? trim((string) $ADMIN_TOKEN) : '';
@@ -57,11 +57,71 @@ function require_admin(): void
     } elseif (!empty($_GET['token'])) {
         $token = trim((string) $_GET['token']);
     }
-    if ($expected === '' || !hash_equals($expected, $token)) {
+    return $expected !== '' && hash_equals($expected, $token);
+}
+
+function require_admin(): void
+{
+    if (!admin_token_ok()) {
         http_response_code(401);
         echo json_encode(['error' => 'Unauthorized']);
         exit;
     }
+}
+
+function verify_owner_password(?string $hash, string $password): bool
+{
+    if ($hash === null || $hash === '') {
+        return false;
+    }
+    if (strpos($hash, '$2y$') === 0 || strpos($hash, '$2a$') === 0 || strpos($hash, '$2b$') === 0) {
+        return password_verify($password, $hash);
+    }
+    return hash_equals($hash, $password);
+}
+
+function find_cafe_by_access_code(string $accessCode): ?array
+{
+    global $pdo;
+    if (!table_exists($pdo, 'corporate_clients')) {
+        return null;
+    }
+    $stmt = $pdo->prepare('SELECT * FROM corporate_clients WHERE UPPER(TRIM(access_code)) = UPPER(?) LIMIT 1');
+    $stmt->execute([trim($accessCode)]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function cafe_owner_from_headers(): ?array
+{
+    $code = trim((string) ($_SERVER['HTTP_X_CAFE_ACCESS_CODE'] ?? ''));
+    $password = (string) ($_SERVER['HTTP_X_CAFE_PASSWORD'] ?? '');
+    if ($code === '' || $password === '') {
+        return null;
+    }
+    $cafe = find_cafe_by_access_code($code);
+    if (!$cafe || empty($cafe['is_active'])) {
+        return null;
+    }
+    $hash = isset($cafe['owner_password']) ? (string) $cafe['owner_password'] : '';
+    if (!verify_owner_password($hash, $password)) {
+        return null;
+    }
+    return $cafe;
+}
+
+function require_admin_or_cafe(): ?array
+{
+    if (admin_token_ok()) {
+        return null;
+    }
+    $cafe = cafe_owner_from_headers();
+    if ($cafe) {
+        return $cafe;
+    }
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
 }
 
 function table_exists(PDO $pdo, string $table): bool

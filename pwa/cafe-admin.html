@@ -1215,13 +1215,25 @@
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch('api/cafe-owner-login.php', {
+                const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
+                    ? CONFIG.API_BASE_URL
+                    : 'api';
+                const response = await fetch(apiBase + '/cafe-owner-login.php', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ access_code: accessCode, password: password })
                 });
-                
-                const data = await response.json();
+                const raw = await response.text();
+                if (!raw || /^\s*</.test(raw)) {
+                    throw new Error('Login API is missing on the server. Deploy pwa/api/cafe-owner-login.php then try again.');
+                }
+                let data;
+                try {
+                    data = JSON.parse(raw);
+                } catch (parseErr) {
+                    throw new Error('Login API returned a non-JSON error');
+                }
                 
                 if (data.success) {
                     currentUser = { 

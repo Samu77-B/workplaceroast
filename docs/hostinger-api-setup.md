@@ -56,6 +56,17 @@ You want JSON like:
 | `database: error` | Wrong user, password, or database name |
 | `corporate_clients_table: false` | Import DB or run migrations; table missing |
 
+## 3b. Hostinger CDN browser check
+
+If Super Dashboard shows `Unexpected token '<'` or `Checking your browser`, Hostinger CDN is returning an HTML bot-check page instead of JSON.
+
+1. hPanel → **Websites** → **Dashboard** → **Performance** → **CDN** → **Manage** → **Security**.
+2. Turn **Under Attack** off.
+3. Set the security level to **Low** (or **Medium**).
+4. Wait a minute, refresh Super Dashboard, and try the save again.
+
+The MySQL database can still be healthy while CDN is blocking API calls. Confirm with `/pwa/api/health.php` after the browser check finishes: `{"ok":true,"database":"connected"}`.
+
 ## 4. Super Dashboard
 
 1. Go to **https://workplaceroast.com/pwa/super-admin.html**

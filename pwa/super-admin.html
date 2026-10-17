@@ -632,15 +632,24 @@
             return base + path + sep + 'token=' + encodeURIComponent(token);
         }
 
+        async function readApiJson(res) {
+            const raw = await res.text();
+            if (!raw) throw new Error('API returned an empty error');
+            if (/^\s*</.test(raw) || /Checking your browser/i.test(raw)) {
+                throw new Error('Hostinger CDN blocked this API call with a browser check. In hPanel go to Performance → CDN → Manage → Security, turn off Under Attack, set the level to Low, then refresh and try again.');
+            }
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                throw new Error('API returned a non-JSON error');
+            }
+        }
+
         async function loadClients() {
             const banner = document.getElementById('apiBanner');
             try {
-                const res = await fetch(apiUrl('/admin/corporate_clients.php'), { headers: apiHeaders() });
-                const raw = await res.text();
-                let data = {};
-                try { data = raw ? JSON.parse(raw) : {}; } catch (e) {
-                    throw new Error(raw ? 'API returned a non-JSON error' : 'API returned an empty error');
-                }
+                const res = await fetch(apiUrl('/admin/corporate_clients.php'), { credentials: 'same-origin', headers: apiHeaders() });
+                const data = await readApiJson(res);
                 if (!res.ok) {
                     throw new Error(data.error || ('HTTP ' + res.status));
                 }
@@ -650,7 +659,7 @@
             } catch (err) {
                 clients = [];
                 banner.className = 'banner error';
-                banner.textContent = 'Could not load cafes from the API. Deploy the new files in pwa/api/ (including config.php) then click Update database. ' + err.message;
+                banner.textContent = 'Could not load cafes from the API. ' + err.message;
                 banner.classList.remove('hidden');
                 render();
             }
@@ -658,12 +667,8 @@
 
         async function runMigration() {
             try {
-                const res = await fetch(apiUrl('/migrate_super_dashboard.php'), { headers: apiHeaders() });
-                const raw = await res.text();
-                let data = {};
-                try { data = raw ? JSON.parse(raw) : {}; } catch (e) {
-                    throw new Error(raw ? 'API returned a non-JSON error' : 'API returned an empty error');
-                }
+                const res = await fetch(apiUrl('/migrate_super_dashboard.php'), { credentials: 'same-origin', headers: apiHeaders() });
+                const data = await readApiJson(res);
                 if (!res.ok) throw new Error(data.error || 'Migration failed');
                 toast(data.message || 'Database updated');
                 loadClients();
@@ -798,8 +803,8 @@
             if (id && document.getElementById('resetOwnerPassword').checked) payload.reset_owner_password = true;
             try {
                 const url = apiUrl('/admin/corporate_clients.php' + (id ? '?id=' + encodeURIComponent(id) : ''));
-                const res = await fetch(url, { method: 'POST', headers: apiHeaders(), body: JSON.stringify(payload) });
-                const data = await res.json();
+                const res = await fetch(url, { method: 'POST', credentials: 'same-origin', headers: apiHeaders(), body: JSON.stringify(payload) });
+                const data = await readApiJson(res);
                 if (!res.ok) throw new Error(data.error || 'Save failed');
                 closeEditor();
                 let msg = id ? 'Cafe updated' : 'Cafe created';
@@ -818,9 +823,10 @@
             try {
                 const res = await fetch(apiUrl('/admin/corporate_clients.php?id=' + encodeURIComponent(id)), {
                     method: 'DELETE',
+                    credentials: 'same-origin',
                     headers: apiHeaders()
                 });
-                const data = await res.json();
+                const data = await readApiJson(res);
                 if (!res.ok) throw new Error(data.error || 'Delete failed');
                 closeEditor();
                 toast('Cafe deleted');
