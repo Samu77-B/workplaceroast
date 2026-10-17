@@ -32,12 +32,32 @@ if (!isset($pdo) || !($pdo instanceof PDO)) {
 
 function json_input(): array
 {
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
     $raw = file_get_contents('php://input');
     if ($raw === false || $raw === '') {
-        return [];
+        $cached = [];
+        return $cached;
     }
     $data = json_decode($raw, true);
-    return is_array($data) ? $data : [];
+    $cached = is_array($data) ? $data : [];
+    return $cached;
+}
+
+function request_header(string $name): string
+{
+    $want = strtolower($name);
+    if (function_exists('getallheaders')) {
+        foreach (getallheaders() as $key => $value) {
+            if (strtolower((string) $key) === $want) {
+                return (string) $value;
+            }
+        }
+    }
+    $cgi = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
+    return (string) ($_SERVER[$cgi] ?? $_SERVER['REDIRECT_' . $cgi] ?? '');
 }
 
 function admin_token_ok(): bool
@@ -92,10 +112,48 @@ function find_cafe_by_access_code(string $accessCode): ?array
     return $row ?: null;
 }
 
+function cafe_owner_credentials(): array
+{
+    $code = trim(request_header('X-Cafe-Access-Code'));
+    $password = (string) request_header('X-Cafe-Password');
+
+    $bearer = request_header('Authorization');
+    if ($bearer === '') {
+        $bearer = (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
+    }
+    $ownerAuth = request_header('X-Cafe-Owner-Auth');
+    foreach ([$bearer, $ownerAuth] as $value) {
+        if (!preg_match('/(?:Bearer\s+)?cafe\.([A-Za-z0-9+\/=_-]+)/i', (string) $value, $m)) {
+            continue;
+        }
+        $decoded = json_decode(base64_decode(strtr($m[1], '-_', '+/')), true);
+        if (!is_array($decoded)) {
+            continue;
+        }
+        if ($code === '') {
+            $code = trim((string) ($decoded['c'] ?? ''));
+        }
+        if ($password === '') {
+            $password = (string) ($decoded['p'] ?? '');
+        }
+    }
+
+    if ($code === '' || $password === '') {
+        $body = json_input();
+        if ($code === '') {
+            $code = trim((string) ($body['_cafe_access_code'] ?? ''));
+        }
+        if ($password === '') {
+            $password = (string) ($body['_cafe_password'] ?? '');
+        }
+    }
+
+    return [$code, $password];
+}
+
 function cafe_owner_from_headers(): ?array
 {
-    $code = trim((string) ($_SERVER['HTTP_X_CAFE_ACCESS_CODE'] ?? ''));
-    $password = (string) ($_SERVER['HTTP_X_CAFE_PASSWORD'] ?? '');
+    [$code, $password] = cafe_owner_credentials();
     if ($code === '' || $password === '') {
         return null;
     }

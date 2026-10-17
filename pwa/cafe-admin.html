@@ -1908,16 +1908,14 @@
                 let response;
                 if (editId) {
                     // Update existing category
-                    response = await fetch(`${CONFIG.API_BASE_URL}/categories.php?id=${editId}`, {
+                    response = await cafeRequest(`${CONFIG.API_BASE_URL}/categories.php?id=${editId}`, {
                         method: 'PUT',
-                        headers: getAuthHeaders(),
                         body: JSON.stringify(categoryData)
                     });
                 } else {
                     // Create new category
-                    response = await fetch(`${CONFIG.API_BASE_URL}/categories.php`, {
+                    response = await cafeRequest(`${CONFIG.API_BASE_URL}/categories.php`, {
                         method: 'POST',
-                        headers: getAuthHeaders(),
                         body: JSON.stringify(categoryData)
                     });
                 }
@@ -1943,9 +1941,8 @@
 
             if (confirm(`Are you sure you want to delete the category "${category.name}"?`)) {
                 try {
-                    const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php?id=${id}`, {
-                        method: 'DELETE',
-                        headers: getAuthHeaders()
+                    const response = await cafeRequest(`${CONFIG.API_BASE_URL}/categories.php?id=${id}`, {
+                        method: 'DELETE'
                     });
 
                     const result = await readJsonResponse(response);
@@ -2051,9 +2048,7 @@
 
         async function loadPlaces() {
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/places.php?cafe_id=${currentUser.id}`, {
-                    headers: getAuthHeaders()
-                });
+                const response = await cafeRequest(`${CONFIG.API_BASE_URL}/places.php?cafe_id=${currentUser.id}`);
                 const data = await readJsonResponse(response);
                 if (data.success && Array.isArray(data.places)) {
                     places = data.places;
@@ -2110,10 +2105,10 @@
                 spots: collectPlaceSpotRows()
             };
             if (editId) payload.id = parseInt(editId, 10);
+            if (currentUser && currentUser.id) payload.cafe_id = currentUser.id;
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/places.php`, {
+                const response = await cafeRequest(`${CONFIG.API_BASE_URL}/places.php`, {
                     method: editId ? 'PUT' : 'POST',
-                    headers: getAuthHeaders(),
                     body: JSON.stringify(payload)
                 });
                 const result = await readJsonResponse(response);
@@ -2135,9 +2130,8 @@
             if (!place) return;
             if (!confirm(`Delete place "${place.name}"? Its order URL will stop working.`)) return;
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/places.php?id=${id}`, {
-                    method: 'DELETE',
-                    headers: getAuthHeaders()
+                const response = await cafeRequest(`${CONFIG.API_BASE_URL}/places.php?id=${id}`, {
+                    method: 'DELETE'
                 });
                 const result = await readJsonResponse(response);
                 if (response.ok && result.success) {
@@ -2313,18 +2307,14 @@
                     return;
                 }
                 
-                const response = await fetch(`${CONFIG.API_BASE_URL}/addons.php?cafe_id=${cafeId}`, {
-                    headers: getAuthHeaders()
-                });
+                const response = await cafeRequest(`${CONFIG.API_BASE_URL}/addons.php?cafe_id=${cafeId}`);
                 const data = await readJsonResponse(response);
                 
                 if (data.success && data.addons && data.addons.length) {
                     // Load selected add-ons for this product if editing
                     let selectedAddonIds = [];
                     if (productId) {
-                        const productAddonsResponse = await fetch(`${CONFIG.API_BASE_URL}/addons.php?product_id=${productId}`, {
-                            headers: getAuthHeaders()
-                        });
+                        const productAddonsResponse = await cafeRequest(`${CONFIG.API_BASE_URL}/addons.php?product_id=${productId}`);
                         const productAddonsData = await readJsonResponse(productAddonsResponse);
                         if (productAddonsData.success && productAddonsData.addons) {
                             selectedAddonIds = productAddonsData.addons.map(a => a.id);
@@ -3183,9 +3173,7 @@
             try {
                 console.log('Loading categories from database...');
                 const cafeQuery = currentUser && currentUser.id ? `?cafe_id=${currentUser.id}` : '';
-                const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php${cafeQuery}`, {
-                    headers: getAuthHeaders()
-                });
+                const response = await cafeRequest(`${CONFIG.API_BASE_URL}/categories.php${cafeQuery}`);
                 const data = await readJsonResponse(response);
                 
                 if (data.success && data.categories) {
@@ -3244,14 +3232,52 @@
             }
         };
         
-        function getAuthHeaders() {
-            if (!currentUser) return {};
-            return {
-                'Content-Type': 'application/json',
-                'X-Cafe-Access-Code': currentUser.accessCode,
-                'X-Cafe-Password': currentUser.password
-            };
+        function cafeOwnerAuthToken() {
+            if (!currentUser) return '';
+            const payload = JSON.stringify({
+                c: currentUser.accessCode || '',
+                p: currentUser.password || ''
+            });
+            return 'cafe.' + btoa(unescape(encodeURIComponent(payload)));
         }
+
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (!currentUser) return headers;
+            const token = cafeOwnerAuthToken();
+            headers['Authorization'] = 'Bearer ' + token;
+            headers['X-Cafe-Owner-Auth'] = token;
+            headers['X-Cafe-Access-Code'] = currentUser.accessCode || '';
+            headers['X-Cafe-Password'] = currentUser.password || '';
+            return headers;
+        }
+
+        function withCafeAuth(data) {
+            const payload = (data && typeof data === 'object') ? Object.assign({}, data) : {};
+            if (currentUser) {
+                payload._cafe_access_code = currentUser.accessCode || '';
+                payload._cafe_password = currentUser.password || '';
+            }
+            return payload;
+        }
+
+        function cafeRequest(url, options) {
+            const opts = Object.assign({}, options || {});
+            opts.headers = Object.assign({}, getAuthHeaders(), opts.headers || {});
+            if (typeof opts.body === 'string') {
+                try {
+                    const parsed = JSON.parse(opts.body);
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                        opts.body = JSON.stringify(withCafeAuth(parsed));
+                    }
+                } catch (err) {}
+            } else if (currentUser && opts.method && /^(POST|PUT|DELETE)$/i.test(opts.method) && opts.body == null) {
+                opts.body = JSON.stringify(withCafeAuth({}));
+            }
+            return fetch(url, opts);
+        }
+        window.getAuthHeaders = getAuthHeaders;
+        window.cafeRequest = cafeRequest;
         
         // Override saveProduct with database-backed version
         window.saveProduct = async function(event) {
@@ -3272,15 +3298,13 @@
                 let productId = editId ? parseInt(editId) : null;
                 let response;
                 if (editId) {
-                    response = await fetch(`${CONFIG.API_BASE_URL}/products.php`, {
+                    response = await cafeRequest(`${CONFIG.API_BASE_URL}/products.php`, {
                         method: 'PUT',
-                        headers: getAuthHeaders(),
                         body: JSON.stringify({ id: parseInt(editId), ...productData })
                     });
                 } else {
-                    response = await fetch(`${CONFIG.API_BASE_URL}/products.php`, {
+                    response = await cafeRequest(`${CONFIG.API_BASE_URL}/products.php`, {
                         method: 'POST',
-                        headers: getAuthHeaders(),
                         body: JSON.stringify(productData)
                     });
                 }
@@ -3294,9 +3318,8 @@
                         const selectedAddons = Array.from(document.querySelectorAll('#productAddonsContainer input[type="checkbox"]:checked'))
                             .map(cb => parseInt(cb.value));
                         
-                        await fetch(`${CONFIG.API_BASE_URL}/addons.php`, {
+                        await cafeRequest(`${CONFIG.API_BASE_URL}/addons.php`, {
                             method: 'POST',
-                            headers: getAuthHeaders(),
                             body: JSON.stringify({
                                 product_id: productId,
                                 addon_ids: selectedAddons
@@ -3322,9 +3345,8 @@
             if (!confirm('Are you sure you want to delete this product?')) return;
 
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/products.php`, {
+                const response = await cafeRequest(`${CONFIG.API_BASE_URL}/products.php`, {
                     method: 'DELETE',
-                    headers: getAuthHeaders(),
                     body: JSON.stringify({ id: id })
                 });
 
@@ -3351,9 +3373,7 @@
             
             try {
                 const cafeId = currentUser.id;
-                const response = await fetch(`${CONFIG.API_BASE_URL}/addons.php?cafe_id=${cafeId}`, {
-                    headers: getAuthHeaders()
-                });
+                const response = await cafeRequest(`${CONFIG.API_BASE_URL}/addons.php?cafe_id=${cafeId}`);
                 const data = await readJsonResponse(response);
                 
                 if (data.success && data.addons) {
@@ -3454,15 +3474,13 @@
             try {
                 let response;
                 if (editingAddonId) {
-                    response = await fetch(`${CONFIG.API_BASE_URL}/addons.php`, {
+                    response = await cafeRequest(`${CONFIG.API_BASE_URL}/addons.php`, {
                         method: 'PUT',
-                        headers: getAuthHeaders(),
                         body: JSON.stringify({ id: editingAddonId, ...addonData })
                     });
                 } else {
-                    response = await fetch(`${CONFIG.API_BASE_URL}/addons.php`, {
+                    response = await cafeRequest(`${CONFIG.API_BASE_URL}/addons.php`, {
                         method: 'POST',
-                        headers: getAuthHeaders(),
                         body: JSON.stringify(addonData)
                     });
                 }
@@ -3486,9 +3504,8 @@
             if (!confirm('Are you sure you want to delete this add-on?')) return;
             
             try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/addons.php`, {
+                const response = await cafeRequest(`${CONFIG.API_BASE_URL}/addons.php`, {
                     method: 'DELETE',
-                    headers: getAuthHeaders(),
                     body: JSON.stringify({ id: id })
                 });
                 
