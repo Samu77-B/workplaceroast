@@ -60,7 +60,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 12px;
 }
 .header h1 {
@@ -249,7 +249,7 @@ body:has(#adminDashboard:not(.hidden)) .theme-float {
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
 }
-html[data-cafe-brand] .btn {
+html[data-cafe-brand] .btn:not(.btn-success):not(.btn-danger):not(.btn-secondary):not(.theme-toggle) {
     background: var(--cafe-primary) !important;
     color: var(--header-text, #fff) !important;
 }
@@ -275,8 +275,18 @@ html[data-cafe-brand] .stat-card {
         padding: 12px !important;
     }
     .header {
-        padding: 14px 16px !important;
+        padding: 14px 12px !important;
+        gap: 8px;
+        flex-wrap: nowrap !important;
+        align-items: center;
+    }
+    .header-brand {
+        flex: 1;
+        min-width: 0;
         gap: 10px;
+    }
+    .header-brand > div {
+        min-width: 0;
     }
     .header-logo {
         width: 40px;
@@ -284,28 +294,39 @@ html[data-cafe-brand] .stat-card {
         flex-basis: 40px;
     }
     .header h1 {
-        font-size: 1.08rem !important;
+        font-size: 1.02rem !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .header p {
-        font-size: 0.8rem !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .header .theme-toggle {
+        flex: 0 0 auto;
+        margin: 0 !important;
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+        min-height: 36px !important;
+        white-space: nowrap;
     }
     .admin-nav {
-        display: flex;
-        flex-wrap: nowrap !important;
-        overflow-x: auto;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px !important;
-        padding-bottom: 4px;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-    .admin-nav::-webkit-scrollbar {
-        display: none;
+        overflow: visible;
+        margin-bottom: 16px !important;
     }
     .admin-nav .nav-btn {
-        flex: 0 0 auto;
-        padding: 10px 14px !important;
-        font-size: 13px !important;
+        width: 100%;
+        padding: 10px 6px !important;
+        font-size: 12px !important;
         min-height: 40px;
+        text-align: center;
+        margin: 0 !important;
     }
     .stats-grid {
         grid-template-columns: 1fr 1fr !important;
@@ -313,6 +334,14 @@ html[data-cafe-brand] .stat-card {
     }
     .stat-number {
         font-size: 1.6rem !important;
+    }
+    .categories-grid,
+    .products-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .category-card,
+    .product-card {
+        overflow: visible;
     }
     .login-form {
         margin: 48px 16px !important;
