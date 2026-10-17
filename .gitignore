@@ -37,3 +37,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Cafe logos uploaded from Super Dashboard
+pwa/uploads/cafes/*
+!pwa/uploads/cafes/.gitkeep

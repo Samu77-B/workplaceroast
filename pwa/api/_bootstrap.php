@@ -182,3 +182,33 @@ function default_owner_hash(): string
 {
     return password_hash('CafeOwner2024', PASSWORD_BCRYPT);
 }
+
+function normalize_hex_color($value): ?string
+{
+    $value = trim((string) $value);
+    if ($value === '') {
+        return null;
+    }
+    if (preg_match('/^#?([0-9a-fA-F]{6})$/', $value, $m)) {
+        return '#' . strtolower($m[1]);
+    }
+    return null;
+}
+
+function ensure_cafe_branding_columns(PDO $pdo): void
+{
+    if (!table_exists($pdo, 'corporate_clients')) {
+        return;
+    }
+    $cols = table_columns($pdo, 'corporate_clients');
+    $definitions = [
+        'logo_url' => 'VARCHAR(255) NULL',
+        'brand_primary' => 'VARCHAR(7) NULL',
+        'brand_accent' => 'VARCHAR(7) NULL',
+    ];
+    foreach ($definitions as $column => $ddl) {
+        if (!in_array($column, $cols, true)) {
+            $pdo->exec("ALTER TABLE corporate_clients ADD COLUMN `{$column}` {$ddl}");
+        }
+    }
+}

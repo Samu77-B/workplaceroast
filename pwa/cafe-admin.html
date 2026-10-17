@@ -723,7 +723,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="admin-theme.css?v=1">
+    <link rel="stylesheet" href="admin-theme.css?v=2">
 </head>
 <body>
     <button type="button" class="nav-btn theme-toggle theme-float" onclick="toggleTheme()">Light mode</button>
@@ -746,9 +746,12 @@
     <!-- Admin Dashboard -->
     <div id="adminDashboard" class="admin-container hidden">
         <div class="header">
-            <div>
-                <h1>Cafe Owner Dashboard</h1>
-                <p>Manage your cafe menu and orders</p>
+            <div class="header-brand">
+                <img id="cafeDashLogo" class="header-logo hidden" alt="">
+                <div>
+                    <h1 id="cafeDashTitle">Cafe Owner Dashboard</h1>
+                    <p>Owner dashboard · menu, add-ons, and orders</p>
+                </div>
             </div>
             <button type="button" class="nav-btn theme-toggle" onclick="toggleTheme()">Light mode</button>
         </div>
@@ -1242,6 +1245,9 @@
                         name: data.client_name,
                         accessCode: data.access_code,
                         password: password,
+                        logo_url: data.logo_url || '',
+                        brand_primary: data.brand_primary || '',
+                        brand_accent: data.brand_accent || '',
                         loginTime: new Date() 
                     };
                     localStorage.setItem('cafeOwnerUser', JSON.stringify(currentUser));
@@ -1270,7 +1276,62 @@
         function showDashboard() {
             document.getElementById('loginForm').classList.add('hidden');
             document.getElementById('adminDashboard').classList.remove('hidden');
+            applyCafeBrand(currentUser);
             updateOverview();
+        }
+
+        function hexLuma(hex) {
+            const h = String(hex || '').replace('#', '');
+            if (h.length !== 6) return 0;
+            const r = parseInt(h.slice(0, 2), 16) / 255;
+            const g = parseInt(h.slice(2, 4), 16) / 255;
+            const b = parseInt(h.slice(4, 6), 16) / 255;
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        }
+
+        function applyCafeBrand(user) {
+            const name = (user && user.name) || 'Cafe';
+            const titleEl = document.getElementById('cafeDashTitle');
+            if (titleEl) titleEl.textContent = name;
+            document.title = name + ' — Owner dashboard';
+            const logo = document.getElementById('cafeDashLogo');
+            if (logo) {
+                if (user && user.logo_url) {
+                    logo.src = user.logo_url;
+                    logo.alt = name + ' logo';
+                    logo.classList.remove('hidden');
+                } else {
+                    logo.removeAttribute('src');
+                    logo.classList.add('hidden');
+                }
+            }
+            const root = document.documentElement;
+            const primary = user && user.brand_primary;
+            const accent = user && user.brand_accent;
+            if (primary || accent) {
+                root.setAttribute('data-cafe-brand', 'on');
+            } else {
+                root.removeAttribute('data-cafe-brand');
+            }
+            if (primary) {
+                root.style.setProperty('--cafe-primary', primary);
+                root.style.setProperty('--header-bg', primary);
+                const darkText = hexLuma(primary) > 0.62;
+                root.style.setProperty('--header-text', darkText ? '#0f172a' : '#f8fafc');
+                root.style.setProperty('--header-muted', darkText ? 'rgba(15,23,42,0.7)' : 'rgba(248,250,252,0.68)');
+            } else {
+                root.style.removeProperty('--cafe-primary');
+                root.style.removeProperty('--header-bg');
+                root.style.removeProperty('--header-text');
+                root.style.removeProperty('--header-muted');
+            }
+            if (accent) {
+                root.style.setProperty('--cafe-accent', accent);
+                root.style.setProperty('--accent', accent);
+            } else {
+                root.style.removeProperty('--cafe-accent');
+                root.style.removeProperty('--accent');
+            }
         }
 
         // Section Navigation
@@ -1281,7 +1342,7 @@
             });
             
             // Remove active class from all nav buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
+            document.querySelectorAll('.admin-nav .nav-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
@@ -1289,7 +1350,9 @@
             document.getElementById(sectionName).classList.add('active');
             
             // Add active class to clicked button
-            event.target.classList.add('active');
+            if (event && event.target && event.target.classList) {
+                event.target.classList.add('active');
+            }
             
             // Load section-specific data
             switch(sectionName) {

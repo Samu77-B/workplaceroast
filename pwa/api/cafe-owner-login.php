@@ -48,4 +48,7 @@ echo json_encode([
     'corporate_client_id' => (int) $cafe['id'],
     'client_name' => $cafe['name'],
     'access_code' => $cafe['access_code'],
+    'logo_url' => $cafe['logo_url'] ?? null,
+    'brand_primary' => $cafe['brand_primary'] ?? null,
+    'brand_accent' => $cafe['brand_accent'] ?? null,
 ]);

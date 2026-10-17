@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/_bootstrap.php';
 require_admin();
+ensure_cafe_branding_columns($pdo);
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -133,6 +134,9 @@ function format_client(array $row, array $statsByCafe): array
         'contact_email' => $row['contact_email'] ?? null,
         'contact_name' => $row['contact_name'] ?? null,
         'notes' => $row['notes'] ?? null,
+        'logo_url' => $row['logo_url'] ?? null,
+        'brand_primary' => $row['brand_primary'] ?? null,
+        'brand_accent' => $row['brand_accent'] ?? null,
     ];
     $out['health'] = health_payload($out, $stats);
     return $out;
@@ -144,7 +148,7 @@ if ($method === 'GET') {
     if ($has('owner_password')) {
         $select[] = 'owner_password';
     }
-    foreach (['slug', 'tier', 'contact_email', 'contact_name', 'notes'] as $optional) {
+    foreach (['slug', 'tier', 'contact_email', 'contact_name', 'notes', 'logo_url', 'brand_primary', 'brand_accent'] as $optional) {
         if ($has($optional)) {
             $select[] = $optional;
         }
@@ -196,6 +200,9 @@ if ($method === 'POST') {
     $contactEmail = trim((string) ($body['contact_email'] ?? ''));
     $contactName = trim((string) ($body['contact_name'] ?? ''));
     $notes = trim((string) ($body['notes'] ?? ''));
+    $brandPrimary = array_key_exists('brand_primary', $body) ? normalize_hex_color($body['brand_primary']) : null;
+    $brandAccent = array_key_exists('brand_accent', $body) ? normalize_hex_color($body['brand_accent']) : null;
+    $removeLogo = !empty($body['remove_logo']);
 
     if ($editId > 0) {
         $fields = ['name = ?', 'is_active = ?'];
@@ -219,6 +226,18 @@ if ($method === 'POST') {
         if ($has('notes')) {
             $fields[] = 'notes = ?';
             $params[] = $notes !== '' ? $notes : null;
+        }
+        if ($has('brand_primary') && array_key_exists('brand_primary', $body)) {
+            $fields[] = 'brand_primary = ?';
+            $params[] = $brandPrimary;
+        }
+        if ($has('brand_accent') && array_key_exists('brand_accent', $body)) {
+            $fields[] = 'brand_accent = ?';
+            $params[] = $brandAccent;
+        }
+        if ($has('logo_url') && $removeLogo) {
+            $fields[] = 'logo_url = ?';
+            $params[] = null;
         }
         if (!empty($body['regenerate_access_code'])) {
             $fields[] = 'access_code = ?';
@@ -281,6 +300,16 @@ if ($method === 'POST') {
         $cols[] = 'notes';
         $placeholders[] = '?';
         $params[] = $notes !== '' ? $notes : null;
+    }
+    if ($has('brand_primary')) {
+        $cols[] = 'brand_primary';
+        $placeholders[] = '?';
+        $params[] = $brandPrimary;
+    }
+    if ($has('brand_accent')) {
+        $cols[] = 'brand_accent';
+        $placeholders[] = '?';
+        $params[] = $brandAccent;
     }
     $sql = 'INSERT INTO corporate_clients (`' . implode('`, `', $cols) . '`) VALUES (' . implode(', ', $placeholders) . ')';
     $stmt = $pdo->prepare($sql);

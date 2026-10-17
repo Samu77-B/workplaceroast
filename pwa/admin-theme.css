@@ -230,3 +230,102 @@ body:has(#adminDashboard:not(.hidden)) .theme-float {
 .footer-copyright p {
     color: var(--header-muted) !important;
 }
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+.header-logo {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    flex: 0 0 52px;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+html[data-cafe-brand] .btn {
+    background: var(--cafe-primary) !important;
+    color: var(--header-text, #fff) !important;
+}
+html[data-cafe-brand] .nav-btn.active,
+html[data-cafe-brand] .nav-btn:hover {
+    background: var(--cafe-accent, var(--accent)) !important;
+    color: #0f172a !important;
+    border-color: var(--cafe-accent, var(--accent)) !important;
+}
+html[data-cafe-brand] .stat-card {
+    border-left-color: var(--cafe-accent, var(--accent)) !important;
+}
+@media (max-width: 900px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .header h1 {
+        font-size: 1.2rem !important;
+    }
+}
+@media (max-width: 640px) {
+    .admin-container {
+        padding: 12px !important;
+    }
+    .header {
+        padding: 14px 16px !important;
+        gap: 10px;
+    }
+    .header-logo {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+    }
+    .header h1 {
+        font-size: 1.08rem !important;
+    }
+    .header p {
+        font-size: 0.8rem !important;
+    }
+    .admin-nav {
+        display: flex;
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        gap: 8px !important;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .admin-nav::-webkit-scrollbar {
+        display: none;
+    }
+    .admin-nav .nav-btn {
+        flex: 0 0 auto;
+        padding: 10px 14px !important;
+        font-size: 13px !important;
+        min-height: 40px;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+    .stat-number {
+        font-size: 1.6rem !important;
+    }
+    .login-form {
+        margin: 48px 16px !important;
+        max-width: none;
+        padding: 28px 20px !important;
+    }
+    .theme-float {
+        top: 12px;
+        right: 12px;
+    }
+}
+@media (max-width: 400px) {
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

@@ -311,7 +311,7 @@
             transform: translateY(-2px);
             border-color: rgba(148, 163, 184, 0.45);
         }
-        .cafe-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+        .cafe-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
         .cafe h3 { font-size: 1.08rem; letter-spacing: -0.02em; }
         .pill {
             font-size: 0.7rem;
@@ -414,6 +414,44 @@
             margin-bottom: 12px;
         }
         .reset-check input { width: auto; margin: 0; }
+        .color-field { display: flex; align-items: center; gap: 8px; }
+        .color-field input[type="color"] {
+            width: 44px;
+            height: 40px;
+            padding: 2px;
+            border-radius: 6px;
+            flex: 0 0 44px;
+        }
+        .color-field input[type="text"] { margin-bottom: 0; }
+        .logo-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0 12px;
+        }
+        .logo-preview img {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--bg-elevated);
+        }
+        .cafe-logo {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            border-radius: 6px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--line);
+            flex: 0 0 36px;
+        }
+        .cafe-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
         .toast {
             position: fixed;
             bottom: 20px;
@@ -517,6 +555,30 @@
             </div>
             <label for="clientNotes">Internal notes</label>
             <textarea id="clientNotes" placeholder="Hours, machine type, anything useful"></textarea>
+            <div class="row">
+                <div>
+                    <label for="brandPrimary">Primary colour</label>
+                    <div class="color-field">
+                        <input type="color" id="brandPrimaryPicker" value="#334155" aria-label="Primary colour picker">
+                        <input id="brandPrimary" type="text" maxlength="7" placeholder="#334155">
+                    </div>
+                </div>
+                <div>
+                    <label for="brandAccent">Accent colour</label>
+                    <div class="color-field">
+                        <input type="color" id="brandAccentPicker" value="#c4a574" aria-label="Accent colour picker">
+                        <input id="brandAccent" type="text" maxlength="7" placeholder="#c4a574">
+                    </div>
+                </div>
+            </div>
+            <p class="hint">Used on the cafe owner dashboard header, buttons, and highlights.</p>
+            <label for="cafeLogo">Logo</label>
+            <input id="cafeLogo" type="file" accept="image/png,image/jpeg,image/webp">
+            <div id="logoPreviewWrap" class="logo-preview hidden">
+                <img id="logoPreview" alt="Cafe logo preview">
+                <button type="button" class="btn btn-small btn-ghost" onclick="clearLogo()">Remove logo</button>
+            </div>
+            <p class="hint">PNG, JPG or WebP, under 1.5MB.</p>
             <label style="display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:12px;">
                 <input id="clientActive" type="checkbox" checked style="width:auto;margin:0;">
                 Active (can take orders)
@@ -557,11 +619,15 @@
         let clients = [];
         let filter = 'all';
         let editing = null;
+        let pendingRemoveLogo = false;
 
         const THEME_KEY = 'superDashTheme';
 
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+            bindColorField('brandPrimaryPicker', 'brandPrimary');
+            bindColorField('brandAccentPicker', 'brandAccent');
+            document.getElementById('cafeLogo').addEventListener('change', previewLogoFile);
             document.querySelectorAll('#filters .chip').forEach(btn => {
                 btn.addEventListener('click', () => {
                     filter = btn.dataset.filter;
@@ -705,7 +771,10 @@
                 return `
                 <article class="cafe" data-id="${c.id}">
                     <div class="cafe-head">
-                        <h3>${escapeHtml(c.name)}</h3>
+                        <div class="cafe-title">
+                            ${c.logo_url ? `<img class="cafe-logo" src="${escapeAttr(c.logo_url)}" alt="">` : ''}
+                            <h3>${escapeHtml(c.name)}</h3>
+                        </div>
                         <span class="pill st-${status}">${labelFor(status)} · ${score}</span>
                     </div>
                     <div class="score-bar ${status}"><span style="width:${Math.min(100, score)}%"></span></div>
@@ -757,6 +826,11 @@
             document.getElementById('contactName').value = editing ? (editing.contact_name || '') : '';
             document.getElementById('contactEmail').value = editing ? (editing.contact_email || '') : '';
             document.getElementById('clientNotes').value = editing ? (editing.notes || '') : '';
+            setColorField('brandPrimaryPicker', 'brandPrimary', editing && editing.brand_primary ? editing.brand_primary : '#334155');
+            setColorField('brandAccentPicker', 'brandAccent', editing && editing.brand_accent ? editing.brand_accent : '#c4a574');
+            pendingRemoveLogo = false;
+            document.getElementById('cafeLogo').value = '';
+            showLogoPreview(editing && editing.logo_url ? editing.logo_url : '');
             document.getElementById('clientActive').checked = editing ? !!editing.is_active : true;
             document.getElementById('ownerPassword').value = '';
             document.getElementById('regenCode').checked = false;
@@ -795,17 +869,39 @@
                 contact_name: document.getElementById('contactName').value.trim(),
                 contact_email: document.getElementById('contactEmail').value.trim(),
                 notes: document.getElementById('clientNotes').value.trim(),
-                is_active: document.getElementById('clientActive').checked ? 1 : 0
+                is_active: document.getElementById('clientActive').checked ? 1 : 0,
+                brand_primary: document.getElementById('brandPrimary').value.trim(),
+                brand_accent: document.getElementById('brandAccent').value.trim()
             };
             const password = document.getElementById('ownerPassword').value;
             if (password) payload.owner_password = password;
             if (id && document.getElementById('regenCode').checked) payload.regenerate_access_code = true;
             if (id && document.getElementById('resetOwnerPassword').checked) payload.reset_owner_password = true;
+            if (id && pendingRemoveLogo) payload.remove_logo = true;
             try {
                 const url = apiUrl('/admin/corporate_clients.php' + (id ? '?id=' + encodeURIComponent(id) : ''));
                 const res = await fetch(url, { method: 'POST', credentials: 'same-origin', headers: apiHeaders(), body: JSON.stringify(payload) });
                 const data = await readApiJson(res);
                 if (!res.ok) throw new Error(data.error || 'Save failed');
+                const cafeId = data.id || id;
+                const logoFile = document.getElementById('cafeLogo').files[0];
+                if (logoFile && cafeId) {
+                    const form = new FormData();
+                    form.append('id', cafeId);
+                    form.append('logo', logoFile);
+                    const token = (typeof CONFIG !== 'undefined' && CONFIG.ADMIN_TOKEN) ? CONFIG.ADMIN_TOKEN : '';
+                    const logoRes = await fetch(apiUrl('/admin/cafe_logo.php'), {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'X-Admin-Token': token
+                        },
+                        body: form
+                    });
+                    const logoData = await readApiJson(logoRes);
+                    if (!logoRes.ok) throw new Error(logoData.error || 'Cafe saved, but logo upload failed');
+                }
                 closeEditor();
                 let msg = id ? 'Cafe updated' : 'Cafe created';
                 if (data.access_code) msg += ' · access code ' + data.access_code;
@@ -838,6 +934,46 @@
 
         function copyShownCode() {
             copyText(document.getElementById('shownAccessCode').textContent);
+        }
+
+        function bindColorField(pickerId, textId) {
+            const picker = document.getElementById(pickerId);
+            const text = document.getElementById(textId);
+            picker.addEventListener('input', () => { text.value = picker.value; });
+            text.addEventListener('input', () => {
+                if (/^#[0-9a-fA-F]{6}$/.test(text.value)) picker.value = text.value;
+            });
+        }
+
+        function setColorField(pickerId, textId, hex) {
+            const value = /^#[0-9a-fA-F]{6}$/.test(hex) ? hex : '#334155';
+            document.getElementById(pickerId).value = value;
+            document.getElementById(textId).value = value;
+        }
+
+        function showLogoPreview(url) {
+            const wrap = document.getElementById('logoPreviewWrap');
+            const img = document.getElementById('logoPreview');
+            if (url) {
+                img.src = url;
+                wrap.classList.remove('hidden');
+            } else {
+                img.removeAttribute('src');
+                wrap.classList.add('hidden');
+            }
+        }
+
+        function previewLogoFile() {
+            const file = document.getElementById('cafeLogo').files[0];
+            pendingRemoveLogo = false;
+            if (!file) return;
+            showLogoPreview(URL.createObjectURL(file));
+        }
+
+        function clearLogo() {
+            document.getElementById('cafeLogo').value = '';
+            pendingRemoveLogo = true;
+            showLogoPreview('');
         }
 
         function copyText(text) {

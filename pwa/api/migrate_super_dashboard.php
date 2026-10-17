@@ -17,6 +17,9 @@ $definitions = [
     'contact_email' => 'VARCHAR(255) NULL',
     'contact_name' => 'VARCHAR(255) NULL',
     'notes' => 'TEXT NULL',
+    'logo_url' => 'VARCHAR(255) NULL',
+    'brand_primary' => 'VARCHAR(7) NULL',
+    'brand_accent' => 'VARCHAR(7) NULL',
 ];
 
 foreach ($definitions as $column => $ddl) {
