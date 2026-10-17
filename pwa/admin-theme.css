@@ -235,10 +235,18 @@ input:focus, select:focus, textarea:focus {
 .category-stat-label {
     color: var(--muted) !important;
 }
-.category-slug {
+.category-slug,
+.product-category {
     background: var(--accent) !important;
     color: #0f172a !important;
     border-radius: 4px !important;
+}
+.place-url {
+    background: var(--input-bg) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 8px !important;
+    word-break: break-word;
 }
 .category-icon {
     display: flex !important;
