@@ -2966,7 +2966,11 @@
                 const response = await fetch(`${CONFIG.API_BASE_URL}/addons.php?cafe_id=${cafeId}`, {
                     headers: getAuthHeaders()
                 });
-                const data = await response.json();
+                const raw = await response.text();
+                if (!raw || /^\s*</.test(raw)) {
+                    throw new Error('Add-ons API is missing on the server. Deploy pwa/api/addons.php then try again.');
+                }
+                const data = JSON.parse(raw);
                 
                 if (data.success && data.addons) {
                     addons = data.addons;
