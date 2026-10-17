@@ -627,14 +627,20 @@
             const base = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
                 ? CONFIG.API_BASE_URL
                 : (window.location.origin + '/pwa/api');
-            return base + path;
+            const token = (typeof CONFIG !== 'undefined' && CONFIG.ADMIN_TOKEN) ? CONFIG.ADMIN_TOKEN : '';
+            const sep = path.indexOf('?') === -1 ? '?' : '&';
+            return base + path + sep + 'token=' + encodeURIComponent(token);
         }
 
         async function loadClients() {
             const banner = document.getElementById('apiBanner');
             try {
                 const res = await fetch(apiUrl('/admin/corporate_clients.php'), { headers: apiHeaders() });
-                const data = await res.json();
+                const raw = await res.text();
+                let data = {};
+                try { data = raw ? JSON.parse(raw) : {}; } catch (e) {
+                    throw new Error(raw ? 'API returned a non-JSON error' : 'API returned an empty error');
+                }
                 if (!res.ok) {
                     throw new Error(data.error || ('HTTP ' + res.status));
                 }
@@ -653,7 +659,11 @@
         async function runMigration() {
             try {
                 const res = await fetch(apiUrl('/migrate_super_dashboard.php'), { headers: apiHeaders() });
-                const data = await res.json();
+                const raw = await res.text();
+                let data = {};
+                try { data = raw ? JSON.parse(raw) : {}; } catch (e) {
+                    throw new Error(raw ? 'API returned a non-JSON error' : 'API returned an empty error');
+                }
                 if (!res.ok) throw new Error(data.error || 'Migration failed');
                 toast(data.message || 'Database updated');
                 loadClients();

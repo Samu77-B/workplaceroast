@@ -16,7 +16,13 @@ if (!is_file($configPath)) {
     exit;
 }
 
-require_once $configPath;
+try {
+    require_once $configPath;
+} catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'database' => 'error', 'hint' => 'Check DB user, password, and database name in config.php']);
+    exit;
+}
 
 if (!isset($pdo) || !($pdo instanceof PDO)) {
     http_response_code(500);

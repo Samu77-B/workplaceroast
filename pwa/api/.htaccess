@@ -1,5 +1,5 @@
-# Hostinger runs PHP as CGI and drops Authorization unless we pass it through.
-CGIPassAuth On
+# Pass Authorization to PHP when the host allows it.
+# Do not use CGIPassAuth here — Hostinger rejects it and the whole /api folder returns HTTP 500.
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 RewriteEngine On
 RewriteCond %{HTTP:Authorization} .
