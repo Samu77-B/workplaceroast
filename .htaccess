@@ -24,7 +24,7 @@ ServerSignature Off
 
 # 4. PROTECT SENSITIVE FILES AND DIRECTORIES
 # Block access to configuration files, logs, and sensitive data
-<FilesMatch "^(\.htaccess|\.htpasswd|\.env|\.git|\.gitignore|\.gitattributes|config\.php|config\.js|config\.json|php\.ini|error_log|\.log|composer\.json|composer\.lock|package\.json|package-lock\.json|yarn\.lock|webpack\.config\.js|\.DS_Store|Thumbs\.db)$">
+<FilesMatch "^(\.htaccess|\.htpasswd|\.env|\.git|\.gitignore|\.gitattributes|config\.php|config\.json|php\.ini|error_log|\.log|composer\.json|composer\.lock|package\.json|package-lock\.json|yarn\.lock|webpack\.config\.js|\.DS_Store|Thumbs\.db)$">
     <IfModule mod_authz_core.c>
         # Apache 2.4+
         Require all denied
