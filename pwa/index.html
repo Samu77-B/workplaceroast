@@ -2703,7 +2703,7 @@
 
                 <div style="text-align: center; margin: 20px 0;">
                     <p style="font-size: 18px; margin-bottom: 10px;">Your drink is being prepared!</p>
-                    <p style="font-size: 14px; opacity: 0.8;">Please wait at your chair</p>
+                    <p style="font-size: 14px; opacity: 0.8;" id="orderWaitHint">Please wait at your chair</p>
                 </div>
 
                 <div id="orderMessageDisplay" style="display: none; text-align: center; margin: 20px 0; padding: 15px; background: rgba(255, 255, 255, 0.1); border-radius: 10px;">
@@ -3330,6 +3330,40 @@
                 return !!place.show_spots;
             }
             return localStorage.getItem('show_spots') !== '0';
+        }
+
+        function getVenueKind() {
+            const place = getActivePlace() || {};
+            const noun = String(getSpotNoun() || '').toLowerCase();
+            const hay = [
+                place.name,
+                place.slug,
+                noun,
+                localStorage.getItem('place_name'),
+                localStorage.getItem('cafe_name')
+            ].join(' ').toLowerCase();
+            if (/\bnail/.test(hay)) return 'nail';
+            if (/\bbarber|\bbarb/.test(hay) || noun === 'station') return 'barber';
+            if (/\bsalon|\bhair/.test(hay) || noun === 'chair' || noun === 'seat') return 'salon';
+            if (noun === 'desk' || !placeShowsSpots()) return 'office';
+            return 'venue';
+        }
+
+        function getDeliveryCopy() {
+            const noun = getSpotNoun();
+            const place = getActivePlace();
+            const kind = getVenueKind();
+            const deliver = placeShowsSpots()
+                ? ('Deliver to my ' + String(noun || 'spot').toLowerCase())
+                : ((place && place.name) ? ('Deliver to ' + place.name) : 'Deliver to me');
+            const pickup = ({
+                nail: "I'll pick it up when my nails are done",
+                barber: "I'll pick it up when my cut is done",
+                salon: "I'll pick it up when my hair is done",
+                office: "I'll pick it up",
+                venue: "I'll pick it up"
+            })[kind] || "I'll pick it up";
+            return { deliver: deliver, pickup: pickup };
         }
 
         function getPlaceSpots() {
@@ -4447,10 +4481,10 @@
                 chairNumberText = 'Corporate Order';
             } else {
                 const deliveryOption = document.querySelector('input[name="deliveryOption"]:checked')?.value || 'deliver';
-                const noun = location.spot_noun || 'Chair';
+                const copy = getDeliveryCopy();
                 deliveryText = deliveryOption === 'deliver'
-                    ? `🚚 Deliver to ${noun.toLowerCase()}`
-                    : '🏪 Customer will pick up';
+                    ? `🚚 ${copy.deliver}`
+                    : `🏪 ${copy.pickup}`;
             }
             
             const cafeId = parseInt(localStorage.getItem('cafe_id') || CONFIG.CAFE_ID, 10);
@@ -5310,10 +5344,8 @@
                         chairNumberText = 'Corporate Order';
                     } else {
                         const deliveryOption = document.querySelector('input[name="deliveryOption"]:checked')?.value || 'deliver';
-                        const noun = location.spot_noun || 'Chair';
-                        deliveryText = deliveryOption === 'deliver'
-                            ? `Deliver to ${noun.toLowerCase()}`
-                            : 'Customer will pick up';
+                        const copy = getDeliveryCopy();
+                        deliveryText = deliveryOption === 'deliver' ? copy.deliver : copy.pickup;
                     }
                     
                     const orderDetails = {
@@ -5436,7 +5468,7 @@
             const corporateLogin = localStorage.getItem('corporate_login') === '1' && !getActivePlace();
             const deliverySection = document.getElementById('deliveryOptionsSection');
             const corporateOrderNameSection = document.getElementById('corporateOrderNameSection');
-            const noun = getSpotNoun();
+            const copy = getDeliveryCopy();
             
             if (!deliverySection) return;
             
@@ -5471,13 +5503,11 @@
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <label style="display: flex; align-items: center; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid #e0e0e0;">
                             <input type="radio" id="deliverToChair" name="deliveryOption" value="deliver" checked style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <img src="images/chair.png" alt="Chair" style="width: 32px; height: 32px; margin-right: 10px;">
-                            <span style="font-size: 14px; color: #333; text-align: left;">Deliver to my ${noun.toLowerCase()}</span>
+                            <span style="font-size: 14px; color: #333; text-align: left;">${copy.deliver}</span>
                         </label>
                         <label style="display: flex; align-items: center; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid #e0e0e0;">
                             <input type="radio" id="pickUpLater" name="deliveryOption" value="pickup" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
-                            <img src="images/Walking.png" alt="Walking" style="width: 32px; height: 32px; margin-right: 10px;">
-                            <span style="font-size: 14px; color: #333; text-align: left;">I will pick it up when my hair is done</span>
+                            <span style="font-size: 14px; color: #333; text-align: left;">${copy.pickup}</span>
                         </label>
                     </div>
                 `;
@@ -5646,6 +5676,15 @@
             document.getElementById('cartSummary').style.display = 'none';
             
             currentPage = 'orderConfirmation';
+
+            const waitHint = document.getElementById('orderWaitHint');
+            if (waitHint) {
+                const pickup = document.querySelector('input[name="deliveryOption"]:checked')?.value === 'pickup';
+                const noun = String(getSpotNoun() || 'spot').toLowerCase();
+                waitHint.textContent = pickup
+                    ? "We'll have it ready for pickup"
+                    : (placeShowsSpots() ? ('Please wait at your ' + noun) : "We'll bring it to you");
+            }
             
             // Update order confirmation details
             updateOrderConfirmation();
