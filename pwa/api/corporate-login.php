@@ -26,4 +26,6 @@ echo json_encode([
     'success' => true,
     'corporate_client_id' => (int) $cafe['id'],
     'client_name' => $cafe['name'],
+    'brand_primary' => $cafe['brand_primary'] ?? null,
+    'brand_accent' => $cafe['brand_accent'] ?? null,
 ]);

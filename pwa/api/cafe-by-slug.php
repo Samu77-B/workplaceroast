@@ -26,6 +26,12 @@ if ($hasSlug) {
 if (in_array('tier', $cols, true)) {
     $sql .= ', tier';
 }
+if (in_array('brand_primary', $cols, true)) {
+    $sql .= ', brand_primary';
+}
+if (in_array('brand_accent', $cols, true)) {
+    $sql .= ', brand_accent';
+}
 $sql .= ' FROM corporate_clients WHERE is_active = 1 AND (';
 $params = [];
 if ($hasSlug) {
@@ -50,4 +56,6 @@ echo json_encode([
     'slug' => $row['slug'] ?? $slug,
     'tier' => $row['tier'] ?? 'basic',
     'access_code' => $row['access_code'],
+    'brand_primary' => $row['brand_primary'] ?? null,
+    'brand_accent' => $row['brand_accent'] ?? null,
 ]);

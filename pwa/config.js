@@ -79,6 +79,9 @@ async function hydrateCafeFromSlug() {
             localStorage.setItem('corporate_client_id', String(CONFIG.CAFE_ID));
             localStorage.setItem('cafe_name', data.name || '');
             localStorage.setItem('cafe_tier', data.tier || 'basic');
+            if (typeof applyCafeColors === 'function') {
+                applyCafeColors(data.brand_primary, data.brand_accent);
+            }
             document.title = (data.name || 'Workplace Roast') + ' - Ordering';
             return CONFIG.CAFE_ID;
         }

@@ -219,7 +219,27 @@
         .category-icon {
             font-size: 2rem;
             margin-bottom: 10px;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+        }
+
+        .category-icon img,
+        .category-icon .icon-shape {
+            width: 44px;
+            height: 44px;
+        }
+
+        .category-icon img {
+            object-fit: contain;
+        }
+
+        .category-icon .icon-shape {
+            background-color: currentColor;
+            -webkit-mask: var(--icon-url) center / contain no-repeat;
+            mask: var(--icon-url) center / contain no-repeat;
+            mask-mode: alpha;
         }
 
         .category-name {
@@ -723,7 +743,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="admin-theme.css?v=3">
+    <link rel="stylesheet" href="admin-theme.css?v=5">
 </head>
 <body>
     <button type="button" class="nav-btn theme-toggle theme-float" onclick="toggleTheme()">Light mode</button>
@@ -1173,7 +1193,8 @@
     </div>
 
     <!-- Configuration -->
-    <script src="config.js?v=9"></script>
+    <script src="config.js?v=10"></script>
+    <script src="category-icons.js?v=2"></script>
     
     <script>
         // Cafe Owner Authentication
@@ -1676,7 +1697,7 @@
                 const categoryCard = document.createElement('div');
                 categoryCard.className = 'category-card';
                 categoryCard.innerHTML = `
-                    <div class="category-icon">${category.icon || '📁'}</div>
+                    <div class="category-icon">${renderCategoryIconHtml(category)}</div>
                     <div class="category-name">${category.name}</div>
                     <div class="category-slug">${category.slug}</div>
                     <div class="category-description">${category.description || 'No description'}</div>

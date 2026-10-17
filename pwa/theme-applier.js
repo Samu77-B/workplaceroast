@@ -57,6 +57,44 @@ function getClientIdFromPath() {
   return null;
 }
 
+function hexLuma(hex) {
+  const h = String(hex || '').replace('#', '');
+  if (h.length !== 6) {
+    return 0;
+  }
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function setIconContrastFromPrimary(primary) {
+  const lightBrand = hexLuma(primary) > 0.62;
+  const root = document.documentElement;
+  root.style.setProperty('--icon-on-brand', lightBrand ? '#0f172a' : '#ffffff');
+  root.setAttribute('data-brand-luma', lightBrand ? 'light' : 'dark');
+}
+
+function applyCafeColors(primary, accent) {
+  const root = document.documentElement;
+  if (primary || accent) {
+    root.setAttribute('data-cafe-brand', 'on');
+  }
+  if (primary) {
+    root.style.setProperty('--theme-primary', primary);
+    root.style.setProperty('--primary-color', primary);
+    setIconContrastFromPrimary(primary);
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', primary);
+    }
+  }
+  if (accent) {
+    root.style.setProperty('--theme-accent', accent);
+    root.style.setProperty('--accent-color', accent);
+  }
+}
+
 // Function to apply theme
 function applyTheme() {
   // Get clientId from URL path
@@ -68,16 +106,19 @@ function applyTheme() {
   // Set CSS Variables on the <html> element
   const root = document.documentElement;
   
+  const cafeBrandLocked = root.getAttribute('data-cafe-brand') === 'on';
+
   // Set theme CSS variables
-  root.style.setProperty('--theme-primary', theme.primaryColor);
-  root.style.setProperty('--theme-accent', theme.accentColor);
+  if (!cafeBrandLocked) {
+    root.style.setProperty('--theme-primary', theme.primaryColor);
+    root.style.setProperty('--theme-accent', theme.accentColor);
+    root.style.setProperty('--primary-color', theme.primaryColor);
+    root.style.setProperty('--accent-color', theme.accentColor);
+    setIconContrastFromPrimary(theme.primaryColor);
+  }
   root.style.setProperty('--theme-background', theme.backgroundColor);
   root.style.setProperty('--theme-text', theme.textColor);
   root.style.setProperty('--theme-secondary', theme.secondaryColor);
-  
-  // Also set legacy CSS variables for backward compatibility
-  root.style.setProperty('--primary-color', theme.primaryColor);
-  root.style.setProperty('--accent-color', theme.accentColor);
   
   // Update the document title
   if (document.title !== theme.appName) {

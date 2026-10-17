@@ -34,10 +34,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <!-- Configuration -->
-    <script src="config.js?v=9"></script>
+    <script src="config.js?v=10"></script>
     
     <!-- Theme Applier - Must load early to set CSS variables -->
-    <script src="theme-applier.js"></script>
+    <script src="theme-applier.js?v=2"></script>
     
     <!-- Dynamic Product Loader -->
     <script src="dynamic_products.js?v=9"></script>
@@ -52,6 +52,7 @@
             --theme-secondary: #f5f5f5;
             --primary-color: #431c0d;
             --accent-color: #8b4513;
+            --icon-on-brand: #ffffff;
         }
         
         * {
@@ -710,6 +711,7 @@
             width: 80px;
             height: 80px;
             background: var(--theme-primary);
+            color: var(--icon-on-brand, #ffffff);
             border-radius: 50%;
             margin: 0 auto 15px;
             display: flex;
@@ -725,19 +727,34 @@
             box-shadow: 0 8px 20px rgba(107, 122, 90, 0.3);
         }
 
-        .item-icon img {
+        .item-icon img,
+        .item-icon svg,
+        .item-icon .icon-shape {
             width: 50px;
             height: 50px;
+        }
+
+        .item-icon img {
             object-fit: contain;
             filter: brightness(0) invert(1);
         }
 
+        [data-brand-luma="light"] .item-icon img {
+            filter: brightness(0);
+        }
+
         .item-icon svg {
-            width: 50px;
-            height: 50px;
-            color: white;
-            stroke: white;
-            fill: none;
+            color: currentColor;
+            fill: currentColor;
+            stroke: none;
+        }
+
+        .icon-shape {
+            display: block;
+            background-color: currentColor;
+            -webkit-mask: var(--icon-url) center / contain no-repeat;
+            mask: var(--icon-url) center / contain no-repeat;
+            mask-mode: alpha;
         }
 
         .item-name {
@@ -2228,7 +2245,9 @@
                 height: 70px;
             }
             
-            .item-icon img {
+            .item-icon img,
+            .item-icon svg,
+            .item-icon .icon-shape {
                 width: 40px;
                 height: 40px;
             }
@@ -2341,7 +2360,9 @@
                 height: 75px;
             }
             
-            .item-icon img {
+            .item-icon img,
+            .item-icon svg,
+            .item-icon .icon-shape {
                 width: 45px;
                 height: 45px;
             }
@@ -2387,7 +2408,9 @@
                 height: 80px;
             }
             
-            .item-icon img {
+            .item-icon img,
+            .item-icon svg,
+            .item-icon .icon-shape {
                 width: 50px;
                 height: 50px;
             }
@@ -2463,7 +2486,9 @@
                 height: 90px;
             }
             
-            .item-icon img {
+            .item-icon img,
+            .item-icon svg,
+            .item-icon .icon-shape {
                 width: 55px;
                 height: 55px;
             }
@@ -2626,42 +2651,42 @@
 
                      <div class="menu-item" onclick="showCategory('chai')">
                          <div class="item-icon">
-                             <img src="images/cold-drinks.png" alt="Chai">
+                             <span class="icon-shape" style="--icon-url: url('images/categories/chai.svg')" role="img" aria-label="Chai"></span>
                          </div>
                          <div class="item-name">Chai</div>
                      </div>
 
                      <div class="menu-item" onclick="showCategory('everyday-teas')">
                          <div class="item-icon">
-                             <img src="images/tea.png" alt="Loose Leaf Tea">
+                             <span class="icon-shape" style="--icon-url: url('images/categories/loose-leaf-tea.svg')" role="img" aria-label="Loose Leaf Tea"></span>
                          </div>
                          <div class="item-name">Loose Leaf<br>Tea</div>
                      </div>
 
                      <div class="menu-item" onclick="showCategory('matcha-teas')">
                          <div class="item-icon">
-                             <img src="images/matcha.png" alt="Matcha" style="max-width: 100%; height: auto;">
+                             <span class="icon-shape" style="--icon-url: url('images/categories/matcha.svg')" role="img" aria-label="Matcha"></span>
                          </div>
                          <div class="item-name">Matcha</div>
                      </div>
 
                      <div class="menu-item" onclick="showCategory('coffees')">
                          <div class="item-icon">
-                             <img src="images/hot-drinks.png" alt="Coffee">
+                             <span class="icon-shape" style="--icon-url: url('images/categories/coffee.svg')" role="img" aria-label="Coffee"></span>
                          </div>
                          <div class="item-name">Coffee</div>
                      </div>
 
                      <div class="menu-item" onclick="showCategory('specialties')">
                          <div class="item-icon">
-                             <img src="images/special.png" alt="Specials" style="max-width: 100%; height: auto;">
+                             <span class="icon-shape" style="--icon-url: url('images/categories/specials.svg')" role="img" aria-label="Specials"></span>
                          </div>
                          <div class="item-name">Specials</div>
                      </div>
 
                      <div class="menu-item" onclick="showCategory('chocolate')">
                          <div class="item-icon">
-                             <img src="images/chocolate.png" alt="Chocolate" style="max-width: 100%; height: auto;">
+                             <span class="icon-shape" style="--icon-url: url('images/categories/chocolate.svg')" role="img" aria-label="Chocolate"></span>
                          </div>
                          <div class="item-name">Chocolate</div>
                      </div>
@@ -4000,6 +4025,9 @@
                     // Store corporate_client_id securely in localStorage
                     localStorage.setItem('corporate_client_id', result.corporate_client_id.toString());
                     localStorage.setItem('corporate_client_name', result.client_name || 'Corporate Client');
+                    if (typeof applyCafeColors === 'function') {
+                        applyCafeColors(result.brand_primary, result.brand_accent);
+                    }
                     
                     // Update UI based on corporate client status
                     updateCorporateClientUI();
