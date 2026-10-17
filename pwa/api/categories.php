@@ -77,9 +77,11 @@ if ($method === 'POST' || $method === 'PUT') {
         'name' => $name,
         'slug' => $slug,
         'description' => trim((string) ($body['description'] ?? '')),
-        'icon' => trim((string) ($body['icon'] ?? '')),
         'active' => !empty($body['active']) ? 1 : 0,
     ];
+    if ($has('icon')) {
+        $fields['icon'] = trim((string) ($body['icon'] ?? ''));
+    }
     if ($has('corporate_client_id') && $cafe) {
         $fields['corporate_client_id'] = (int) $cafe['id'];
     }

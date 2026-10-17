@@ -54,9 +54,8 @@
             .replace(/>/g, '&gt;');
     }
 
-    function isIconPath(icon) {
-        var value = String(icon || '').trim();
-        return /\.(png|svg|webp|jpe?g|gif)$/i.test(value) || value.indexOf('images/') === 0 || value.charAt(0) === '/';
+    function isCompleteIconPath(icon) {
+        return /\.(png|svg|webp|jpe?g|gif)$/i.test(String(icon || '').trim());
     }
 
     function getCategoryIconSrc(category) {
@@ -64,7 +63,7 @@
             return '';
         }
         var icon = String(category.icon || '').trim();
-        if (isIconPath(icon)) {
+        if (isCompleteIconPath(icon)) {
             return icon;
         }
         var slug = String(category.slug || '').toLowerCase();

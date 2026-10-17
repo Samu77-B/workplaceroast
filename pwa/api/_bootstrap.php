@@ -319,6 +319,15 @@ function ensure_category_cafe_column(PDO $pdo): void
     if (!in_array('corporate_client_id', $cols, true)) {
         $pdo->exec('ALTER TABLE categories ADD COLUMN corporate_client_id INT NULL');
     }
+    $iconCol = $pdo->query("SHOW COLUMNS FROM categories LIKE 'icon'")->fetch(PDO::FETCH_ASSOC);
+    if (!$iconCol) {
+        $pdo->exec('ALTER TABLE categories ADD COLUMN icon VARCHAR(255) NULL');
+        return;
+    }
+    $type = strtolower((string) ($iconCol['Type'] ?? ''));
+    if (preg_match('/varchar\((\d+)\)/', $type, $m) && (int) $m[1] < 255) {
+        $pdo->exec('ALTER TABLE categories MODIFY COLUMN icon VARCHAR(255) NULL');
+    }
 }
 
 function ensure_places_tables(PDO $pdo): void

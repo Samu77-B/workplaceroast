@@ -1140,7 +1140,7 @@
 
     <!-- Configuration -->
     <script src="config.js?v=11"></script>
-    <script src="category-icons.js?v=3"></script>
+    <script src="category-icons.js?v=4"></script>
     
     <script>
         // Admin Authentication
@@ -1679,7 +1679,10 @@
                 slug: document.getElementById('categorySlug').value,
                 description: document.getElementById('categoryDescription').value,
                 subtitle: document.getElementById('categorySubtitle').value,
-                icon: document.getElementById('categoryIcon').value,
+                icon: document.getElementById('categoryIcon').value
+                    || (typeof suggestCategoryIcon === 'function'
+                        ? suggestCategoryIcon(document.getElementById('categorySlug').value, document.getElementById('categoryName').value)
+                        : ''),
                 order: parseInt(document.getElementById('categoryOrder').value),
                 active: document.getElementById('categoryActive').checked
             };
