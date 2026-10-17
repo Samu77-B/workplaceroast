@@ -75,6 +75,15 @@ function setIconContrastFromPrimary(primary) {
   root.setAttribute('data-brand-luma', lightBrand ? 'light' : 'dark');
 }
 
+function setStatusBarColor(color) {
+  if (!color) return;
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute('content', color);
+  }
+  document.documentElement.style.backgroundColor = color;
+}
+
 function applyCafeColors(primary, accent) {
   const root = document.documentElement;
   if (primary || accent) {
@@ -84,10 +93,7 @@ function applyCafeColors(primary, accent) {
     root.style.setProperty('--theme-primary', primary);
     root.style.setProperty('--primary-color', primary);
     setIconContrastFromPrimary(primary);
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-    if (themeColorMeta) {
-      themeColorMeta.setAttribute('content', primary);
-    }
+    setStatusBarColor(primary);
   }
   if (accent) {
     root.style.setProperty('--theme-accent', accent);
@@ -156,9 +162,8 @@ function applyTheme() {
     pwaTitleMeta.setAttribute('content', theme.appName);
   }
   
-  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeColorMeta) {
-    themeColorMeta.setAttribute('content', theme.primaryColor);
+  if (!cafeBrandLocked) {
+    setStatusBarColor(theme.primaryColor);
   }
   
   // Debug logging

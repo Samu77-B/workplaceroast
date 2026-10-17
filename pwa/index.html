@@ -6,7 +6,7 @@
     <title>Workplace Roast - Ordering</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="var(--theme-primary)">
+    <meta name="theme-color" content="#431c0d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Workplace Roast">
@@ -37,7 +37,7 @@
     <script src="config.js?v=12"></script>
     
     <!-- Theme Applier - Must load early to set CSS variables -->
-    <script src="theme-applier.js?v=3"></script>
+    <script src="theme-applier.js?v=4"></script>
     <script src="category-icons.js?v=4"></script>
     
     <!-- Dynamic Product Loader -->
@@ -54,6 +54,10 @@
             --primary-color: #431c0d;
             --accent-color: #8b4513;
             --icon-on-brand: #ffffff;
+        }
+
+        html {
+            background-color: var(--theme-primary);
         }
         
         * {
@@ -126,10 +130,7 @@
         }
 
         .header {
-            /* Fallback for browsers that don't support color-mix */
             background: var(--theme-primary);
-            /* Modern browsers with color-mix support */
-            background: linear-gradient(135deg, color-mix(in srgb, var(--theme-primary) 90%, transparent), color-mix(in srgb, var(--theme-primary) 80%, transparent));
             backdrop-filter: blur(calc(20px + var(--blur-intensity, 0px)));
             -webkit-backdrop-filter: blur(calc(20px + var(--blur-intensity, 0px)));
             color: white;
@@ -209,10 +210,7 @@
             padding: 25px 20px;
             z-index: 100;
             min-height: 90px;
-            /* Fallback for browsers that don't support color-mix */
             background: var(--theme-primary);
-            /* Modern browsers with color-mix support */
-            background: linear-gradient(135deg, color-mix(in srgb, var(--theme-primary) 90%, transparent), color-mix(in srgb, var(--theme-primary) 80%, transparent));
             backdrop-filter: blur(calc(20px + var(--blur-intensity, 0px)));
             -webkit-backdrop-filter: blur(calc(20px + var(--blur-intensity, 0px)));
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -2578,7 +2576,8 @@
         
         /* Safe Area Insets for Notched Devices (iPhone X and newer) */
         @supports (padding: max(0px)) {
-            .header {
+            .header,
+            .minimal-header {
                 padding-left: max(72px, env(safe-area-inset-left));
                 padding-right: max(72px, env(safe-area-inset-right));
                 padding-top: max(24px, env(safe-area-inset-top));
