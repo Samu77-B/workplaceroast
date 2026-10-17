@@ -28,4 +28,5 @@ echo json_encode([
     'client_name' => $cafe['name'],
     'brand_primary' => $cafe['brand_primary'] ?? null,
     'brand_accent' => $cafe['brand_accent'] ?? null,
+    'logo_url' => $cafe['logo_url'] ?? null,
 ]);

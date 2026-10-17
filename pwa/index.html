@@ -34,10 +34,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <!-- Configuration -->
-    <script src="config.js?v=10"></script>
+    <script src="config.js?v=11"></script>
     
     <!-- Theme Applier - Must load early to set CSS variables -->
-    <script src="theme-applier.js?v=2"></script>
+    <script src="theme-applier.js?v=3"></script>
     
     <!-- Dynamic Product Loader -->
     <script src="dynamic_products.js?v=9"></script>
@@ -132,7 +132,7 @@
             backdrop-filter: blur(calc(20px + var(--blur-intensity, 0px)));
             -webkit-backdrop-filter: blur(calc(20px + var(--blur-intensity, 0px)));
             color: white;
-            padding: 30px 20px;
+            padding: 28px 76px 16px;
             text-align: center;
             position: sticky;
             top: 0;
@@ -624,21 +624,30 @@
         }
 
         .logo {
-            width: 120px;
+            width: auto;
+            max-width: 160px;
+            max-height: 56px;
             height: auto;
             margin: 0 auto 10px;
             display: block;
+            object-fit: contain;
             animation: fadeInScale 1s ease-out;
+        }
+
+        .logo.logo--mono {
             filter: brightness(0) invert(1);
         }
 
+        [data-brand-luma="light"] .logo.logo--mono {
+            filter: brightness(0);
+        }
+
         .cafe-name {
-            color: white;
+            color: var(--icon-on-brand, #ffffff);
             font-size: 20px;
             font-weight: 600;
             text-align: center;
             margin-top: 5px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
             animation: fadeInUp 0.8s ease-out;
         }
 
@@ -883,63 +892,44 @@
             transform: scale(1.1);
         }
 
-        .fixed-logo-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 201;
-            display: none; /* Hidden by default, shown after login */
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            padding: 0;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        
-        .fixed-logo-btn.show {
-            display: flex;
-        }
-
-        .fixed-logo-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
-        }
-
-        .fixed-logo-btn img {
-            width: 28px;
-            height: 28px;
-            object-fit: contain;
-            filter: brightness(0) invert(1);
-        }
-
+        .fixed-logo-btn,
         .fixed-home-btn {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            top: max(16px, env(safe-area-inset-top, 0px));
+            left: max(16px, env(safe-area-inset-left, 0px));
+            background: rgba(255,255,255,0.18);
+            color: var(--icon-on-brand, #ffffff);
+            border: 1px solid color-mix(in srgb, var(--icon-on-brand, #ffffff) 35%, transparent);
+            width: auto;
+            min-width: 64px;
+            height: 36px;
+            min-height: 36px;
+            padding: 0 14px;
+            border-radius: 8px;
             cursor: pointer;
-            z-index: 200;
-            display: flex;
+            z-index: 201;
+            display: none;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            line-height: 1;
+            box-shadow: none;
+            overflow: visible;
+            transition: background 0.2s ease;
         }
 
+        .fixed-logo-btn.show,
+        .fixed-home-btn.show {
+            display: flex;
+        }
+
+        .fixed-logo-btn:hover,
         .fixed-home-btn:hover {
             background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
+            transform: none;
         }
 
         .basket-count {
@@ -2213,7 +2203,7 @@
             }
             
             .header {
-                padding: 20px 15px;
+                padding: 22px 72px 14px;
             }
             
             .header-title {
@@ -2344,7 +2334,7 @@
             }
             
             .header {
-                padding: 25px 18px;
+                padding: 24px 72px 14px;
             }
             
             .menu-section {
@@ -2392,7 +2382,7 @@
             }
             
             .header {
-                padding: 28px 20px;
+                padding: 26px 76px 16px;
             }
             
             .menu-section {
@@ -2574,9 +2564,9 @@
         /* Safe Area Insets for Notched Devices (iPhone X and newer) */
         @supports (padding: max(0px)) {
             .header {
-                padding-left: max(20px, env(safe-area-inset-left));
-                padding-right: max(20px, env(safe-area-inset-right));
-                padding-top: max(30px, env(safe-area-inset-top));
+                padding-left: max(72px, env(safe-area-inset-left));
+                padding-right: max(72px, env(safe-area-inset-right));
+                padding-top: max(24px, env(safe-area-inset-top));
             }
             
             .container {
@@ -2597,9 +2587,7 @@
 <body>
     <div class="container">
         <!-- Fixed Logo Button (Home) - Hidden until logged in -->
-        <button class="fixed-logo-btn" id="fixedLogoBtn" onclick="goToMainMenu()" title="Home" style="display: none; z-index: 9999; position: fixed; top: 20px; left: 20px;">
-            <img id="homeLogoImage" src="/pwa/Brand/Workplace-Roast-Logo-V4.svg" alt="Home" onerror="if(!this.parentElement.textContent.includes('🏠')) this.parentElement.innerHTML='🏠 Home';">
-        </button>
+        <button type="button" class="fixed-home-btn" id="fixedLogoBtn" onclick="goToMainMenu()" title="Home" style="display: none; z-index: 9999;">Home</button>
 
         <!-- Back Button -->
         <button class="back-btn" id="backBtn" onclick="goBack()">←</button>
@@ -2617,7 +2605,7 @@
         <!-- Header -->
         <div class="header" id="mainHeader">
             <div class="logo-container">
-                <img src="/pwa/Brand/Workplace-Roast-Logo-V4.svg" alt="Workplace Roast Logo" class="logo">
+                <img id="headerCafeLogo" src="/pwa/Brand/Workplace-Roast-Logo-V4.svg" alt="Workplace Roast Logo" class="logo logo--mono">
                 <div class="cafe-name" id="cafeNameDisplay" style="display: none;"></div>
             </div>
         </div>
@@ -3774,10 +3762,16 @@
             const cafeId = CONFIG.CAFE_ID || parseInt(localStorage.getItem('cafe_id'));
             const cafeNameDisplay = document.getElementById('cafeNameDisplay');
             
-            if (cafeId && CONFIG.CAFE_NAMES && CONFIG.CAFE_NAMES[cafeId] && cafeNameDisplay) {
-                const cafeName = CONFIG.CAFE_NAMES[cafeId];
+            const storedName = localStorage.getItem('cafe_name');
+            const cafeName = (cafeId && CONFIG.CAFE_NAMES && CONFIG.CAFE_NAMES[cafeId])
+                ? CONFIG.CAFE_NAMES[cafeId]
+                : storedName;
+            if (cafeName && cafeNameDisplay) {
                 cafeNameDisplay.textContent = cafeName;
                 cafeNameDisplay.style.display = 'block';
+                if (typeof applyCafeLogo === 'function') {
+                    applyCafeLogo(localStorage.getItem('cafe_logo_url'), cafeName);
+                }
                 
                 // Update page title if not already updated by config.js
                 if (document.title === 'Workplace Roast - Ordering') {
@@ -4025,8 +4019,12 @@
                     // Store corporate_client_id securely in localStorage
                     localStorage.setItem('corporate_client_id', result.corporate_client_id.toString());
                     localStorage.setItem('corporate_client_name', result.client_name || 'Corporate Client');
+                    localStorage.setItem('cafe_name', result.client_name || '');
                     if (typeof applyCafeColors === 'function') {
                         applyCafeColors(result.brand_primary, result.brand_accent);
+                    }
+                    if (typeof applyCafeLogo === 'function') {
+                        applyCafeLogo(result.logo_url, result.client_name);
                     }
                     
                     // Update UI based on corporate client status
@@ -5661,6 +5659,8 @@
             // Clear corporate client data from localStorage
             localStorage.removeItem('corporate_client_id');
             localStorage.removeItem('corporate_client_name');
+            localStorage.removeItem('cafe_logo_url');
+            localStorage.removeItem('cafe_name');
             
             // Clear discount cache
             clearDiscountCache();

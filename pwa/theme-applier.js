@@ -95,6 +95,31 @@ function applyCafeColors(primary, accent) {
   }
 }
 
+var DEFAULT_CAFE_LOGO = '/pwa/Brand/Workplace-Roast-Logo-V4.svg';
+
+function applyCafeLogo(logoUrl, cafeName) {
+  const img = document.getElementById('headerCafeLogo');
+  const name = (cafeName || localStorage.getItem('cafe_name') || 'Cafe').trim();
+  const url = String(logoUrl || '').trim();
+  if (url) {
+    localStorage.setItem('cafe_logo_url', url);
+  } else {
+    localStorage.removeItem('cafe_logo_url');
+  }
+  if (!img) {
+    return;
+  }
+  if (url) {
+    img.src = url;
+    img.alt = name + ' logo';
+    img.classList.remove('logo--mono');
+  } else {
+    img.src = DEFAULT_CAFE_LOGO;
+    img.alt = name ? name + ' logo' : 'Workplace Roast Logo';
+    img.classList.add('logo--mono');
+  }
+}
+
 // Function to apply theme
 function applyTheme() {
   // Get clientId from URL path

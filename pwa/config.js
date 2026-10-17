@@ -61,12 +61,12 @@ function getCafeIdFromPath() {
 }
 
 async function hydrateCafeFromSlug() {
-    if (CONFIG.CAFE_ID) {
-        return CONFIG.CAFE_ID;
-    }
     const slug = getCafeSlugFromPath();
     if (!slug) {
-        return null;
+        if (typeof applyCafeLogo === 'function') {
+            applyCafeLogo(localStorage.getItem('cafe_logo_url'), localStorage.getItem('cafe_name'));
+        }
+        return CONFIG.CAFE_ID || null;
     }
     try {
         const response = await fetch(CONFIG.API_BASE_URL + '/cafe-by-slug.php?slug=' + encodeURIComponent(slug));
@@ -82,13 +82,16 @@ async function hydrateCafeFromSlug() {
             if (typeof applyCafeColors === 'function') {
                 applyCafeColors(data.brand_primary, data.brand_accent);
             }
+            if (typeof applyCafeLogo === 'function') {
+                applyCafeLogo(data.logo_url, data.name);
+            }
             document.title = (data.name || 'Workplace Roast') + ' - Ordering';
             return CONFIG.CAFE_ID;
         }
     } catch (err) {
         console.warn('Could not resolve cafe slug', slug, err);
     }
-    return null;
+    return CONFIG.CAFE_ID || null;
 }
 
 // Store cafe_id

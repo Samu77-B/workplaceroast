@@ -32,6 +32,9 @@ if (in_array('brand_primary', $cols, true)) {
 if (in_array('brand_accent', $cols, true)) {
     $sql .= ', brand_accent';
 }
+if (in_array('logo_url', $cols, true)) {
+    $sql .= ', logo_url';
+}
 $sql .= ' FROM corporate_clients WHERE is_active = 1 AND (';
 $params = [];
 if ($hasSlug) {
@@ -58,4 +61,5 @@ echo json_encode([
     'access_code' => $row['access_code'],
     'brand_primary' => $row['brand_primary'] ?? null,
     'brand_accent' => $row['brand_accent'] ?? null,
+    'logo_url' => $row['logo_url'] ?? null,
 ]);
