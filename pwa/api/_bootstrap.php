@@ -310,6 +310,28 @@ function seed_default_place_for_cafe(PDO $pdo, array $cafe): ?int
     return $placeId;
 }
 
+function ensure_product_catalog_columns(PDO $pdo): void
+{
+    if (!table_exists($pdo, 'products')) {
+        return;
+    }
+    $widen = static function (PDO $pdo, string $column, string $ddl, int $minLen) {
+        $stmt = $pdo->query('SHOW COLUMNS FROM products LIKE ' . $pdo->quote($column));
+        $col = $stmt ? $stmt->fetch(PDO::FETCH_ASSOC) : null;
+        if (!$col) {
+            $pdo->exec("ALTER TABLE products ADD COLUMN `{$column}` {$ddl}");
+            return;
+        }
+        $type = strtolower((string) ($col['Type'] ?? ''));
+        $tooShort = preg_match('/varchar\((\d+)\)/', $type, $m) && (int) $m[1] < $minLen;
+        if (strpos($type, 'enum') === 0 || $tooShort) {
+            $pdo->exec("ALTER TABLE products MODIFY COLUMN `{$column}` {$ddl}");
+        }
+    };
+    $widen($pdo, 'category', 'VARCHAR(80) NOT NULL DEFAULT \'\'', 80);
+    $widen($pdo, 'type', 'VARCHAR(40) NULL', 40);
+}
+
 function ensure_category_cafe_column(PDO $pdo): void
 {
     if (!table_exists($pdo, 'categories')) {

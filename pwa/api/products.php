@@ -7,6 +7,8 @@ if (!table_exists($pdo, 'products')) {
     exit;
 }
 
+ensure_product_catalog_columns($pdo);
+
 $cols = table_columns($pdo, 'products');
 $has = static function (string $col) use ($cols): bool {
     return in_array($col, $cols, true);
@@ -61,17 +63,23 @@ $productFields = static function (array $body, callable $hasCol, ?array $cafe) {
         echo json_encode(['success' => false, 'error' => 'Product name is required']);
         exit;
     }
-    $fields = [
+    $wanted = [
         'name' => $name,
         'category' => trim((string) ($body['category'] ?? '')),
         'subcategory' => ($body['subcategory'] ?? '') !== '' ? trim((string) $body['subcategory']) : null,
-        'type' => trim((string) ($body['type'] ?? '')),
+        'type' => trim((string) ($body['type'] ?? '')) ?: 'other',
         'description' => trim((string) ($body['description'] ?? '')),
         'regular_price' => (float) ($body['regular_price'] ?? 0),
         'large_price' => ($body['large_price'] === null || $body['large_price'] === ''
             ? 0.0
             : (float) ($body['large_price'] ?? 0)),
     ];
+    $fields = [];
+    foreach ($wanted as $col => $value) {
+        if ($hasCol($col)) {
+            $fields[$col] = $value;
+        }
+    }
     if ($hasCol('is_available')) {
         $fields['is_available'] = array_key_exists('is_available', $body) ? (!empty($body['is_available']) ? 1 : 0) : 1;
     }
@@ -82,12 +90,17 @@ $productFields = static function (array $body, callable $hasCol, ?array $cafe) {
 };
 
 if ($method === 'POST') {
-    $fields = $productFields($body, $has, $cafe);
-    $colsSql = '`' . implode('`, `', array_keys($fields)) . '`';
-    $placeholders = implode(', ', array_fill(0, count($fields), '?'));
-    $pdo->prepare("INSERT INTO products ({$colsSql}) VALUES ({$placeholders})")->execute(array_values($fields));
-    $id = (int) $pdo->lastInsertId();
-    echo json_encode(['success' => true, 'product_id' => $id, 'id' => $id]);
+    try {
+        $fields = $productFields($body, $has, $cafe);
+        $colsSql = '`' . implode('`, `', array_keys($fields)) . '`';
+        $placeholders = implode(', ', array_fill(0, count($fields), '?'));
+        $pdo->prepare("INSERT INTO products ({$colsSql}) VALUES ({$placeholders})")->execute(array_values($fields));
+        $id = (int) $pdo->lastInsertId();
+        echo json_encode(['success' => true, 'product_id' => $id, 'id' => $id]);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Could not save product']);
+    }
     exit;
 }
 
@@ -98,19 +111,24 @@ if ($method === 'PUT') {
         echo json_encode(['success' => false, 'error' => 'Missing id']);
         exit;
     }
-    $fields = $productFields($body, $has, $cafe);
-    $sets = [];
-    $params = [];
-    foreach ($fields as $col => $value) {
-        $sets[] = "`{$col}` = ?";
-        $params[] = $value;
+    try {
+        $fields = $productFields($body, $has, $cafe);
+        $sets = [];
+        $params = [];
+        foreach ($fields as $col => $value) {
+            $sets[] = "`{$col}` = ?";
+            $params[] = $value;
+        }
+        if ($has('updated_at')) {
+            $sets[] = 'updated_at = NOW()';
+        }
+        $params[] = $id;
+        $pdo->prepare('UPDATE products SET ' . implode(', ', $sets) . ' WHERE id = ?')->execute($params);
+        echo json_encode(['success' => true, 'id' => $id]);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Could not update product']);
     }
-    if ($has('updated_at')) {
-        $sets[] = 'updated_at = NOW()';
-    }
-    $params[] = $id;
-    $pdo->prepare('UPDATE products SET ' . implode(', ', $sets) . ' WHERE id = ?')->execute($params);
-    echo json_encode(['success' => true, 'id' => $id]);
     exit;
 }
 

@@ -956,7 +956,7 @@
                         </div>
                         <div class="form-group">
                             <label for="productCategory">Category</label>
-                            <select id="productCategory" required onchange="updateSubcategoryDropdown()">
+                            <select id="productCategory" required onchange="onProductCategoryChange()">
                                 <!-- Categories will be loaded dynamically -->
                             </select>
                         </div>
@@ -975,6 +975,8 @@
                                 <option value="coffee">Coffee</option>
                                 <option value="matcha">Matcha</option>
                                 <option value="specialty">Specialty</option>
+                                <option value="food">Food</option>
+                                <option value="other">Other</option>
                             </select>
                         </div>
                     </div>
@@ -2164,7 +2166,7 @@
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
                 const category = categories.find(cat => cat.slug === product.category);
-                const categoryDisplay = category ? `${category.icon || '📁'} ${category.name}` : product.category.replace(/-/g, ' ').toUpperCase();
+                const categoryDisplay = category ? categoryLabel(category) : product.category.replace(/-/g, ' ').toUpperCase();
                 
                 const subcategoryDisplay = product.subcategory ? ` - ${product.subcategory}` : '';
                 productCard.innerHTML = `
@@ -2196,10 +2198,35 @@
             document.getElementById('productCategory').value = categories.length > 0 ? categories[0].slug : '';
             document.getElementById('regularPrice').value = '';
             document.getElementById('largePrice').value = '';
-            document.getElementById('productType').value = 'tea';
+            document.getElementById('productType').value = typeFromCategorySlug(
+                categories.length > 0 ? categories[0].slug : ''
+            );
             document.getElementById('productDescription').value = '';
             document.getElementById('productForm').removeAttribute('data-edit-id');
             await loadProductAddons();
+        }
+
+        function categoryLabel(category) {
+            return (category && category.name) ? category.name : '';
+        }
+
+        function typeFromCategorySlug(slug) {
+            const value = String(slug || '').toLowerCase();
+            if (/coffee|hot-drink|cold-drink/.test(value)) return 'coffee';
+            if (/matcha/.test(value)) return 'matcha';
+            if (/tea|chai/.test(value)) return 'tea';
+            if (/sweet|food|cake|chocolate|dessert/.test(value)) return 'food';
+            if (/special/.test(value)) return 'specialty';
+            return 'other';
+        }
+
+        function onProductCategoryChange() {
+            updateSubcategoryDropdown();
+            const typeSelect = document.getElementById('productType');
+            const editing = document.getElementById('productForm').getAttribute('data-edit-id');
+            if (!editing && typeSelect) {
+                typeSelect.value = typeFromCategorySlug(document.getElementById('productCategory').value);
+            }
         }
 
         function populateCategoryDropdown() {
@@ -2214,7 +2241,7 @@
             activeCategories.forEach(category => {
                 const option = document.createElement('option');
                 option.value = category.slug;
-                option.textContent = `${category.icon || '📁'} ${category.name}`;
+                option.textContent = categoryLabel(category);
                 categorySelect.appendChild(option);
             });
             

@@ -57,6 +57,7 @@ if (in_array('slug', table_columns($pdo, 'corporate_clients'), true)) {
 
 ensure_cafe_branding_columns($pdo);
 ensure_category_cafe_column($pdo);
+ensure_product_catalog_columns($pdo);
 ensure_places_tables($pdo);
 $added[] = 'places';
 $added[] = 'place_spots';

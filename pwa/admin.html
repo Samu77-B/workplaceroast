@@ -907,6 +907,8 @@
                                 <option value="coffee">Coffee</option>
                                 <option value="matcha">Matcha</option>
                                 <option value="specialty">Specialty</option>
+                                <option value="food">Food</option>
+                                <option value="other">Other</option>
                             </select>
                         </div>
                     </div>
@@ -927,6 +929,8 @@
                             <option value="coffee">Coffee</option>
                             <option value="matcha">Matcha</option>
                             <option value="specialty">Specialty</option>
+                            <option value="food">Food</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1777,7 +1781,7 @@
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
                 const category = categories.find(cat => cat.slug === product.category);
-                const categoryDisplay = category ? `${category.icon || '📁'} ${category.name}` : product.category.replace(/-/g, ' ').toUpperCase();
+                const categoryDisplay = category ? category.name : product.category.replace(/-/g, ' ').toUpperCase();
                 
                 const subcategoryDisplay = product.subcategory ? ` - ${product.subcategory}` : '';
                 productCard.innerHTML = `
@@ -1825,7 +1829,7 @@
             activeCategories.forEach(category => {
                 const option = document.createElement('option');
                 option.value = category.slug;
-                option.textContent = `${category.icon || '📁'} ${category.name}`;
+                option.textContent = category.name;
                 categorySelect.appendChild(option);
             });
             
