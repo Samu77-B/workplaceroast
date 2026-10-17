@@ -77,6 +77,49 @@ body {
 .header a {
     color: var(--header-text) !important;
 }
+
+.icon-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 10px;
+}
+
+.icon-picker-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 8px;
+    background: var(--input-bg);
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    color: var(--text);
+    cursor: pointer;
+    min-height: 92px;
+}
+
+.icon-picker-btn:hover,
+.icon-picker-btn.selected {
+    border-color: var(--brand);
+    background: var(--accent-soft);
+}
+
+.icon-picker-btn .icon-shape {
+    width: 40px;
+    height: 40px;
+    background-color: currentColor;
+    -webkit-mask: var(--icon-url) center / contain no-repeat;
+    mask: var(--icon-url) center / contain no-repeat;
+    mask-mode: alpha;
+}
+
+.icon-picker-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.2;
+}
 .nav-btn {
     background: var(--card) !important;
     border: 1px solid var(--line) !important;

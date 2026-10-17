@@ -764,7 +764,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="admin-theme.css?v=5">
+    <link rel="stylesheet" href="admin-theme.css?v=6">
 </head>
 <body>
     <button type="button" class="nav-btn theme-toggle theme-float" onclick="toggleTheme()">Light mode</button>
@@ -862,8 +862,9 @@
                         <input type="text" id="categorySubtitle" placeholder="e.g., Premium matcha, freshly whisked">
                     </div>
                     <div class="form-group">
-                        <label for="categoryIcon">Icon (emoji or text)</label>
-                        <input type="text" id="categoryIcon" placeholder="e.g., ☕ or 🍵" maxlength="2">
+                        <label>Category icon</label>
+                        <input type="hidden" id="categoryIcon" value="">
+                        <div id="categoryIconPicker" class="icon-picker" aria-label="Choose a category icon"></div>
                     </div>
                     <div class="form-group">
                         <label for="categoryOrder">Display Order</label>
@@ -1262,7 +1263,7 @@
 
     <!-- Configuration -->
     <script src="config.js?v=12"></script>
-    <script src="category-icons.js?v=2"></script>
+    <script src="category-icons.js?v=3"></script>
     
     <script>
         // Cafe Owner Authentication
@@ -1801,6 +1802,42 @@
             });
         }
 
+        function bindCategoryIconPicker() {
+            const picker = document.getElementById('categoryIconPicker');
+            const hidden = document.getElementById('categoryIcon');
+            const nameInput = document.getElementById('categoryName');
+            const slugInput = document.getElementById('categorySlug');
+            if (!picker || !hidden || picker.dataset.bound === '1') return;
+            picker.dataset.bound = '1';
+            picker.dataset.auto = '1';
+            const maybeSuggest = function () {
+                if (picker.dataset.auto === '0') return;
+                const suggested = typeof suggestCategoryIcon === 'function'
+                    ? suggestCategoryIcon(slugInput.value, nameInput.value)
+                    : '';
+                if (typeof renderCategoryIconPicker === 'function') {
+                    renderCategoryIconPicker(picker, hidden, suggested);
+                }
+            };
+            nameInput.addEventListener('input', maybeSuggest);
+            slugInput.addEventListener('input', maybeSuggest);
+            picker.addEventListener('click', function () {
+                picker.dataset.auto = '0';
+            });
+        }
+
+        function setCategoryIconSelection(src, allowAuto) {
+            const picker = document.getElementById('categoryIconPicker');
+            const hidden = document.getElementById('categoryIcon');
+            bindCategoryIconPicker();
+            if (picker) picker.dataset.auto = allowAuto ? '1' : '0';
+            if (typeof renderCategoryIconPicker === 'function') {
+                renderCategoryIconPicker(picker, hidden, src || '');
+            } else if (hidden) {
+                hidden.value = src || '';
+            }
+        }
+
         function showAddCategoryForm() {
             document.getElementById('categoryForm').classList.remove('hidden');
             document.getElementById('categoryName').value = '';
@@ -1813,6 +1850,7 @@
             
             // Remove edit ID
             document.getElementById('categoryForm').removeAttribute('data-edit-id');
+            setCategoryIconSelection('', true);
         }
 
         function hideCategoryForm() {
@@ -1827,9 +1865,12 @@
                 document.getElementById('categorySlug').value = category.slug;
                 document.getElementById('categoryDescription').value = category.description || '';
                 document.getElementById('categorySubtitle').value = category.subtitle || '';
-                document.getElementById('categoryIcon').value = category.icon || '';
                 document.getElementById('categoryOrder').value = category.order;
                 document.getElementById('categoryActive').checked = category.active;
+                const selectedIcon = (typeof getCategoryIconSrc === 'function')
+                    ? getCategoryIconSrc(category)
+                    : (category.icon || '');
+                setCategoryIconSelection(selectedIcon, false);
                 
                 // Store the category ID for editing
                 document.getElementById('categoryForm').setAttribute('data-edit-id', id);
