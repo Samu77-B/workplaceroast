@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/_bootstrap.php';
 
+ensure_category_cafe_column($pdo);
+
 if (!table_exists($pdo, 'categories')) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'categories table not found']);
@@ -31,9 +33,25 @@ function format_category(array $row): array
 if ($method === 'GET') {
     $sql = 'SELECT * FROM categories';
     $params = [];
+    $where = [];
     if (isset($_GET['id'])) {
-        $sql .= ' WHERE id = ?';
+        $where[] = 'id = ?';
         $params[] = (int) $_GET['id'];
+    }
+    $cafeId = isset($_GET['cafe_id']) ? (int) $_GET['cafe_id'] : 0;
+    if ($cafeId > 0 && $has('corporate_client_id')) {
+        $prodCols = table_exists($pdo, 'products') ? table_columns($pdo, 'products') : [];
+        if (in_array('corporate_client_id', $prodCols, true) && in_array('category', $prodCols, true)) {
+            $where[] = '(corporate_client_id = ? OR slug IN (SELECT DISTINCT category FROM products WHERE corporate_client_id = ? AND category IS NOT NULL AND category != \'\'))';
+            $params[] = $cafeId;
+            $params[] = $cafeId;
+        } else {
+            $where[] = 'corporate_client_id = ?';
+            $params[] = $cafeId;
+        }
+    }
+    if ($where) {
+        $sql .= ' WHERE ' . implode(' AND ', $where);
     }
     $orderCol = $has('display_order') ? 'display_order' : ($has('order') ? '`order`' : 'id');
     $sql .= " ORDER BY {$orderCol} ASC, name ASC";
@@ -44,7 +62,7 @@ if ($method === 'GET') {
     exit;
 }
 
-require_admin_or_cafe();
+$cafe = require_admin_or_cafe();
 $body = json_input();
 
 if ($method === 'POST' || $method === 'PUT') {
@@ -62,6 +80,9 @@ if ($method === 'POST' || $method === 'PUT') {
         'icon' => trim((string) ($body['icon'] ?? '')),
         'active' => !empty($body['active']) ? 1 : 0,
     ];
+    if ($has('corporate_client_id') && $cafe) {
+        $fields['corporate_client_id'] = (int) $cafe['id'];
+    }
     if ($has('subtitle')) {
         $fields['subtitle'] = trim((string) ($body['subtitle'] ?? ''));
     }

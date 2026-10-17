@@ -34,13 +34,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <!-- Configuration -->
-    <script src="config.js?v=11"></script>
+    <script src="config.js?v=12"></script>
     
     <!-- Theme Applier - Must load early to set CSS variables -->
     <script src="theme-applier.js?v=3"></script>
+    <script src="category-icons.js?v=2"></script>
     
     <!-- Dynamic Product Loader -->
-    <script src="dynamic_products.js?v=9"></script>
+    <script src="dynamic_products.js?v=10"></script>
     
     <style>
         /* Set default CSS variables (will be overridden by theme-applier.js) */
@@ -714,6 +715,20 @@
         .menu-item:hover {
             transform: scale(1.05) translateY(-5px);
             box-shadow: 0 10px 25px rgba(107, 122, 90, 0.2);
+        }
+
+        .empty-menu-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--theme-text, #555);
+            padding: 28px 12px;
+            font-size: 1.05rem;
+        }
+
+        .menu-item-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.75;
+            margin-top: 4px;
         }
 
         .item-icon {
@@ -2626,7 +2641,9 @@
 
         <!-- Chair Info -->
         <div class="chair-info" id="chairInfo">
-            <div class="chair-number">Chair <span id="chairNumber" class="chair-number-display">One</span></div>
+            <div class="chair-number" id="spotBanner">
+                <span id="spotNoun">Chair</span> <span id="chairNumber" class="chair-number-display">One</span>
+            </div>
         </div>
 
         <!-- Main Menu Page -->
@@ -2636,288 +2653,14 @@
                 <button type="button" class="logout-btn" id="logoutBtn" onclick="handleLogout()" style="display: none;">Logout</button>
                 <h2 class="section-title">Drinks Menu</h2>
                 <div class="menu-grid">
-
-                     <div class="menu-item" onclick="showCategory('chai')">
-                         <div class="item-icon">
-                             <span class="icon-shape" style="--icon-url: url('images/categories/chai.svg')" role="img" aria-label="Chai"></span>
-                         </div>
-                         <div class="item-name">Chai</div>
-                     </div>
-
-                     <div class="menu-item" onclick="showCategory('everyday-teas')">
-                         <div class="item-icon">
-                             <span class="icon-shape" style="--icon-url: url('images/categories/loose-leaf-tea.svg')" role="img" aria-label="Loose Leaf Tea"></span>
-                         </div>
-                         <div class="item-name">Loose Leaf<br>Tea</div>
-                     </div>
-
-                     <div class="menu-item" onclick="showCategory('matcha-teas')">
-                         <div class="item-icon">
-                             <span class="icon-shape" style="--icon-url: url('images/categories/matcha.svg')" role="img" aria-label="Matcha"></span>
-                         </div>
-                         <div class="item-name">Matcha</div>
-                     </div>
-
-                     <div class="menu-item" onclick="showCategory('coffees')">
-                         <div class="item-icon">
-                             <span class="icon-shape" style="--icon-url: url('images/categories/coffee.svg')" role="img" aria-label="Coffee"></span>
-                         </div>
-                         <div class="item-name">Coffee</div>
-                     </div>
-
-                     <div class="menu-item" onclick="showCategory('specialties')">
-                         <div class="item-icon">
-                             <span class="icon-shape" style="--icon-url: url('images/categories/specials.svg')" role="img" aria-label="Specials"></span>
-                         </div>
-                         <div class="item-name">Specials</div>
-                     </div>
-
-                     <div class="menu-item" onclick="showCategory('chocolate')">
-                         <div class="item-icon">
-                             <span class="icon-shape" style="--icon-url: url('images/categories/chocolate.svg')" role="img" aria-label="Chocolate"></span>
-                         </div>
-                         <div class="item-name">Chocolate</div>
-                     </div>
+                    <p class="empty-menu-message">Loading menu…</p>
                 </div>
             </div>
             <!-- Footer Component -->
             <div id="footer-placeholder"></div>
         </div>
 
-        <!-- Chai Page -->
-        <div class="page" id="chai">
-            <div class="menu-section">
-                <h2 class="section-title">Chai</h2>
-                <p class="section-subtitle">Award-winning Pomban Chai</p>
-                <div class="item-list">
-                    <div class="list-item" onclick="openCustomizeModal('Pistachio Latte', 3.36, 4.48, 'coffee')">
-                        <span class="list-item-name">Pistachio Latte</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £4.20</span>
-                            <span class="discounted-price">Your price £3.36</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Strawberry Iced Chocolate', 3.52, 4.64, 'specialty')">
-                        <span class="list-item-name">Strawberry Iced Chocolate</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £4.40</span>
-                            <span class="discounted-price">Your price £3.52</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Classic Matcha Latte', 3.36, 4.48, 'matcha')">
-                        <span class="list-item-name">Classic Matcha Latte</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £4.20</span>
-                            <span class="discounted-price">Your price £3.36</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Sparkling Rose & Hibiscus', 2.56, 3.68, 'specialty')">
-                        <span class="list-item-name">Sparkling Rose & Hibiscus</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.20</span>
-                            <span class="discounted-price">Your price £2.56</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Footer Component -->
-            <div class="footer-placeholder"></div>
-        </div>
-
-        <!-- Everyday Teas Page -->
-        <div class="page" id="everyday-teas">
-            <div class="menu-section">
-                <h2 class="section-title">Loose Leaf Tea</h2>
-                <p class="section-subtitle">Premium loose leaf teas from around the world</p>
-                <div class="item-list">
-                    <div class="list-item" onclick="openCustomizeModal('Milk Oolong', 3.2, 4.32, 'tea')">
-                        <span class="list-item-name">Milk Oolong</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £4.00</span>
-                            <span class="discounted-price">Your price £3.20</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Breakfast Tea', 2.72, 3.84, 'tea')">
-                        <span class="list-item-name">Breakfast Tea</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.40</span>
-                            <span class="discounted-price">Your price £2.72</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Earl Grey', 2.88, 4.0, 'tea')">
-                        <span class="list-item-name">Earl Grey</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.60</span>
-                            <span class="discounted-price">Your price £2.88</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Wild Mint', 2.88, 4.0, 'tea')">
-                        <span class="list-item-name">Wild Mint</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.60</span>
-                            <span class="discounted-price">Your price £2.88</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Berry Tea', 2.88, 4.0, 'tea')">
-                        <span class="list-item-name">Berry Tea</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.60</span>
-                            <span class="discounted-price">Your price £2.88</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Footer Component -->
-            <div class="footer-placeholder"></div>
-        </div>
-
-        <!-- Matcha Teas Page -->
-        <div class="page" id="matcha-teas">
-            <div class="menu-section">
-                <h2 class="section-title">Matcha</h2>
-                <p class="section-subtitle">Premium matcha, freshly whisked</p>
-                <div class="item-list">
-                    <div class="list-item" onclick="openCustomizeModal('Matcha Thin Tea', 3.2, 4.32, 'matcha')">
-                        <span class="list-item-name">Matcha Thin Tea (Usucha)</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £4.00</span>
-                            <span class="discounted-price">Your price £3.20</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Classic Matcha Latte', 3.36, 4.48, 'matcha')">
-                        <span class="list-item-name">Classic Matcha Latte</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £4.20</span>
-                            <span class="discounted-price">Your price £3.36</span>
-                        </div>
-                    </div>
-                    <!-- Products will be dynamically loaded from database -->
-                </div>
-            </div>
-            <!-- Footer Component -->
-            <div class="footer-placeholder"></div>
-        </div>
-
-        <!-- Coffees Page -->
-        <div class="page" id="coffees">
-            <div class="menu-section">
-                <h2 class="section-title">Coffee</h2>
-                <p class="section-subtitle">Climpson & Sons Specialty Coffee beans from Brazil</p>
-                <div class="item-list">
-                    <div class="list-item" onclick="openCustomizeModal('Espresso', 2.24, 3.36, 'coffee')">
-                        <span class="list-item-name">Espresso (2oz)</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £2.80</span>
-                            <span class="discounted-price">Your price £2.24</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Americano', 2.24, 3.36, 'coffee')">
-                        <span class="list-item-name">Americano</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £2.80</span>
-                            <span class="discounted-price">Your price £2.24</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Long Black', 2.24, 3.36, 'coffee')">
-                        <span class="list-item-name">Long Black (6oz)</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £2.80</span>
-                            <span class="discounted-price">Your price £2.24</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Macchiato', 2.4, 3.52, 'coffee')">
-                        <span class="list-item-name">Macchiato (4oz)</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.00</span>
-                            <span class="discounted-price">Your price £2.40</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Piccolo/Cortado', 2.4, 3.52, 'coffee')">
-                        <span class="list-item-name">Piccolo or Cortado (4oz)</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.00</span>
-                            <span class="discounted-price">Your price £2.40</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Flat White', 2.72, 3.84, 'coffee')">
-                        <span class="list-item-name">Flat White (6oz)</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.40</span>
-                            <span class="discounted-price">Your price £2.72</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Latte', 2.88, 4.0, 'coffee')">
-                        <span class="list-item-name">Latte</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.60</span>
-                            <span class="discounted-price">Your price £2.88</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Cappuccino', 2.88, 4.0, 'coffee')">
-                        <span class="list-item-name">Cappuccino</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.60</span>
-                            <span class="discounted-price">Your price £2.88</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Mocha', 3.2, 4.32, 'coffee')">
-                        <span class="list-item-name">Mocha w/ Mork 50% choc</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £4.00</span>
-                            <span class="discounted-price">Your price £3.20</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Footer Component -->
-            <div class="footer-placeholder"></div>
-        </div>
-
-        <!-- Specialties Page -->
-        <div class="page" id="specialties">
-            <div class="menu-section">
-                <h2 class="section-title">Specials</h2>
-                <p class="section-subtitle">Limited time specials</p>
-                <div class="item-list">
-                    <div class="list-item" onclick="openCustomizeModal('Chai Latte', 2.88, 4.0, 'specialty')">
-                        <span class="list-item-name">Chai Latte</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £3.60</span>
-                            <span class="discounted-price">Your price £2.88</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Dirty Chai Latte', 3.2, 4.32, 'specialty')">
-                        <span class="list-item-name">Dirty Chai Latte</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £4.00</span>
-                            <span class="discounted-price">Your price £3.20</span>
-                        </div>
-                    </div>
-                    <div class="list-item" onclick="openCustomizeModal('Hojicha Salted Caramel', 3.36, 4.48, 'specialty')">
-                        <span class="list-item-name">Hojicha Salted Caramel Latte</span>
-                        <div class="price-container">
-                            <span class="original-price">Normal price £4.20</span>
-                            <span class="discounted-price">Your price £3.36</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Footer Component -->
-            <div class="footer-placeholder"></div>
-        </div>
-
-        <!-- Chocolate Page -->
-        <div class="page" id="chocolate">
-            <div class="menu-section">
-                <h2 class="section-title">Chocolate</h2>
-                <p class="section-subtitle">Specialty chocolate by Mörk</p>
-                <div class="item-list">
-                    <!-- Chocolate items will be populated here -->
-                </div>
-            </div>
-            <!-- Footer Component -->
-            <div class="footer-placeholder"></div>
-        </div>
+        <div id="dynamicCategoryPages"></div>
 
         <!-- Customize Modal -->
         <div class="modal" id="customizeModal">
@@ -3522,6 +3265,9 @@
                 goToMainMenu();
                 updateCartDisplay();
                 initializeChairNumber();
+                if (typeof loadStorefrontMenu === 'function') {
+                    loadStorefrontMenu();
+                }
                 
                 // Update UI based on corporate client status
                 updateCorporateClientUI();
@@ -3566,27 +3312,132 @@
             });
         }
 
-        // Initialize chair number from URL parameter or default to Chair One
+        function getActivePlace() {
+            if (typeof CONFIG !== 'undefined' && CONFIG.PLACE) {
+                return CONFIG.PLACE;
+            }
+            return null;
+        }
+
+        function getSpotNoun() {
+            const place = getActivePlace();
+            return (place && place.spot_noun) || localStorage.getItem('spot_noun') || 'Chair';
+        }
+
+        function placeShowsSpots() {
+            const place = getActivePlace();
+            if (place && typeof place.show_spots !== 'undefined') {
+                return !!place.show_spots;
+            }
+            return localStorage.getItem('show_spots') !== '0';
+        }
+
+        function getPlaceSpots() {
+            const place = getActivePlace();
+            return (place && Array.isArray(place.spots)) ? place.spots.filter(s => s && s.is_active !== false) : [];
+        }
+
+        function resolveSpotFromParam(raw) {
+            const value = String(raw == null ? '' : raw).trim();
+            if (!value) return null;
+            const spots = getPlaceSpots();
+            const asNum = parseInt(value, 10);
+            if (spots.length) {
+                const byId = spots.find(s => String(s.id) === value);
+                if (byId) return byId;
+                const byLabel = spots.find(s => String(s.label).toLowerCase() === value.toLowerCase());
+                if (byLabel) return byLabel;
+                if (!Number.isNaN(asNum) && asNum >= 1 && asNum <= spots.length) {
+                    return spots[asNum - 1];
+                }
+                const byOrder = spots.find(s => Number(s.sort_order) === asNum);
+                if (byOrder) return byOrder;
+            }
+            const fallbackNames = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
+            if (!Number.isNaN(asNum) && asNum >= 1 && asNum <= fallbackNames.length) {
+                return { id: asNum, label: fallbackNames[asNum - 1], sort_order: asNum };
+            }
+            return { id: null, label: value, sort_order: 0 };
+        }
+
+        function applyPlaceBanner() {
+            const banner = document.getElementById('spotBanner');
+            const scanBtn = document.getElementById('scanQRBtn');
+            const place = getActivePlace();
+            const noun = getSpotNoun();
+            const existingLabel = document.getElementById('chairNumber');
+            const currentLabel = (existingLabel && existingLabel.textContent.trim())
+                || localStorage.getItem('spot_label')
+                || '';
+
+            if (scanBtn) {
+                const show = placeShowsSpots();
+                scanBtn.textContent = show ? ('Scan ' + noun + ' QR') : 'Scan QR';
+                scanBtn.style.display = show ? 'block' : 'none';
+            }
+            if (!banner) return;
+            if (!placeShowsSpots()) {
+                banner.textContent = (place && place.name) || localStorage.getItem('place_name') || '';
+                return;
+            }
+            const spots = getPlaceSpots();
+            const label = currentLabel || (spots[0] && spots[0].label) || 'One';
+            banner.innerHTML = '<span id="spotNoun">' + noun + '</span> <span id="chairNumber" class="chair-number-display">' + label + '</span>';
+        }
+        window.applyPlaceBanner = applyPlaceBanner;
+
+        function getOrderLocation() {
+            const place = getActivePlace();
+            const labelEl = document.getElementById('chairNumber');
+            const spotLabel = labelEl ? labelEl.textContent.trim() : '';
+            const noun = getSpotNoun();
+            let chairNumberText;
+            if (place && !placeShowsSpots()) {
+                chairNumberText = place.name || 'Place';
+            } else if (place || spotLabel) {
+                chairNumberText = (noun + ' ' + spotLabel).trim();
+            } else if (localStorage.getItem('corporate_login') === '1') {
+                chairNumberText = 'Corporate Order';
+            } else {
+                chairNumberText = (noun + ' ' + (spotLabel || 'One')).trim();
+            }
+            return {
+                place_id: place ? place.id : null,
+                place_name: place ? place.name : (localStorage.getItem('place_name') || ''),
+                place_slug: place ? place.slug : (localStorage.getItem('place_slug') || ''),
+                spot_noun: noun,
+                spot_label: placeShowsSpots() ? spotLabel : '',
+                chairNumberText
+            };
+        }
+
+        // Initialize chair/spot from URL parameter
         function initializeChairNumber() {
-            // Check for chair parameter in URL
+            applyPlaceBanner();
             const urlParams = new URLSearchParams(window.location.search);
-            const chairParam = urlParams.get('chair');
-            
-            if (chairParam) {
-                const chairNumber = parseInt(chairParam);
-                if (chairNumber >= 1 && chairNumber <= 8) {
-                    setChairNumber(chairNumber);
-                    // Clean up URL to remove parameter (keeps URL clean)
+            const spotParam = urlParams.get('spot') || urlParams.get('chair');
+
+            if (spotParam) {
+                const spot = resolveSpotFromParam(spotParam);
+                if (spot) {
+                    setSpotLabel(spot.label);
                     if (window.history && window.history.replaceState) {
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }
                     return;
                 }
             }
-            
-            // If no valid chair parameter, default to Chair One
-            // Users can change it by scanning QR code or manual entry
-            document.getElementById('chairNumber').textContent = 'One';
+
+            const spots = getPlaceSpots();
+            if (!placeShowsSpots()) {
+                applyPlaceBanner();
+                return;
+            }
+            if (spots.length) {
+                setSpotLabel(spots[0].label);
+            } else {
+                setSpotLabel('One');
+            }
         }
 
         // QR Scanner functions
@@ -3684,37 +3535,34 @@
             // Handle QR code scan success
             console.log(`QR Code scanned: ${decodedText}`);
             
-            // Check if QR code is a URL with chair parameter
             try {
                 const url = new URL(decodedText);
-                const chairParam = url.searchParams.get('chair');
-                if (chairParam) {
-                    const chairNumber = parseInt(chairParam);
-                    if (chairNumber >= 1 && chairNumber <= 8) {
-                        setChairNumber(chairNumber);
+                const spotParam = url.searchParams.get('spot') || url.searchParams.get('chair');
+                if (spotParam) {
+                    const spot = resolveSpotFromParam(spotParam);
+                    if (spot) {
+                        setSpotLabel(spot.label);
                         closeQRScanner();
-                        showNotification(`Chair ${getChairName(chairNumber)} detected!`);
+                        showNotification(`${getSpotNoun()} ${spot.label} detected!`);
                         return;
                     }
                 }
             } catch (e) {
                 // Not a valid URL, continue with text parsing
             }
-            
-            // Extract chair number from QR code text
-            // Assuming QR codes contain text like "chair 1", "chair1", "1", etc.
-            const chairMatch = decodedText.toLowerCase().match(/chair\s*(\d+)|^(\d+)$/);
+
+            const chairMatch = decodedText.toLowerCase().match(/(?:chair|spot)\s*(\d+)|^(\d+)$/i);
             if (chairMatch) {
-                const chairNumber = parseInt(chairMatch[1] || chairMatch[2]);
-                if (chairNumber >= 1 && chairNumber <= 8) {
-                    setChairNumber(chairNumber);
+                const spot = resolveSpotFromParam(chairMatch[1] || chairMatch[2]);
+                if (spot) {
+                    setSpotLabel(spot.label);
                     closeQRScanner();
-                    showNotification(`Chair ${getChairName(chairNumber)} detected!`);
+                    showNotification(`${getSpotNoun()} ${spot.label} detected!`);
                 } else {
-                    showNotification('Invalid chair number in QR code');
+                    showNotification('Invalid spot in QR code');
                 }
             } else {
-                showNotification('QR code does not contain a valid chair number');
+                showNotification('QR code does not contain a valid spot');
             }
         }
 
@@ -3726,29 +3574,34 @@
         function submitChairNumber() {
             triggerHapticFeedback();
             const input = document.getElementById('qrInput').value.trim();
-            const chairNumber = parseInt(input);
-            
-            console.log('Manual chair input:', input, 'Parsed number:', chairNumber);
-            
-            if (chairNumber >= 1 && chairNumber <= 8) {
-                console.log('Setting chair number:', chairNumber, 'Chair name:', getChairName(chairNumber));
-                setChairNumber(chairNumber);
+            const spot = resolveSpotFromParam(input);
+            if (spot && spot.label) {
+                setSpotLabel(spot.label);
                 closeQRScanner();
-                showNotification(`Chair ${getChairName(chairNumber)} selected!`);
+                showNotification(`${getSpotNoun()} ${spot.label} selected!`);
             } else {
-                showNotification('Please enter a valid chair number (1-8)');
+                showNotification('Please enter a valid spot');
                 document.getElementById('qrInput').focus();
             }
         }
 
+        function setSpotLabel(label) {
+            applyPlaceBanner();
+            const labelEl = document.getElementById('chairNumber');
+            if (labelEl && placeShowsSpots()) {
+                labelEl.textContent = label;
+            }
+            localStorage.setItem('spot_label', label);
+        }
+
         function setChairNumber(chairNumber) {
-            const chairNames = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
-            document.getElementById('chairNumber').textContent = chairNames[chairNumber - 1];
+            const spot = resolveSpotFromParam(chairNumber);
+            setSpotLabel(spot ? spot.label : String(chairNumber));
         }
 
         function getChairName(chairNumber) {
-            const chairNames = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
-            return chairNames[chairNumber - 1];
+            const spot = resolveSpotFromParam(chairNumber);
+            return spot ? spot.label : String(chairNumber);
         }
 
         // Display cafe name in header
@@ -3812,21 +3665,26 @@
                 // Show/hide submit button based on input
                 qrInput.addEventListener('input', function(e) {
                     const value = e.target.value.trim();
-                    const chairNumber = parseInt(value);
-                    if (chairNumber >= 1 && chairNumber <= 8) {
-                        qrSubmitBtn.style.display = 'block';
-                    } else {
-                        qrSubmitBtn.style.display = 'none';
-                    }
+                    const spot = resolveSpotFromParam(value);
+                    qrSubmitBtn.style.display = (spot && spot.label) ? 'block' : 'none';
                 });
             }
         });
 
         // Navigation functions
+        function showPage(category) {
+            showCategory(category);
+        }
+
         function showCategory(category) {
             triggerHapticFeedback();
+            const page = document.getElementById(category);
+            if (!page) {
+                showNotification('That menu is not available');
+                return;
+            }
             hideAllPages();
-            document.getElementById(category).classList.add('active');
+            page.classList.add('active');
             
             // Switch to minimal header with back button only
             document.getElementById('mainHeader').style.display = 'none';
@@ -4018,8 +3876,16 @@
                 if (response.ok && result.success) {
                     // Store corporate_client_id securely in localStorage
                     localStorage.setItem('corporate_client_id', result.corporate_client_id.toString());
+                    localStorage.setItem('corporate_login', '1');
                     localStorage.setItem('corporate_client_name', result.client_name || 'Corporate Client');
+                    localStorage.setItem('cafe_id', result.corporate_client_id.toString());
                     localStorage.setItem('cafe_name', result.client_name || '');
+                    if (typeof CONFIG !== 'undefined') {
+                        CONFIG.CAFE_ID = parseInt(result.corporate_client_id, 10);
+                    }
+                    if (typeof loadStorefrontMenu === 'function') {
+                        loadStorefrontMenu();
+                    }
                     if (typeof applyCafeColors === 'function') {
                         applyCafeColors(result.brand_primary, result.brand_accent);
                     }
@@ -4097,10 +3963,11 @@
                 const corporateClientId = localStorage.getItem('corporate_client_id');
                 let url = `${CONFIG.API_BASE_URL}/addons.php`;
                 
+                const cafeId = (typeof CONFIG !== 'undefined' && CONFIG.CAFE_ID) || corporateClientId || localStorage.getItem('cafe_id');
                 if (productId) {
                     url += `?product_id=${productId}`;
-                } else if (corporateClientId) {
-                    url += `?cafe_id=${corporateClientId}`;
+                } else if (cafeId) {
+                    url += `?cafe_id=${cafeId}`;
                 }
                 
                 const response = await fetch(url);
@@ -4564,13 +4431,12 @@
             const customerName = document.getElementById('customerName').value.trim();
             const customerPhone = document.getElementById('customerPhone').value.trim();
             
-            // Get delivery option (check for corporate or regular)
-            const corporateClientId = localStorage.getItem('corporate_client_id');
+            const location = getOrderLocation();
+            const corporateLogin = localStorage.getItem('corporate_login') === '1' && !getActivePlace();
             let deliveryText;
-            let chairNumberText;
-            
-            if (corporateClientId) {
-                // Corporate client: Get delivery point from dropdown
+            let chairNumberText = location.chairNumberText;
+
+            if (corporateLogin) {
                 const deliveryPointSelect = document.getElementById('corporateDeliveryPoint');
                 const orderNameDepartment = document.getElementById('orderNameDepartment')?.value || '';
                 const deliveryPoint = deliveryPointSelect ? deliveryPointSelect.value : 'Main Reception';
@@ -4580,10 +4446,11 @@
                 }
                 chairNumberText = 'Corporate Order';
             } else {
-                // Regular user: Get delivery option from radio buttons
                 const deliveryOption = document.querySelector('input[name="deliveryOption"]:checked')?.value || 'deliver';
-                deliveryText = deliveryOption === 'deliver' ? '🚚 Deliver to chair' : '🏪 Customer will pick up when hair is done';
-                chairNumberText = 'Chair ' + document.getElementById('chairNumber').textContent;
+                const noun = location.spot_noun || 'Chair';
+                deliveryText = deliveryOption === 'deliver'
+                    ? `🚚 Deliver to ${noun.toLowerCase()}`
+                    : '🏪 Customer will pick up';
             }
             
             const cafeId = parseInt(localStorage.getItem('cafe_id') || CONFIG.CAFE_ID, 10);
@@ -4604,6 +4471,10 @@
                 special_instructions: orderDetails.message || '',
                 message: orderDetails.message || '',
                 chair_number: chairNumberText,
+                place_id: location.place_id,
+                place_name: location.place_name,
+                spot_noun: location.spot_noun,
+                spot_label: location.spot_label,
                 delivery_option: deliveryText,
                 customer_email: customerEmail || 'No email provided',
                 user_email: customerEmail || 'No email provided',
@@ -5423,12 +5294,12 @@
             async sendOrderToBackend() {
                 try {
                     // Get delivery option (check for corporate or regular)
-                    const corporateClientId = localStorage.getItem('corporate_client_id');
+                    const location = getOrderLocation();
+                    const corporateLogin = localStorage.getItem('corporate_login') === '1' && !getActivePlace();
                     let deliveryText;
-                    let chairNumberText;
-                    
-                    if (corporateClientId) {
-                        // Corporate client: Get delivery point from dropdown
+                    let chairNumberText = location.chairNumberText;
+
+                    if (corporateLogin) {
                         const deliveryPointSelect = document.getElementById('corporateDeliveryPoint');
                         const orderNameDepartment = document.getElementById('orderNameDepartment')?.value || '';
                         const deliveryPoint = deliveryPointSelect ? deliveryPointSelect.value : 'Main Reception';
@@ -5438,10 +5309,11 @@
                         }
                         chairNumberText = 'Corporate Order';
                     } else {
-                        // Regular user: Get delivery option from radio buttons
                         const deliveryOption = document.querySelector('input[name="deliveryOption"]:checked')?.value || 'deliver';
-                        deliveryText = deliveryOption === 'deliver' ? 'Deliver to chair' : 'Customer will pick up when hair is done';
-                        chairNumberText = 'Chair ' + document.getElementById('chairNumber').textContent;
+                        const noun = location.spot_noun || 'Chair';
+                        deliveryText = deliveryOption === 'deliver'
+                            ? `Deliver to ${noun.toLowerCase()}`
+                            : 'Customer will pick up';
                     }
                     
                     const orderDetails = {
@@ -5460,6 +5332,10 @@
                         },
                         paymentIntentId: this.paymentIntentId,
                         chairNumber: chairNumberText,
+                        place_id: location.place_id,
+                        place_name: location.place_name,
+                        spot_noun: location.spot_noun,
+                        spot_label: location.spot_label,
                         message: document.getElementById('orderMessage')?.value?.trim() || '',
                         deliveryOption: deliveryText
                     };
@@ -5557,13 +5433,14 @@
         
         // Function to render delivery options conditionally
         function renderDeliveryOptions() {
-            const corporateClientId = localStorage.getItem('corporate_client_id');
+            const corporateLogin = localStorage.getItem('corporate_login') === '1' && !getActivePlace();
             const deliverySection = document.getElementById('deliveryOptionsSection');
             const corporateOrderNameSection = document.getElementById('corporateOrderNameSection');
+            const noun = getSpotNoun();
             
             if (!deliverySection) return;
             
-            if (corporateClientId) {
+            if (corporateLogin) {
                 // Corporate client: Show dropdown with delivery points
                 deliverySection.innerHTML = `
                     <label class="message-label">
@@ -5595,7 +5472,7 @@
                         <label style="display: flex; align-items: center; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid #e0e0e0;">
                             <input type="radio" id="deliverToChair" name="deliveryOption" value="deliver" checked style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
                             <img src="images/chair.png" alt="Chair" style="width: 32px; height: 32px; margin-right: 10px;">
-                            <span style="font-size: 14px; color: #333; text-align: left;">Deliver to my chair</span>
+                            <span style="font-size: 14px; color: #333; text-align: left;">Deliver to my ${noun.toLowerCase()}</span>
                         </label>
                         <label style="display: flex; align-items: center; padding: 12px; background: white; border-radius: 8px; cursor: pointer; border: 2px solid #e0e0e0;">
                             <input type="radio" id="pickUpLater" name="deliveryOption" value="pickup" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
@@ -5614,7 +5491,7 @@
         
         // Function to update UI based on corporate client status
         function updateCorporateClientUI() {
-            const corporateClientId = localStorage.getItem('corporate_client_id');
+            const corporateLogin = localStorage.getItem('corporate_login') === '1' && !getActivePlace();
             const cafeId = typeof CONFIG !== 'undefined' && CONFIG.CAFE_ID ? CONFIG.CAFE_ID : null;
             const scanQRBtn = document.getElementById('scanQRBtn');
             const chairInfo = document.getElementById('chairInfo');
@@ -5622,8 +5499,9 @@
             
             // Check if user is on a store-specific URL (has cafe_id from URL)
             const isStoreSpecificUrl = cafeId !== null;
+            applyPlaceBanner();
             
-            if (corporateClientId && !isStoreSpecificUrl) {
+            if (corporateLogin && !isStoreSpecificUrl) {
                 // Corporate client logged in with access code (not on store-specific URL)
                 // Hide QR scanner button and chair info for corporate clients
                 if (scanQRBtn) {
@@ -5658,6 +5536,7 @@
             
             // Clear corporate client data from localStorage
             localStorage.removeItem('corporate_client_id');
+            localStorage.removeItem('corporate_login');
             localStorage.removeItem('corporate_client_name');
             localStorage.removeItem('cafe_logo_url');
             localStorage.removeItem('cafe_name');

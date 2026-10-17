@@ -26,6 +26,12 @@ function format_product(array $row): array
         'description' => $row['description'] ?? '',
         'regular_price' => isset($row['regular_price']) ? (float) $row['regular_price'] : 0,
         'large_price' => isset($row['large_price']) ? (float) $row['large_price'] : 0,
+        'price' => isset($row['regular_price']) ? (float) $row['regular_price'] : 0,
+        'sizes' => [
+            'regular' => isset($row['regular_price']) ? (float) $row['regular_price'] : 0,
+            'large' => isset($row['large_price']) ? (float) $row['large_price'] : 0,
+        ],
+        'active' => !isset($row['is_available']) || !empty($row['is_available']),
         'is_available' => !isset($row['is_available']) || !empty($row['is_available']),
     ];
 }
@@ -35,7 +41,7 @@ if ($method === 'GET') {
     $params = [];
     $cafeId = isset($_GET['cafe_id']) ? (int) $_GET['cafe_id'] : 0;
     if ($cafeId > 0 && $has('corporate_client_id')) {
-        $sql .= ' WHERE corporate_client_id = ? OR corporate_client_id IS NULL';
+        $sql .= ' WHERE corporate_client_id = ?';
         $params[] = $cafeId;
     }
     $sql .= ' ORDER BY name ASC';

@@ -3,22 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate QR Codes for Chairs</title>
+    <title>Generate QR Codes for Spots</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="config.js?v=12"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #6B7A5A 0%, #A8B896 100%);
             padding: 40px 20px;
             min-height: 100vh;
         }
-        
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -27,48 +22,22 @@
             padding: 40px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
-        
-        h1 {
-            color: #6B7A5A;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5rem;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 40px;
-            font-size: 1.1rem;
-        }
-        
+        h1 { color: #6B7A5A; text-align: center; margin-bottom: 10px; font-size: 2.2rem; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 40px; font-size: 1.1rem; }
         .qr-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 30px;
             margin-top: 30px;
         }
-        
         .qr-card {
             background: #f8f9fa;
             border-radius: 15px;
             padding: 25px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        
-        .qr-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-        
-        .qr-card h3 {
-            color: #6B7A5A;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-        }
-        
+        .qr-card h3 { color: #6B7A5A; margin-bottom: 15px; font-size: 1.3rem; }
         .qr-code-container {
             background: white;
             padding: 15px;
@@ -76,7 +45,6 @@
             margin-bottom: 15px;
             display: inline-block;
         }
-        
         .qr-url {
             font-size: 0.85rem;
             color: #666;
@@ -86,7 +54,6 @@
             background: white;
             border-radius: 5px;
         }
-        
         .print-btn {
             display: block;
             width: 200px;
@@ -98,14 +65,7 @@
             border-radius: 10px;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: background 0.3s ease;
-            box-shadow: 0 4px 15px rgba(107, 122, 90, 0.3);
         }
-        
-        .print-btn:hover {
-            background: #5a6750;
-        }
-        
         .instructions {
             background: #e8f5e9;
             border-left: 4px solid #6B7A5A;
@@ -113,113 +73,89 @@
             border-radius: 5px;
             margin-bottom: 30px;
         }
-        
-        .instructions h2 {
-            color: #6B7A5A;
-            margin-bottom: 10px;
-        }
-        
-        .instructions ul {
-            margin-left: 20px;
-            color: #555;
-        }
-        
-        .instructions li {
-            margin: 8px 0;
-        }
-        
+        .error { color: #b00020; text-align: center; margin: 20px 0; }
         @media print {
-            body {
-                background: white;
-                padding: 20px;
-            }
-            
-            .container {
-                box-shadow: none;
-                padding: 20px;
-            }
-            
-            .print-btn {
-                display: none;
-            }
-            
-            .qr-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            
-            .instructions {
-                display: none;
-            }
+            body { background: white; padding: 20px; }
+            .container { box-shadow: none; padding: 20px; }
+            .print-btn, .instructions { display: none; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 QR Codes for All Chairs</h1>
-        <p class="subtitle">Teas & C's Ordering System</p>
-        
+        <h1>QR Codes for Spots</h1>
+        <p class="subtitle" id="placeSubtitle">Loading place…</p>
         <div class="instructions">
-            <h2>📋 Instructions</h2>
+            <h2>Instructions</h2>
             <ul>
-                <li>Each QR code below is ready to print</li>
-                <li>Click "Print All QR Codes" to print this page</li>
-                <li>Cut out each QR code and place at the corresponding chair</li>
-                <li>Consider laminating for durability</li>
-                <li>Test by scanning one QR code with your phone first</li>
+                <li>Each QR code opens this place’s order page with the spot already selected.</li>
+                <li>Print, cut, and place at the matching chair, seat, or desk.</li>
+                <li>Open this page from Cafe Admin → Places → QR codes so the correct slug is used.</li>
             </ul>
         </div>
-        
-        <div class="qr-grid" id="qrGrid">
-            <!-- QR codes will be generated here -->
-        </div>
-        
-        <button class="print-btn" onclick="window.print()">🖨️ Print All QR Codes</button>
+        <div class="qr-grid" id="qrGrid"></div>
+        <p class="error" id="qrError" style="display:none;"></p>
+        <button class="print-btn" onclick="window.print()">Print All QR Codes</button>
     </div>
-    
     <script>
-        const baseUrl = 'https://teasandcs.com/ordering/';
-        const chairs = [
-            { number: 1, name: 'One' },
-            { number: 2, name: 'Two' },
-            { number: 3, name: 'Three' },
-            { number: 4, name: 'Four' },
-            { number: 5, name: 'Five' },
-            { number: 6, name: 'Six' },
-            { number: 7, name: 'Seven' },
-            { number: 8, name: 'Eight' }
-        ];
-        
-        const qrGrid = document.getElementById('qrGrid');
-        
-        chairs.forEach(chair => {
-            const url = `${baseUrl}?chair=${chair.number}`;
-            
-            // Create card
+        const params = new URLSearchParams(window.location.search);
+        const slug = (params.get('slug') || params.get('place') || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+        const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
+            ? CONFIG.API_BASE_URL
+            : (window.location.origin + '/pwa/api');
+        const grid = document.getElementById('qrGrid');
+        const subtitle = document.getElementById('placeSubtitle');
+        const errorEl = document.getElementById('qrError');
+
+        function showError(message) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            subtitle.textContent = '';
+        }
+
+        async function loadPlace() {
+            if (!slug) {
+                showError('Add ?slug=your-place to this URL, or open it from Cafe Admin → Places.');
+                return;
+            }
+            const response = await fetch(apiBase + '/cafe-by-slug.php?slug=' + encodeURIComponent(slug));
+            const data = await response.json();
+            if (!response.ok || !data.place) {
+                showError(data.error || 'Place not found');
+                return;
+            }
+            const place = data.place;
+            const noun = place.spot_noun || 'Spot';
+            subtitle.textContent = place.name + ' · /pwa/' + place.slug;
+            const spots = (place.spots || []).filter(function (spot) { return spot && spot.is_active !== false; });
+            if (!place.show_spots || !spots.length) {
+                const url = window.location.origin + '/pwa/' + place.slug;
+                renderCard(place.name, url, 'place');
+                return;
+            }
+            spots.forEach(function (spot, index) {
+                const n = index + 1;
+                const url = window.location.origin + '/pwa/' + place.slug + '?spot=' + n;
+                renderCard(noun + ' ' + spot.label, url, 'spot-' + n);
+            });
+        }
+
+        function renderCard(title, url, id) {
             const card = document.createElement('div');
             card.className = 'qr-card';
-            
-            // Create title
-            const title = document.createElement('h3');
-            title.textContent = `Chair ${chair.name}`;
-            card.appendChild(title);
-            
-            // Create QR code container
+            const heading = document.createElement('h3');
+            heading.textContent = title;
+            card.appendChild(heading);
             const qrContainer = document.createElement('div');
             qrContainer.className = 'qr-code-container';
-            qrContainer.id = `qr-${chair.number}`;
+            qrContainer.id = 'qr-' + id;
             card.appendChild(qrContainer);
-            
-            // Create URL display
             const urlDisplay = document.createElement('div');
             urlDisplay.className = 'qr-url';
             urlDisplay.textContent = url;
             card.appendChild(urlDisplay);
-            
-            qrGrid.appendChild(card);
-            
-            // Generate QR code
-            setTimeout(() => {
+            grid.appendChild(card);
+            setTimeout(function () {
                 new QRCode(qrContainer, {
                     text: url,
                     width: 200,
@@ -228,9 +164,12 @@
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.H
                 });
-            }, 100 * chair.number);
+            }, 50);
+        }
+
+        loadPlace().catch(function (err) {
+            showError('Could not load place: ' + err.message);
         });
     </script>
 </body>
 </html>
-

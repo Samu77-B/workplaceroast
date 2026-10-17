@@ -1,450 +1,191 @@
-// Dynamic Product Loader for Main Website
-// This script will load products from the database and update the HTML
-
-async function loadCategoriesFromDatabase() {
-    try {
-        console.log('Loading categories from database...');
-        if (typeof CONFIG === 'undefined' || !CONFIG.API_BASE_URL) {
-            console.warn('CONFIG not available, skipping database load');
-            return [];
-        }
-        const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.success && data.categories) {
-            console.log('Categories loaded from database:', data.categories);
-            return data.categories;
-        } else {
-            console.error('Failed to load categories from database:', data.error);
-            return [];
-        }
-    } catch (error) {
-        console.error('Error loading categories from database:', error);
-        return [];
+/**
+ * Storefront menu: load this cafe's categories and products from the API.
+ * Once a cafe is known, static demo drinks are never shown.
+ */
+function getStorefrontCafeId() {
+    if (typeof CONFIG !== 'undefined' && CONFIG.CAFE_ID) {
+        return parseInt(CONFIG.CAFE_ID, 10) || 0;
     }
+    return parseInt(localStorage.getItem('cafe_id') || '0', 10) || 0;
 }
 
-function updateCategorySubtitles(categories) {
-    console.log('Updating category subtitles...', categories);
-    
-    const categoryMapping = {
-        'coffees': 'coffees',
-        'chai': 'chai',
-        'cold-drinks': 'cold-drinks', 
-        'tea': 'everyday-teas',
-        'everyday-teas': 'everyday-teas',
-        'matcha-teas': 'matcha-teas',
-        'specialties': 'specialties',
-        'chocolate': 'chocolate'
-    };
-    
-    categories.forEach(category => {
-        const pageId = categoryMapping[category.slug] || category.slug;
-        const page = document.getElementById(pageId);
-        
-        if (page && category.subtitle) {
-            let subtitleElement = page.querySelector('.section-subtitle');
-            if (subtitleElement) {
-                subtitleElement.textContent = category.subtitle;
-                console.log(`Updated subtitle for ${pageId}: ${category.subtitle}`);
-            }
-        }
-    });
+function storefrontApiBase() {
+    if (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) {
+        return CONFIG.API_BASE_URL;
+    }
+    return window.location.origin + '/pwa/api';
 }
 
-async function loadProductsFromDatabase() {
-    try {
-        console.log('Loading products from database...');
-        if (typeof CONFIG === 'undefined' || !CONFIG.API_BASE_URL) {
-            console.warn('CONFIG not available, skipping database load');
-            return [];
-        }
-        console.log('API URL:', CONFIG.API_BASE_URL);
-        
-        const response = await fetch(`${CONFIG.API_BASE_URL}/products.php`);
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Response data:', data);
-        
-        if (data.success && data.products) {
-            console.log('Products loaded from database:', data.products);
-            return data.products;
-        } else {
-            console.error('Failed to load products from database:', data.error);
-            return [];
-        }
-    } catch (error) {
-        console.error('Error loading products from database:', error);
-        return [];
-    }
+function escapeHtml(value) {
+    return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
 }
 
-function updateProductHTML(products) {
-    console.log('updateProductHTML called with products:', products.length);
-    
-    // Map database categories to storefront categories
-    const categoryMapping = {
-        'coffees': 'coffees',
-        'chai': 'chai',
-        'cold-drinks': 'cold-drinks', 
-        'tea': 'everyday-teas',
-        'matcha': 'matcha-teas',
-        'special': 'specialties',
-        'chocolate': 'chocolate'
-    };
-    
-    // Group products by category
-    const productsByCategory = {};
-    products.forEach(product => {
-        const storefrontCategory = categoryMapping[product.category] || product.category;
-        if (!productsByCategory[storefrontCategory]) {
-            productsByCategory[storefrontCategory] = [];
-        }
-        productsByCategory[storefrontCategory].push(product);
-    });
-    
-    console.log('Products grouped by category:', productsByCategory);
-    
-    // Update each category section
-    Object.keys(productsByCategory).forEach(category => {
-        const categoryProducts = productsByCategory[category];
-        const categoryElement = document.getElementById(category);
-        
-        console.log(`Processing category: ${category}, products: ${categoryProducts.length}, element found: ${!!categoryElement}`);
-        
-        if (categoryElement) {
-            // Handle tea category with subcategories
-            if (category === 'everyday-teas') {
-                updateTeaCategory(categoryElement, categoryProducts);
-            } else if (category === 'matcha-teas') {
-                // Handle matcha category with subcategories
-                updateMatchaCategory(categoryElement, categoryProducts);
-            } else {
-                // Regular category update
-                const itemList = categoryElement.querySelector('.item-list');
-                console.log(`Category ${category}: itemList found: ${!!itemList}`);
-                if (itemList) {
-                    console.log(`Category ${category}: clearing ${itemList.children.length} existing items`);
-                    // Clear existing items completely
-                    itemList.innerHTML = '';
-                    
-                    // Add new items
-                    categoryProducts.forEach(product => {
-                        const item = document.createElement('div');
-                        item.className = 'list-item';
-                        item.onclick = () => openCustomizeModal(
-                            product.name, 
-                            parseFloat(product.regular_price), 
-                            parseFloat(product.large_price), 
-                            product.type,
-                            product.id
-                        );
-                        
-                        // Calculate price with discount (async, so we'll update after)
-                        const regularPrice = parseFloat(product.regular_price);
-                        const baseOriginalPrice = regularPrice * 1.25; // Assume 20% base discount
-                        
-                        // Use calculateProductDisplayPrice if available, otherwise use default
-                        if (typeof calculateProductDisplayPrice === 'function') {
-                            calculateProductDisplayPrice(regularPrice).then(priceInfo => {
-                                const priceContainer = item.querySelector('.price-container');
-                                if (priceContainer) {
-                                    priceContainer.innerHTML = `
-                                        <span class="original-price">Normal price £${priceInfo.originalPrice.toFixed(2)}</span>
-                                        <span class="discounted-price">Your price £${priceInfo.finalPrice.toFixed(2)}</span>
-                                    `;
-                                }
-                            }).catch(() => {
-                                // Fallback to default display
-                                const priceContainer = item.querySelector('.price-container');
-                                if (priceContainer) {
-                                    priceContainer.innerHTML = `
-                                        <span class="original-price">Normal price £${baseOriginalPrice.toFixed(2)}</span>
-                                        <span class="discounted-price">Your price £${regularPrice.toFixed(2)}</span>
-                                    `;
-                                }
-                            });
-                        }
-                        
-                        item.innerHTML = `
-                            <span class="list-item-name">${product.name}</span>
-                            <div class="price-container">
-                                <span class="original-price">Normal price £${baseOriginalPrice.toFixed(2)}</span>
-                                <span class="discounted-price">Your price £${regularPrice.toFixed(2)}</span>
-                            </div>
-                        `;
-                        
-                        itemList.appendChild(item);
-                    });
-                }
-            }
-        }
-    });
-}
-
-function updateTeaCategory(categoryElement, products) {
-    console.log('Updating tea category with products:', products);
-    
-    // Clear all existing content including subsections
-    const mainItemList = categoryElement.querySelector('.item-list');
-    if (mainItemList) {
-        mainItemList.innerHTML = '';
-    }
-    
-    // Remove any existing subsections
-    const allSubsections = categoryElement.querySelectorAll('.subsection');
-    allSubsections.forEach(subsection => subsection.remove());
-    
-    // Show ALL tea products in one list (no subcategory divisions)
-    if (mainItemList) {
-        products.forEach(product => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.onclick = () => openCustomizeModal(
-                product.name, 
-                parseFloat(product.regular_price), 
-                parseFloat(product.large_price), 
-                product.type,
-                product.id
-            );
-            
-            const regularPrice = parseFloat(product.regular_price);
-            const baseOriginalPrice = regularPrice * 1.25;
-            
-            // Use calculateProductDisplayPrice if available
-            if (typeof calculateProductDisplayPrice === 'function') {
-                calculateProductDisplayPrice(regularPrice).then(priceInfo => {
-                    const priceContainer = item.querySelector('.price-container');
-                    if (priceContainer) {
-                        priceContainer.innerHTML = `
-                            <span class="original-price">Normal price £${priceInfo.originalPrice.toFixed(2)}</span>
-                            <span class="discounted-price">Your price £${priceInfo.finalPrice.toFixed(2)}</span>
-                        `;
-                    }
-                }).catch(() => {
-                    // Fallback
-                    const priceContainer = item.querySelector('.price-container');
-                    if (priceContainer) {
-                        priceContainer.innerHTML = `
-                            <span class="original-price">Normal price £${baseOriginalPrice.toFixed(2)}</span>
-                            <span class="discounted-price">Your price £${regularPrice.toFixed(2)}</span>
-                        `;
-                    }
-                });
-            }
-            
-            item.innerHTML = `
-                <span class="list-item-name">${product.name}</span>
-                <div class="price-container">
-                    <span class="original-price">Normal price £${baseOriginalPrice.toFixed(2)}</span>
-                    <span class="discounted-price">Your price £${regularPrice.toFixed(2)}</span>
-                </div>
-            `;
-            
-            mainItemList.appendChild(item);
-        });
-        
-        console.log(`Added ${products.length} tea products to the list`);
-    }
-}
-
-function updateMatchaCategory(categoryElement, products) {
-    console.log('Updating matcha category with products:', products);
-    
-    // Clear all existing content including subsections
-    const mainItemList = categoryElement.querySelector('.item-list');
-    if (mainItemList) {
-        mainItemList.innerHTML = '';
-    }
-    
-    // Remove any existing subsections
-    const menuSection = categoryElement.querySelector('.menu-section');
-    const allSubsections = categoryElement.querySelectorAll('.subsection');
-    allSubsections.forEach(subsection => subsection.remove());
-    
-    // Separate products by subcategory
-    const productsWithoutSubcategory = products.filter(p => !p.subcategory || p.subcategory === '');
-    const productsWithSubcategory = products.filter(p => p.subcategory && p.subcategory !== '');
-    
-    // Add products without subcategory to main list
-    if (mainItemList && productsWithoutSubcategory.length > 0) {
-        productsWithoutSubcategory.forEach(product => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.onclick = () => openCustomizeModal(
-                product.name, 
-                parseFloat(product.regular_price), 
-                parseFloat(product.large_price), 
-                product.type,
-                product.id
-            );
-            
-            item.innerHTML = `
-                <span class="list-item-name">${product.name}</span>
-                <div class="price-container">
-                    <span class="original-price">Normal price £${(parseFloat(product.regular_price) * 1.25).toFixed(2)}</span>
-                    <span class="discounted-price">Your price £${parseFloat(product.regular_price).toFixed(2)}</span>
-                </div>
-            `;
-            
-            mainItemList.appendChild(item);
-        });
-    }
-    
-    // Group products by subcategory
-    const subcategories = {};
-    productsWithSubcategory.forEach(product => {
-        if (!subcategories[product.subcategory]) {
-            subcategories[product.subcategory] = [];
-        }
-        subcategories[product.subcategory].push(product);
-    });
-    
-    // Add subsections for each subcategory
-    Object.keys(subcategories).forEach(subcategoryName => {
-        const subsection = document.createElement('div');
-        subsection.className = 'subsection';
-        
-        const title = document.createElement('h3');
-        title.className = 'subsection-title';
-        title.textContent = subcategoryName;
-        subsection.appendChild(title);
-        
-        const itemList = document.createElement('div');
-        itemList.className = 'item-list';
-        
-        subcategories[subcategoryName].forEach(product => {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.onclick = () => openCustomizeModal(
-                product.name, 
-                parseFloat(product.regular_price), 
-                parseFloat(product.large_price), 
-                product.type,
-                product.id
-            );
-            
-            const regularPrice = parseFloat(product.regular_price);
-            const baseOriginalPrice = regularPrice * 1.25;
-            
-            // Use calculateProductDisplayPrice if available
-            if (typeof calculateProductDisplayPrice === 'function') {
-                calculateProductDisplayPrice(regularPrice).then(priceInfo => {
-                    const priceContainer = item.querySelector('.price-container');
-                    if (priceContainer) {
-                        priceContainer.innerHTML = `
-                            <span class="original-price">Normal price £${priceInfo.originalPrice.toFixed(2)}</span>
-                            <span class="discounted-price">Your price £${priceInfo.finalPrice.toFixed(2)}</span>
-                        `;
-                    }
-                }).catch(() => {
-                    // Fallback
-                    const priceContainer = item.querySelector('.price-container');
-                    if (priceContainer) {
-                        priceContainer.innerHTML = `
-                            <span class="original-price">Normal price £${baseOriginalPrice.toFixed(2)}</span>
-                            <span class="discounted-price">Your price £${regularPrice.toFixed(2)}</span>
-                        `;
-                    }
-                });
-            }
-            
-            item.innerHTML = `
-                <span class="list-item-name">${product.name}</span>
-                <div class="price-container">
-                    <span class="original-price">Normal price £${baseOriginalPrice.toFixed(2)}</span>
-                    <span class="discounted-price">Your price £${regularPrice.toFixed(2)}</span>
-                </div>
-            `;
-            
-            itemList.appendChild(item);
-        });
-        
-        subsection.appendChild(itemList);
-        menuSection.appendChild(subsection);
-    });
-    
-    console.log(`Added ${productsWithoutSubcategory.length} main matcha products and ${productsWithSubcategory.length} special matcha products`);
-}
-
-async function initializeDynamicProducts() {
-    console.log('Initializing dynamic products...');
-    
-    // Load categories from database
-    const categories = await loadCategoriesFromDatabase();
-    if (categories.length > 0) {
-        updateCategorySubtitles(categories);
-    }
-    
-    // Load products from database
-    const products = await loadProductsFromDatabase();
-    
-    if (products.length > 0) {
-        console.log('Updating HTML with database products:', products);
-        console.log('Products by category:', products.reduce((acc, p) => {
-            acc[p.category] = (acc[p.category] || 0) + 1;
-            return acc;
-        }, {}));
-        updateProductHTML(products);
+function categoryIconMarkup(category) {
+    var inner = '';
+    if (typeof window.renderCategoryIconHtml === 'function') {
+        inner = window.renderCategoryIconHtml(category, (category && category.name || '?').charAt(0));
     } else {
-        console.log('No products found in database, keeping existing HTML');
+        inner = '<span class="category-icon-fallback" aria-hidden="true">' +
+            escapeHtml((category && category.name || '?').charAt(0).toUpperCase()) + '</span>';
     }
+    return '<div class="item-icon">' + inner + '</div>';
 }
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait a bit for the page to fully load
-    setTimeout(initializeDynamicProducts, 1000);
-    
-    // Also try to initialize when the window loads completely
-    window.addEventListener('load', function() {
-        setTimeout(initializeDynamicProducts, 2000);
+function productPrices(product) {
+    var sizes = product.sizes || {};
+    var regular = typeof sizes.regular === 'number' ? sizes.regular : Number(product.price) || 0;
+    var large = typeof sizes.large === 'number' ? sizes.large : 0;
+    return { regular: regular, large: large };
+}
+
+function formatPrice(amount) {
+    return '£' + Number(amount).toFixed(2);
+}
+
+function categoryPageId(slug) {
+    return String(slug || '').replace(/[^a-z0-9-]/gi, '');
+}
+
+function renderEmptyMenu() {
+    var grid = document.querySelector('#mainMenu .menu-grid');
+    if (grid) {
+        grid.innerHTML = '<p class="empty-menu-message">No drinks available yet</p>';
+    }
+    document.querySelectorAll('.page.dynamic-category-page').forEach(function (page) {
+        page.remove();
     });
-});
+}
 
-// Retry mechanism - try to load products multiple times
-let retryCount = 0;
-const maxRetries = 5;
+function renderCategoryGrid(categories) {
+    var grid = document.querySelector('#mainMenu .menu-grid');
+    if (!grid) return;
 
-function retryInitialization() {
-    if (retryCount < maxRetries) {
-        retryCount++;
-        console.log(`Retry attempt ${retryCount} to load products...`);
-        setTimeout(() => {
-            initializeDynamicProducts().then(() => {
-                // Check if products were loaded successfully
-                const products = document.querySelectorAll('.list-item');
-                if (products.length === 0) {
-                    retryInitialization(); // Try again if no products found
-                } else {
-                    console.log('Products loaded successfully after retry');
-                }
+    if (!categories.length) {
+        grid.innerHTML = '<p class="empty-menu-message">No drinks available yet</p>';
+        return;
+    }
+
+    grid.innerHTML = categories.map(function (category) {
+        var pageId = categoryPageId(category.slug);
+        var subtitle = category.subtitle || '';
+        return (
+            '<div class="menu-item" onclick="showCategory(\'' + escapeHtml(pageId) + '\')">' +
+                categoryIconMarkup(category) +
+                '<div class="item-name">' + escapeHtml(category.name) + '</div>' +
+                (subtitle ? '<div class="menu-item-subtitle">' + escapeHtml(subtitle) + '</div>' : '') +
+            '</div>'
+        );
+    }).join('');
+}
+
+function renderCategoryPages(categories, products) {
+    var host = document.getElementById('dynamicCategoryPages');
+    if (!host) {
+        host = document.createElement('div');
+        host.id = 'dynamicCategoryPages';
+        var mainMenu = document.getElementById('mainMenu');
+        if (mainMenu && mainMenu.parentNode) {
+            mainMenu.parentNode.insertBefore(host, mainMenu.nextSibling);
+        } else {
+            document.body.appendChild(host);
+        }
+    }
+
+    host.innerHTML = categories.map(function (category) {
+        var pageId = categoryPageId(category.slug);
+        var items = products.filter(function (product) {
+            return product.category === category.slug && product.active !== false;
+        });
+        var listHtml = items.length
+            ? items.map(function (product) {
+                var prices = productPrices(product);
+                var nameJs = JSON.stringify(product.name);
+                var typeJs = JSON.stringify(category.slug);
+                var idArg = product.id ? String(product.id) : 'null';
+                return (
+                    '<div class="list-item" onclick=\'openCustomizeModal(' + nameJs + ', ' +
+                        prices.regular + ', ' + prices.large + ', ' + typeJs + ', ' + idArg + ')\'>' +
+                        '<span class="list-item-name">' + escapeHtml(product.name) + '</span>' +
+                        '<div class="price-container">' +
+                            '<span class="discounted-price">' + formatPrice(prices.regular) + '</span>' +
+                        '</div>' +
+                    '</div>'
+                );
+            }).join('')
+            : '<p class="empty-menu-message">No drinks available yet</p>';
+
+        return (
+            '<div class="page dynamic-category-page" id="' + escapeHtml(pageId) + '">' +
+                '<div class="menu-section">' +
+                    '<h2 class="section-title">' + escapeHtml(category.name) + '</h2>' +
+                    (category.subtitle ? '<p class="section-subtitle">' + escapeHtml(category.subtitle) + '</p>' : '') +
+                    '<div class="item-list">' + listHtml + '</div>' +
+                '</div>' +
+                '<div class="footer-placeholder"></div>' +
+            '</div>'
+        );
+    }).join('');
+}
+
+async function loadStorefrontMenu() {
+    var cafeId = getStorefrontCafeId();
+    if (!cafeId) {
+        renderEmptyMenu();
+        return;
+    }
+
+    var apiBase = storefrontApiBase();
+    try {
+        var catRes = await fetch(apiBase + '/categories.php?cafe_id=' + encodeURIComponent(cafeId));
+        var prodRes = await fetch(apiBase + '/products.php?cafe_id=' + encodeURIComponent(cafeId));
+        var catData = await catRes.json();
+        var prodData = await prodRes.json();
+        var categories = (catData.success && Array.isArray(catData.categories))
+            ? catData.categories.filter(function (c) { return c.active !== false && categoryPageId(c.slug); })
+            : [];
+        var products = (prodData.success && Array.isArray(prodData.products))
+            ? prodData.products.filter(function (p) { return p.active !== false; })
+            : [];
+        var known = {};
+        categories.forEach(function (category) {
+            known[category.slug] = true;
+        });
+        products.forEach(function (product) {
+            var slug = categoryPageId(product.category);
+            if (!slug || known[slug]) return;
+            known[slug] = true;
+            categories.push({
+                slug: slug,
+                name: slug.replace(/-/g, ' ').replace(/\b\w/g, function (ch) { return ch.toUpperCase(); }),
+                active: true
             });
-        }, 1000 * retryCount);
-    } else {
-        console.log('Max retries reached. Products may not be available.');
+        });
+
+        renderCategoryGrid(categories);
+        renderCategoryPages(categories, products);
+        window.storefrontMenu = { categories: categories, products: products, cafeId: cafeId };
+    } catch (error) {
+        console.error('Failed to load cafe menu:', error);
+        renderEmptyMenu();
     }
 }
 
-// Start retry mechanism after initial load
-setTimeout(retryInitialization, 3000);
+function initializeDynamicProducts() {
+    if (typeof getCafeSlugFromPath === 'function' && getCafeSlugFromPath()) {
+        return;
+    }
+    loadStorefrontMenu();
+}
 
-// Make the function globally available for manual triggering
-window.refreshStorefrontProducts = initializeDynamicProducts;
+window.loadStorefrontMenu = loadStorefrontMenu;
+window.refreshStorefrontProducts = loadStorefrontMenu;
 
-// Also expose a function to check if products are loaded
-window.checkProductsLoaded = function() {
-    const products = document.querySelectorAll('.list-item');
-    console.log(`Found ${products.length} products in the storefront`);
-    return products.length > 0;
-};
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDynamicProducts);
+} else {
+    initializeDynamicProducts();
+}

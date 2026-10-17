@@ -75,15 +75,30 @@ async function hydrateCafeFromSlug() {
             CONFIG.CAFE_ID = parseInt(data.id, 10);
             CONFIG.CAFE_NAMES[CONFIG.CAFE_ID] = data.name;
             CONFIG.CAFE_TIERS[CONFIG.CAFE_ID] = data.tier || 'basic';
+            CONFIG.PLACE = data.place || null;
+            CONFIG.ARRIVED_VIA_PLACE = !!(data.place && data.place.id);
             localStorage.setItem('cafe_id', String(CONFIG.CAFE_ID));
             localStorage.setItem('corporate_client_id', String(CONFIG.CAFE_ID));
             localStorage.setItem('cafe_name', data.name || '');
             localStorage.setItem('cafe_tier', data.tier || 'basic');
+            if (CONFIG.PLACE) {
+                localStorage.setItem('place_id', String(CONFIG.PLACE.id));
+                localStorage.setItem('place_name', CONFIG.PLACE.name || '');
+                localStorage.setItem('place_slug', CONFIG.PLACE.slug || slug);
+                localStorage.setItem('spot_noun', CONFIG.PLACE.spot_noun || 'Chair');
+                localStorage.setItem('show_spots', CONFIG.PLACE.show_spots ? '1' : '0');
+            }
             if (typeof applyCafeColors === 'function') {
                 applyCafeColors(data.brand_primary, data.brand_accent);
             }
             if (typeof applyCafeLogo === 'function') {
                 applyCafeLogo(data.logo_url, data.name);
+            }
+            if (typeof applyPlaceBanner === 'function') {
+                applyPlaceBanner();
+            }
+            if (typeof loadStorefrontMenu === 'function') {
+                loadStorefrontMenu();
             }
             document.title = (data.name || 'Workplace Roast') + ' - Ordering';
             return CONFIG.CAFE_ID;
@@ -122,6 +137,8 @@ const CONFIG = {
     
     // Cafe/Corporate Client Configuration
     CAFE_ID: detectedCafeId,  // Auto-detected from URL path or parameter
+    PLACE: null,
+    ARRIVED_VIA_PLACE: false,
     
     // Tier mapping based on cafe_id
     CAFE_TIERS: {

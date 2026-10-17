@@ -216,6 +216,27 @@
             box-shadow: 0 5px 15px rgba(107, 122, 90, 0.1);
         }
 
+        .spot-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .spot-row input {
+            flex: 1;
+        }
+
+        .place-url {
+            font-size: 0.85rem;
+            word-break: break-all;
+            background: #fff;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 8px;
+            margin: 10px 0;
+        }
+
         .category-icon {
             font-size: 2rem;
             margin-bottom: 10px;
@@ -780,6 +801,7 @@
         <div class="admin-nav">
             <button class="nav-btn active" onclick="showSection('overview')">Overview</button>
             <button class="nav-btn" onclick="showSection('categories')">Categories</button>
+            <button class="nav-btn" onclick="showSection('places')">Places</button>
             <button class="nav-btn" onclick="showSection('products')">Products</button>
             <button class="nav-btn" onclick="showSection('addons')">Add-ons</button>
             <button class="nav-btn" onclick="showSection('orders')">Orders</button>
@@ -863,6 +885,52 @@
             <div id="categoriesList" class="categories-grid">
                 <!-- Categories will be dynamically loaded here -->
             </div>
+        </div>
+
+        <!-- Places Section -->
+        <div id="places" class="admin-section">
+            <h2 class="section-title">Places</h2>
+            <p style="margin-bottom: 16px; color: #666;">Each place gets its own order URL. Use a custom spot name (Chair, Seat, Desk, or a company name) and add as many spots as you need.</p>
+            <div class="form-group">
+                <button class="btn btn-success" onclick="showAddPlaceForm()">Add Place</button>
+            </div>
+            <div id="placeForm" class="hidden">
+                <h3 id="placeFormTitle">Add Place</h3>
+                <form onsubmit="savePlace(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="placeName">Place name</label>
+                            <input type="text" id="placeName" required placeholder="e.g. Acme Salon" oninput="syncPlaceSlugFromName()">
+                        </div>
+                        <div class="form-group">
+                            <label for="placeSlug">URL slug</label>
+                            <input type="text" id="placeSlug" required pattern="[a-z0-9-]+" placeholder="acme-salon">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="placeSpotNoun">What should we call a spot?</label>
+                            <input type="text" id="placeSpotNoun" value="Chair" placeholder="Chair, Seat, Station, Desk…">
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="placeShowSpots" checked> Show spots on the order banner
+                            </label>
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 6px;">Turn this off for delivery/pickup companies with no chairs — the banner will show the place name only.</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Spots</label>
+                        <div id="placeSpotsList"></div>
+                        <button type="button" class="btn btn-secondary" onclick="addPlaceSpotRow()">Add spot</button>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn">Save Place</button>
+                        <button type="button" class="btn btn-secondary" onclick="hidePlaceForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            <div id="placesList" class="categories-grid"></div>
         </div>
 
         <!-- Products Section -->
@@ -1193,7 +1261,7 @@
     </div>
 
     <!-- Configuration -->
-    <script src="config.js?v=11"></script>
+    <script src="config.js?v=12"></script>
     <script src="category-icons.js?v=2"></script>
     
     <script>
@@ -1202,6 +1270,7 @@
         let products = [];
         let orders = [];
         let categories = [];
+        let places = [];
 
         async function readJsonResponse(response) {
             const raw = await response.text();
@@ -1403,6 +1472,9 @@
             switch(sectionName) {
                 case 'categories':
                     loadCategoriesFromDatabase();
+                    break;
+                case 'places':
+                    loadPlaces();
                     break;
                 case 'products':
                     loadData(); // Load from database
@@ -1840,6 +1912,195 @@
                     console.error('Error deleting category:', error);
                     showNotification('Error deleting category: ' + error.message, 'error');
                 }
+            }
+        }
+
+        function placeOrderUrl(slug) {
+            return window.location.origin + '/pwa/' + slug;
+        }
+
+        function syncPlaceSlugFromName() {
+            const form = document.getElementById('placeForm');
+            if (form && form.getAttribute('data-edit-id')) return;
+            const name = document.getElementById('placeName').value;
+            document.getElementById('placeSlug').value = String(name || '').toLowerCase().trim()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '')
+                .slice(0, 80);
+        }
+
+        function collectPlaceSpotRows() {
+            return Array.from(document.querySelectorAll('#placeSpotsList .spot-row')).map((row, index) => {
+                const input = row.querySelector('input[data-spot-label]');
+                const id = row.getAttribute('data-spot-id');
+                return {
+                    id: id ? parseInt(id, 10) : null,
+                    label: (input && input.value.trim()) || '',
+                    sort_order: index + 1,
+                    is_active: true
+                };
+            }).filter(spot => spot.label);
+        }
+
+        function addPlaceSpotRow(label, id) {
+            const list = document.getElementById('placeSpotsList');
+            const row = document.createElement('div');
+            row.className = 'spot-row';
+            if (id) row.setAttribute('data-spot-id', String(id));
+            row.innerHTML = `
+                <input type="text" data-spot-label placeholder="e.g. One, Bay 3, Reception" value="${escapeHtml(label || '')}">
+                <button type="button" class="btn btn-small btn-danger" onclick="this.parentElement.remove()">Remove</button>
+            `;
+            list.appendChild(row);
+        }
+
+        function resetPlaceSpotRows(spots) {
+            const list = document.getElementById('placeSpotsList');
+            list.innerHTML = '';
+            const rows = (spots && spots.length) ? spots : [{ label: 'One' }];
+            rows.forEach(spot => addPlaceSpotRow(spot.label, spot.id));
+        }
+
+        function showAddPlaceForm() {
+            document.getElementById('placeForm').classList.remove('hidden');
+            document.getElementById('placeFormTitle').textContent = 'Add Place';
+            document.getElementById('placeForm').removeAttribute('data-edit-id');
+            document.getElementById('placeName').value = '';
+            document.getElementById('placeSlug').value = '';
+            document.getElementById('placeSpotNoun').value = 'Chair';
+            document.getElementById('placeShowSpots').checked = true;
+            resetPlaceSpotRows([{ label: 'One' }, { label: 'Two' }, { label: 'Three' }, { label: 'Four' }]);
+        }
+
+        function hidePlaceForm() {
+            document.getElementById('placeForm').classList.add('hidden');
+            document.getElementById('placeForm').removeAttribute('data-edit-id');
+        }
+
+        function editPlace(id) {
+            const place = places.find(p => p.id === id);
+            if (!place) return;
+            document.getElementById('placeForm').classList.remove('hidden');
+            document.getElementById('placeFormTitle').textContent = 'Edit Place';
+            document.getElementById('placeForm').setAttribute('data-edit-id', id);
+            document.getElementById('placeName').value = place.name || '';
+            document.getElementById('placeSlug').value = place.slug || '';
+            document.getElementById('placeSpotNoun').value = place.spot_noun || 'Chair';
+            document.getElementById('placeShowSpots').checked = place.show_spots !== false;
+            resetPlaceSpotRows(place.spots || []);
+            document.getElementById('placeForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function copyPlaceUrl(slug) {
+            const url = placeOrderUrl(slug);
+            try {
+                await navigator.clipboard.writeText(url);
+                showNotification('Order URL copied', 'success');
+            } catch (err) {
+                window.prompt('Copy this order URL', url);
+            }
+        }
+
+        async function loadPlaces() {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/places.php?cafe_id=${currentUser.id}`, {
+                    headers: getAuthHeaders()
+                });
+                const data = await readJsonResponse(response);
+                if (data.success && Array.isArray(data.places)) {
+                    places = data.places;
+                    renderPlaces();
+                } else {
+                    showNotification('Failed to load places: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error loading places:', error);
+                showNotification('Error loading places: ' + error.message, 'error');
+            }
+        }
+
+        function renderPlaces() {
+            const list = document.getElementById('placesList');
+            if (!list) return;
+            if (!places.length) {
+                list.innerHTML = '<p>No places yet. Add a company or venue to get a unique order URL.</p>';
+                return;
+            }
+            list.innerHTML = places.map(place => {
+                const url = placeOrderUrl(place.slug);
+                const spotCount = (place.spots || []).length;
+                const noun = place.spot_noun || 'Chair';
+                return `
+                    <div class="category-card" style="text-align: left;">
+                        <div class="category-name">${escapeHtml(place.name)}</div>
+                        <div class="category-slug">${escapeHtml(place.slug)}</div>
+                        <div class="place-url">${escapeHtml(url)}</div>
+                        <div class="category-description">
+                            ${place.show_spots === false ? 'Banner shows place name only' : 'Spot label: ' + escapeHtml(noun)}
+                            · ${spotCount} spot${spotCount === 1 ? '' : 's'}
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-small" onclick="copyPlaceUrl('${escapeHtml(place.slug)}')">Copy URL</button>
+                            <a class="btn btn-small" href="generate-qr-codes.html?slug=${encodeURIComponent(place.slug)}" target="_blank">QR codes</a>
+                            <button class="btn btn-small" onclick="editPlace(${place.id})">Edit</button>
+                            <button class="btn btn-small btn-danger" onclick="deletePlace(${place.id})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function savePlace(event) {
+            event.preventDefault();
+            const editId = document.getElementById('placeForm').getAttribute('data-edit-id');
+            const payload = {
+                name: document.getElementById('placeName').value.trim(),
+                slug: document.getElementById('placeSlug').value.trim().toLowerCase(),
+                spot_noun: document.getElementById('placeSpotNoun').value.trim() || 'Chair',
+                show_spots: document.getElementById('placeShowSpots').checked,
+                is_active: true,
+                spots: collectPlaceSpotRows()
+            };
+            if (editId) payload.id = parseInt(editId, 10);
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/places.php`, {
+                    method: editId ? 'PUT' : 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                const result = await readJsonResponse(response);
+                if (response.ok && result.success) {
+                    showNotification(editId ? 'Place updated' : 'Place added', 'success');
+                    hidePlaceForm();
+                    loadPlaces();
+                } else {
+                    showNotification('Error saving place: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error saving place:', error);
+                showNotification('Error saving place: ' + error.message, 'error');
+            }
+        }
+
+        async function deletePlace(id) {
+            const place = places.find(p => p.id === id);
+            if (!place) return;
+            if (!confirm(`Delete place "${place.name}"? Its order URL will stop working.`)) return;
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/places.php?id=${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const result = await readJsonResponse(response);
+                if (response.ok && result.success) {
+                    showNotification('Place deleted', 'success');
+                    loadPlaces();
+                } else {
+                    showNotification('Error deleting place: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting place:', error);
+                showNotification('Error deleting place: ' + error.message, 'error');
             }
         }
 
@@ -2541,6 +2802,21 @@
             return div.innerHTML;
         }
 
+        function formatOrderLocation(order) {
+            if (!order) return 'Not specified';
+            const placeName = order.place_name || '';
+            const noun = order.spot_noun || '';
+            const label = order.spot_label || '';
+            if (placeName && label) {
+                return `${placeName} · ${noun ? noun + ' ' : ''}${label}`.trim();
+            }
+            if (label) {
+                return `${noun ? noun + ' ' : ''}${label}`.trim();
+            }
+            if (placeName) return placeName;
+            return order.chairNumber || 'Not specified';
+        }
+
         // Order Management
         function loadOrders() {
             const ordersList = document.getElementById('ordersList');
@@ -2561,8 +2837,8 @@
                     </div>
                     <div class="order-info" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <strong>Chair:</strong>
-                            <span style="color: var(--brand); font-weight: 600;">${order.chairNumber || 'Not specified'}</span>
+                            <strong>${escapeHtml(order.spot_noun || 'Place')}:</strong>
+                            <span style="color: var(--brand); font-weight: 600;">${escapeHtml(formatOrderLocation(order))}</span>
                         </div>
                         ${order.deliveryOption ? `
                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
@@ -2689,7 +2965,7 @@
                     <strong>Order #${order.id}</strong>
                 </div>
                 <div style="margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.2); border-radius: 5px;">
-                    <strong>🪑 ${order.chairNumber || 'Chair Not specified'}</strong>
+                    <strong>${escapeHtml(formatOrderLocation(order))}</strong>
                 </div>
                 <div style="margin: 10px 0;">
                     <strong>Total: £${order.total.toFixed(2)}</strong>
@@ -2783,12 +3059,19 @@
         // Simulate new orders (for testing)
         function simulateNewOrder() {
             const orderId = Math.max(...orders.map(o => o.id), 0) + 1;
-            const chairNumbers = ['Chair One', 'Chair Two', 'Chair Three', 'Chair Four', 'Chair Five', 'Chair Six', 'Chair Seven', 'Chair Eight'];
-            const randomChair = chairNumbers[Math.floor(Math.random() * chairNumbers.length)];
+            const sampleSpots = (places[0] && places[0].spots && places[0].spots.length)
+                ? places[0].spots
+                : [{ label: 'One' }, { label: 'Two' }, { label: 'Five' }];
+            const randomSpot = sampleSpots[Math.floor(Math.random() * sampleSpots.length)];
+            const spotNoun = (places[0] && places[0].spot_noun) || 'Chair';
+            const randomChair = `${spotNoun} ${randomSpot.label}`;
             
             const newOrder = {
                 id: orderId,
                 chairNumber: randomChair,
+                place_name: (places[0] && places[0].name) || '',
+                spot_noun: spotNoun,
+                spot_label: randomSpot.label,
                 items: [
                     { name: 'Flat White', quantity: 1, price: 2.72 },
                     { name: 'Croissant', quantity: 2, price: 1.50 }
@@ -2826,7 +3109,8 @@
         async function loadCategoriesFromDatabase() {
             try {
                 console.log('Loading categories from database...');
-                const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php`, {
+                const cafeQuery = currentUser && currentUser.id ? `?cafe_id=${currentUser.id}` : '';
+                const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php${cafeQuery}`, {
                     headers: getAuthHeaders()
                 });
                 const data = await readJsonResponse(response);
@@ -2867,6 +3151,9 @@
                     // Update the UI
                     // Also load categories for the product form
                     await loadCategoriesFromDatabase();
+                    if (typeof loadPlaces === 'function') {
+                        await loadPlaces();
+                    }
                     
                     if (typeof loadProducts === 'function') {
                         loadProducts();
