@@ -34,10 +34,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <!-- Configuration -->
-    <script src="config.js?v=12"></script>
+    <script src="config.js?v=13"></script>
     
     <!-- Theme Applier - Must load early to set CSS variables -->
-    <script src="theme-applier.js?v=4"></script>
+    <script src="theme-applier.js?v=5"></script>
     <script src="category-icons.js?v=4"></script>
     
     <!-- Dynamic Product Loader -->
@@ -68,7 +68,7 @@
 
         body {
             font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background: white;
+            background: var(--theme-primary);
             color: #333;
             line-height: 1.6;
             min-height: 100vh;
@@ -134,7 +134,7 @@
             backdrop-filter: blur(calc(20px + var(--blur-intensity, 0px)));
             -webkit-backdrop-filter: blur(calc(20px + var(--blur-intensity, 0px)));
             color: white;
-            padding: 28px 76px 16px;
+            padding: calc(16px + env(safe-area-inset-top, 0px)) 76px 16px;
             text-align: center;
             position: sticky;
             top: 0;
@@ -655,10 +655,10 @@
         }
 
         .chair-info {
-            background: var(--theme-accent);
+            background: var(--theme-primary);
             padding: 20px;
             text-align: center;
-            color: white;
+            color: var(--icon-on-brand, #ffffff);
             font-size: 18px;
             font-weight: 600;
             border-radius: 0 0 20px 20px;
@@ -866,8 +866,8 @@
 
         .back-btn {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: max(20px, env(safe-area-inset-top, 0px));
+            left: max(20px, env(safe-area-inset-left, 0px));
             background: rgba(255,255,255,0.2);
             color: white;
             border: none;
@@ -884,8 +884,8 @@
 
         .basket-btn {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: max(20px, env(safe-area-inset-top, 0px));
+            right: max(20px, env(safe-area-inset-right, 0px));
             background: rgba(255,255,255,0.2);
             color: white;
             border: none;
@@ -951,13 +951,13 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: var(--theme-accent);
-            color: white;
+            color: var(--icon-on-brand, #ffffff);
+            display: none;
             border-radius: 50%;
             width: 24px;
             height: 24px;
             font-size: 12px;
             font-weight: 700;
-            display: flex;
             align-items: center;
             justify-content: center;
             min-width: 24px;
@@ -2216,7 +2216,7 @@
             }
             
             .header {
-                padding: 22px 72px 14px;
+                padding: calc(14px + env(safe-area-inset-top, 0px)) 72px 14px;
             }
             
             .header-title {
@@ -2347,7 +2347,7 @@
             }
             
             .header {
-                padding: 24px 72px 14px;
+                padding: calc(14px + env(safe-area-inset-top, 0px)) 72px 14px;
             }
             
             .menu-section {
@@ -2395,7 +2395,7 @@
             }
             
             .header {
-                padding: 26px 76px 16px;
+                padding: calc(16px + env(safe-area-inset-top, 0px)) 76px 16px;
             }
             
             .menu-section {
@@ -2580,7 +2580,7 @@
             .minimal-header {
                 padding-left: max(72px, env(safe-area-inset-left));
                 padding-right: max(72px, env(safe-area-inset-right));
-                padding-top: max(24px, env(safe-area-inset-top));
+                padding-top: calc(16px + env(safe-area-inset-top, 0px));
             }
             
             .container {
@@ -2639,10 +2639,8 @@
         </div>
 
         <!-- Chair Info -->
-        <div class="chair-info" id="chairInfo">
-            <div class="chair-number" id="spotBanner">
-                <span id="spotNoun">Chair</span> <span id="chairNumber" class="chair-number-display">One</span>
-            </div>
+        <div class="chair-info" id="chairInfo" style="display: none;">
+            <div class="chair-number" id="spotBanner"></div>
         </div>
 
         <!-- Main Menu Page -->
@@ -3323,7 +3321,25 @@
             return (place && place.spot_noun) || localStorage.getItem('spot_noun') || 'Chair';
         }
 
+        function venueHaystack() {
+            const place = getActivePlace() || {};
+            return [
+                place.name,
+                place.slug,
+                getSpotNoun(),
+                localStorage.getItem('place_name'),
+                localStorage.getItem('cafe_name')
+            ].join(' ').toLowerCase();
+        }
+
+        function isCounterCafe() {
+            const hay = venueHaystack();
+            if (/\b(salon|barber|nail|hairdresser)\b/.test(hay)) return false;
+            return /\b(coffee|cafe|café|bakery|bean|roast|kitchen)\b/.test(hay);
+        }
+
         function placeShowsSpots() {
+            if (isCounterCafe()) return false;
             const place = getActivePlace();
             if (place && typeof place.show_spots !== 'undefined') {
                 return !!place.show_spots;
@@ -3332,15 +3348,9 @@
         }
 
         function getVenueKind() {
-            const place = getActivePlace() || {};
             const noun = String(getSpotNoun() || '').toLowerCase();
-            const hay = [
-                place.name,
-                place.slug,
-                noun,
-                localStorage.getItem('place_name'),
-                localStorage.getItem('cafe_name')
-            ].join(' ').toLowerCase();
+            const hay = venueHaystack();
+            if (isCounterCafe()) return 'cafe';
             if (/\bnail/.test(hay)) return 'nail';
             if (/\bbarber|\bbarb/.test(hay) || noun === 'station') return 'barber';
             if (/\bsalon|\bhair/.test(hay) || noun === 'chair' || noun === 'seat') return 'salon';
@@ -3359,6 +3369,7 @@
                 nail: "I'll pick it up when my nails are done",
                 barber: "I'll pick it up when my cut is done",
                 salon: "I'll pick it up when my hair is done",
+                cafe: "I'll pick it up",
                 office: "I'll pick it up",
                 venue: "I'll pick it up"
             })[kind] || "I'll pick it up";
@@ -3396,23 +3407,32 @@
         function applyPlaceBanner() {
             const banner = document.getElementById('spotBanner');
             const scanBtn = document.getElementById('scanQRBtn');
+            const chairInfo = document.getElementById('chairInfo');
             const place = getActivePlace();
             const noun = getSpotNoun();
             const existingLabel = document.getElementById('chairNumber');
             const currentLabel = (existingLabel && existingLabel.textContent.trim())
                 || localStorage.getItem('spot_label')
                 || '';
+            const cafeName = localStorage.getItem('cafe_name') || '';
+            const placeName = (place && place.name) || localStorage.getItem('place_name') || '';
 
             if (scanBtn) {
                 const show = placeShowsSpots();
                 scanBtn.textContent = show ? ('Scan ' + noun + ' QR') : 'Scan QR';
                 scanBtn.style.display = show ? 'block' : 'none';
             }
-            if (!banner) return;
             if (!placeShowsSpots()) {
-                banner.textContent = (place && place.name) || localStorage.getItem('place_name') || '';
+                const sameName = placeName && cafeName && placeName.trim().toLowerCase() === cafeName.trim().toLowerCase();
+                const hideBanner = isCounterCafe() || !placeName || sameName;
+                if (chairInfo) {
+                    chairInfo.style.display = hideBanner ? 'none' : 'block';
+                }
+                if (banner) banner.textContent = hideBanner ? '' : placeName;
                 return;
             }
+            if (chairInfo) chairInfo.style.display = 'block';
+            if (!banner) return;
             const spots = getPlaceSpots();
             const label = currentLabel || (spots[0] && spots[0].label) || 'One';
             banner.innerHTML = '<span id="spotNoun">' + noun + '</span> <span id="chairNumber" class="chair-number-display">' + label + '</span>';
@@ -3764,11 +3784,7 @@
             document.getElementById('minimalHeader').style.display = 'none';
             document.getElementById('backBtn').style.display = 'none';
             
-            // Show chair info again (was hidden on login page)
-            const chairInfo = document.getElementById('chairInfo');
-            if (chairInfo) {
-                chairInfo.style.display = 'block';
-            }
+            applyPlaceBanner();
             
             // Show the fixed basket button on main menu
             document.getElementById('basketBtn').style.display = 'flex';
@@ -5525,37 +5541,22 @@
             const scanQRBtn = document.getElementById('scanQRBtn');
             const chairInfo = document.getElementById('chairInfo');
             const logoutBtn = document.getElementById('logoutBtn');
-            
-            // Check if user is on a store-specific URL (has cafe_id from URL)
             const isStoreSpecificUrl = cafeId !== null;
+
             applyPlaceBanner();
-            
+
             if (corporateLogin && !isStoreSpecificUrl) {
-                // Corporate client logged in with access code (not on store-specific URL)
-                // Hide QR scanner button and chair info for corporate clients
                 if (scanQRBtn) {
                     scanQRBtn.style.display = 'none';
                 }
                 if (chairInfo) {
                     chairInfo.style.display = 'none';
                 }
-                // Show logout button only for corporate clients NOT on store-specific URLs
                 if (logoutBtn) {
                     logoutBtn.style.display = 'block';
                 }
-            } else {
-                // Regular users OR users on store-specific URLs
-                // Show QR scanner button and chair info
-                if (scanQRBtn) {
-                    scanQRBtn.style.display = 'block';
-                }
-                if (chairInfo) {
-                    chairInfo.style.display = 'block';
-                }
-                // Hide logout button for regular users and store-specific URL users
-                if (logoutBtn) {
-                    logoutBtn.style.display = 'none';
-                }
+            } else if (logoutBtn) {
+                logoutBtn.style.display = 'none';
             }
         }
 

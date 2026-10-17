@@ -164,6 +164,15 @@ function slugify(string $name): string
     return $slug !== '' ? substr($slug, 0, 80) : 'cafe';
 }
 
+function cafe_looks_like_counter_service(array $cafe): bool
+{
+    $hay = strtolower(trim(($cafe['name'] ?? '') . ' ' . ($cafe['slug'] ?? '')));
+    if (preg_match('/\b(salon|barber|nail|hairdresser)\b/', $hay)) {
+        return false;
+    }
+    return (bool) preg_match('/\b(coffee|cafe|bakery|bean|roast|kitchen)\b/', $hay);
+}
+
 function unique_access_code(PDO $pdo): string
 {
     $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -301,10 +310,12 @@ function seed_default_place_for_cafe(PDO $pdo, array $cafe): ?int
     $name = trim((string) ($cafe['name'] ?? 'Place'));
     $baseSlug = !empty($cafe['slug']) ? (string) $cafe['slug'] : slugify($name);
     $slug = unique_place_slug($pdo, $baseSlug, null, $cafeId);
+    $showSpots = cafe_looks_like_counter_service($cafe) ? 0 : 1;
+    $noun = $showSpots ? 'Chair' : 'Place';
     $insert = $pdo->prepare(
-        'INSERT INTO places (cafe_id, name, slug, spot_noun, show_spots, is_active) VALUES (?, ?, ?, ?, 1, 1)'
+        'INSERT INTO places (cafe_id, name, slug, spot_noun, show_spots, is_active) VALUES (?, ?, ?, ?, ?, 1)'
     );
-    $insert->execute([$cafeId, $name !== '' ? $name : 'Place', $slug, 'Chair']);
+    $insert->execute([$cafeId, $name !== '' ? $name : 'Place', $slug, $noun, $showSpots]);
     $placeId = (int) $pdo->lastInsertId();
     seed_default_spots($pdo, $placeId);
     return $placeId;
@@ -423,7 +434,7 @@ function format_place(PDO $pdo, array $row, bool $includeInactiveSpots = false):
         'name' => $row['name'],
         'slug' => $row['slug'],
         'spot_noun' => $row['spot_noun'] ?: 'Chair',
-        'show_spots' => (int) $row['show_spots'] === 1,
+        'show_spots' => cafe_looks_like_counter_service($row) ? false : ((int) $row['show_spots'] === 1),
         'is_active' => (int) $row['is_active'] === 1,
         'spots' => load_place_spots($pdo, $placeId, !$includeInactiveSpots),
     ];

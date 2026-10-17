@@ -82,6 +82,15 @@ function setStatusBarColor(color) {
     themeColorMeta.setAttribute('content', color);
   }
   document.documentElement.style.backgroundColor = color;
+  const statusStyle = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  if (statusStyle) {
+    statusStyle.setAttribute('content', hexLuma(color) > 0.62 ? 'default' : 'black-translucent');
+  }
+}
+
+function isWorkplaceRoastDefaultColor(hex) {
+  const value = String(hex || '').trim().toLowerCase();
+  return value === '#431c0d' || value === '#8b4513' || value === '#5a2e1a';
 }
 
 function applyCafeColors(primary, accent) {
@@ -95,9 +104,10 @@ function applyCafeColors(primary, accent) {
     setIconContrastFromPrimary(primary);
     setStatusBarColor(primary);
   }
-  if (accent) {
-    root.style.setProperty('--theme-accent', accent);
-    root.style.setProperty('--accent-color', accent);
+  const accentUse = (accent && !isWorkplaceRoastDefaultColor(accent)) ? accent : (primary || accent);
+  if (accentUse) {
+    root.style.setProperty('--theme-accent', accentUse);
+    root.style.setProperty('--accent-color', accentUse);
   }
 }
 
@@ -138,9 +148,10 @@ function applyTheme() {
   const root = document.documentElement;
   
   const cafeBrandLocked = root.getAttribute('data-cafe-brand') === 'on';
+  const cafeSlugPending = typeof getCafeSlugFromPath === 'function' && !!getCafeSlugFromPath();
 
   // Set theme CSS variables
-  if (!cafeBrandLocked) {
+  if (!cafeBrandLocked && !cafeSlugPending) {
     root.style.setProperty('--theme-primary', theme.primaryColor);
     root.style.setProperty('--theme-accent', theme.accentColor);
     root.style.setProperty('--primary-color', theme.primaryColor);
@@ -162,7 +173,7 @@ function applyTheme() {
     pwaTitleMeta.setAttribute('content', theme.appName);
   }
   
-  if (!cafeBrandLocked) {
+  if (!cafeBrandLocked && !cafeSlugPending) {
     setStatusBarColor(theme.primaryColor);
   }
   
