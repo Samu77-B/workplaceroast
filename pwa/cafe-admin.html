@@ -9,7 +9,7 @@
         (function () {
             var theme = localStorage.getItem('superDashTheme') || 'dark';
             document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
-            var v = '16';
+            var v = '17';
             var params = new URLSearchParams(window.location.search);
             if (params.get('cb') !== v) {
                 params.set('cb', v);

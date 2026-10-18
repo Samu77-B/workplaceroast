@@ -41,14 +41,13 @@ if ($method === 'GET') {
     $cafeId = isset($_GET['cafe_id']) ? (int) $_GET['cafe_id'] : 0;
     if ($cafeId > 0 && $has('corporate_client_id')) {
         $prodCols = table_exists($pdo, 'products') ? table_columns($pdo, 'products') : [];
+        $visibility = '(corporate_client_id = ? OR corporate_client_id IS NULL)';
+        $params[] = $cafeId;
         if (in_array('corporate_client_id', $prodCols, true) && in_array('category', $prodCols, true)) {
-            $where[] = '(corporate_client_id = ? OR slug IN (SELECT DISTINCT category FROM products WHERE corporate_client_id = ? AND category IS NOT NULL AND category != \'\'))';
-            $params[] = $cafeId;
-            $params[] = $cafeId;
-        } else {
-            $where[] = 'corporate_client_id = ?';
+            $visibility = '(corporate_client_id = ? OR corporate_client_id IS NULL OR slug IN (SELECT DISTINCT category FROM products WHERE corporate_client_id = ? AND category IS NOT NULL AND category != \'\'))';
             $params[] = $cafeId;
         }
+        $where[] = $visibility;
     }
     if ($where) {
         $sql .= ' WHERE ' . implode(' AND ', $where);
@@ -101,9 +100,6 @@ if ($method === 'POST' || $method === 'PUT') {
         if ($has('icon')) {
             $fields['icon'] = trim((string) ($body['icon'] ?? ''));
         }
-        if ($has('corporate_client_id') && $cafe) {
-            $fields['corporate_client_id'] = (int) $cafe['id'];
-        }
         if ($has('subtitle')) {
             $fields['subtitle'] = trim((string) ($body['subtitle'] ?? ''));
         }
@@ -113,6 +109,45 @@ if ($method === 'POST' || $method === 'PUT') {
         }
 
         $editId = isset($_GET['id']) ? (int) $_GET['id'] : (int) ($body['id'] ?? 0);
+        $existingBySlug = null;
+        $slugStmt = $pdo->prepare('SELECT * FROM categories WHERE slug = ? LIMIT 1');
+        $slugStmt->execute([$slug]);
+        $existingBySlug = $slugStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        if ($existingBySlug) {
+            $ownerId = isset($existingBySlug['corporate_client_id']) && $existingBySlug['corporate_client_id'] !== null
+                ? (int) $existingBySlug['corporate_client_id']
+                : 0;
+            if ($cafe && $ownerId > 0 && $ownerId !== (int) $cafe['id']) {
+                http_response_code(409);
+                echo json_encode(['success' => false, 'error' => 'That slug is already in use']);
+                exit;
+            }
+            if ($editId < 1) {
+                $editId = (int) $existingBySlug['id'];
+            } elseif ($editId !== (int) $existingBySlug['id']) {
+                http_response_code(409);
+                echo json_encode(['success' => false, 'error' => 'That slug is already in use']);
+                exit;
+            }
+        }
+
+        $existingRow = $existingBySlug;
+        if ($editId > 0 && (!$existingRow || (int) $existingRow['id'] !== $editId)) {
+            $idStmt = $pdo->prepare('SELECT * FROM categories WHERE id = ? LIMIT 1');
+            $idStmt->execute([$editId]);
+            $existingRow = $idStmt->fetch(PDO::FETCH_ASSOC) ?: $existingRow;
+        }
+        if ($has('corporate_client_id') && $cafe) {
+            $rowOwner = ($existingRow && $existingRow['corporate_client_id'] !== null)
+                ? (int) $existingRow['corporate_client_id']
+                : 0;
+            if ($editId < 1) {
+                $fields['corporate_client_id'] = (int) $cafe['id'];
+            } elseif ($rowOwner === (int) $cafe['id']) {
+                $fields['corporate_client_id'] = (int) $cafe['id'];
+            }
+        }
+
         if ($method === 'PUT' || $editId > 0) {
             if ($editId < 1) {
                 http_response_code(400);
