@@ -9,7 +9,7 @@
         (function () {
             var theme = localStorage.getItem('superDashTheme') || 'dark';
             document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
-            var v = '13';
+            var v = '14';
             var params = new URLSearchParams(window.location.search);
             if (params.get('cb') !== v) {
                 params.set('cb', v);
@@ -1287,7 +1287,13 @@
         async function readJsonResponse(response) {
             const raw = await response.text();
             if (!raw || /^\s*</.test(raw)) {
-                throw new Error('Server returned a page instead of data. The API may not be deployed yet.');
+                if (response.status === 500) {
+                    throw new Error('The server hit an error while saving. Try again in a moment.');
+                }
+                if (response.status === 401 || response.status === 403) {
+                    throw new Error('Please log out and log back in, then try again.');
+                }
+                throw new Error('The server returned an unexpected page (HTTP ' + response.status + ').');
             }
             try {
                 return JSON.parse(raw);
@@ -1414,9 +1420,6 @@
             document.getElementById('adminDashboard').classList.remove('hidden');
             applyCafeBrand(currentUser);
             updateOverview();
-            if (typeof ensureOwnerSession === 'function') {
-                ensureOwnerSession();
-            }
         }
 
         function hexLuma(hex) {
@@ -3326,11 +3329,7 @@
                 const opts = Object.assign({}, options || {});
                 opts.credentials = 'same-origin';
                 opts.headers = Object.assign({}, getAuthHeaders(), opts.headers || {});
-                let requestUrl = url;
-                const session = currentUser && currentUser.ownerSession;
-                if (session && opts.method && /^(POST|PUT|DELETE)$/i.test(opts.method)) {
-                    requestUrl += (requestUrl.indexOf('?') >= 0 ? '&' : '?') + 'ow=' + encodeURIComponent(session);
-                }
+                const requestUrl = url;
                 if (typeof opts.body === 'string') {
                     try {
                         const parsed = JSON.parse(opts.body);

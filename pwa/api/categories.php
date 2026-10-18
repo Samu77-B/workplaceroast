@@ -66,6 +66,7 @@ $cafe = require_admin_or_cafe();
 $body = json_input();
 
 if ($method === 'POST' || $method === 'PUT') {
+    try {
     $name = trim((string) ($body['name'] ?? ''));
     $slug = trim((string) ($body['slug'] ?? ''));
     if ($name === '' || $slug === '') {
@@ -119,6 +120,10 @@ if ($method === 'POST' || $method === 'PUT') {
     $placeholders = implode(', ', array_fill(0, count($fields), '?'));
     $pdo->prepare("INSERT INTO categories ({$colsSql}) VALUES ({$placeholders})")->execute(array_values($fields));
     echo json_encode(['success' => true, 'id' => (int) $pdo->lastInsertId()]);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Could not save category']);
+    }
     exit;
 }
 

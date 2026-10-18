@@ -212,7 +212,6 @@ function cafe_owner_token_candidates(): array
     $body = json_input();
     return [
         (string) ($_COOKIE['wr_owner'] ?? ''),
-        (string) ($_GET['ow'] ?? ''),
         request_header('X-WR-Owner'),
         (string) ($body['_wr_owner'] ?? ''),
         request_header('X-Cafe-Owner-Auth'),
