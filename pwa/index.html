@@ -4,9 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <title>Workplace Roast - Ordering</title>
+    <meta name="theme-color" content="#ffffff">
+    <script>
+        (function () {
+            var brown = { '#431c0d': 1, '#8b4513': 1, '#5a2e1a': 1, '#8a4725': 1 };
+            function isBrown(value) {
+                return !!brown[String(value || '').trim().toLowerCase()];
+            }
+            function pathSlug() {
+                try {
+                    var fromQuery = new URLSearchParams(window.location.search).get('cafe_slug');
+                    if (fromQuery) return fromQuery.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                    var parts = window.location.pathname.toLowerCase().split('/').filter(Boolean);
+                    var last = parts[parts.length - 1] || '';
+                    if (!last || last.indexOf('.') !== -1) return '';
+                    var reserved = { 'pwa': 1, 'index.html': 1, 'admin.html': 1, 'cafe-admin.html': 1, 'super-admin.html': 1, 'success.html': 1, 'cancel.html': 1, 'generate-qr-codes.html': 1, 'api': 1, 'brand': 1, 'corporate-login': 1 };
+                    return reserved[last] ? '' : last.replace(/[^a-z0-9-]/g, '');
+                } catch (err) {
+                    return '';
+                }
+            }
+            function paint(primary, accent) {
+                var root = document.documentElement;
+                root.style.setProperty('--theme-primary', primary);
+                root.style.setProperty('--primary-color', primary);
+                root.style.backgroundColor = primary;
+                var useAccent = (accent && !isBrown(accent)) ? accent : primary;
+                root.style.setProperty('--theme-accent', useAccent);
+                root.style.setProperty('--accent-color', useAccent);
+                root.setAttribute('data-cafe-brand', 'on');
+                var themeMeta = document.querySelector('meta[name="theme-color"]');
+                if (themeMeta) themeMeta.setAttribute('content', primary);
+            }
+            var slug = pathSlug();
+            if (!slug) return;
+            var primary = '';
+            var accent = '';
+            try {
+                var map = JSON.parse(localStorage.getItem('wr_brand_by_slug') || '{}');
+                var saved = map[slug] || null;
+                primary = (saved && saved.primary) || localStorage.getItem('cafe_brand_primary') || '';
+                accent = (saved && saved.accent) || localStorage.getItem('cafe_brand_accent') || '';
+            } catch (err) {}
+            if (primary && !isBrown(primary)) {
+                paint(primary, accent);
+            } else {
+                paint('#ffffff', '#ffffff');
+                document.documentElement.removeAttribute('data-cafe-brand');
+            }
+        })();
+    </script>
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#431c0d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Workplace Roast">
@@ -37,7 +86,7 @@
     <script src="config.js?v=14"></script>
     
     <!-- Theme Applier - Must load early to set CSS variables -->
-    <script src="theme-applier.js?v=5"></script>
+    <script src="theme-applier.js?v=6"></script>
     <script src="category-icons.js?v=4"></script>
     
     <!-- Dynamic Product Loader -->

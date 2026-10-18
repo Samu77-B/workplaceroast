@@ -90,11 +90,14 @@ function setStatusBarColor(color) {
 
 function isWorkplaceRoastDefaultColor(hex) {
   const value = String(hex || '').trim().toLowerCase();
-  return value === '#431c0d' || value === '#8b4513' || value === '#5a2e1a';
+  return value === '#431c0d' || value === '#8b4513' || value === '#5a2e1a' || value === '#8a4725';
 }
 
 function applyCafeColors(primary, accent) {
   const root = document.documentElement;
+  if (primary && isWorkplaceRoastDefaultColor(primary)) {
+    primary = '';
+  }
   if (primary || accent) {
     root.setAttribute('data-cafe-brand', 'on');
   }
@@ -109,6 +112,23 @@ function applyCafeColors(primary, accent) {
     root.style.setProperty('--theme-accent', accentUse);
     root.style.setProperty('--accent-color', accentUse);
   }
+  try {
+    if (primary) {
+      localStorage.setItem('cafe_brand_primary', primary);
+      localStorage.setItem('cafe_brand_accent', accentUse || primary);
+      const slug = (typeof getCafeSlugFromPath === 'function') ? getCafeSlugFromPath() : '';
+      if (slug) {
+        let map = {};
+        try {
+          map = JSON.parse(localStorage.getItem('wr_brand_by_slug') || '{}');
+        } catch (err) {
+          map = {};
+        }
+        map[slug] = { primary: primary, accent: accentUse || primary };
+        localStorage.setItem('wr_brand_by_slug', JSON.stringify(map));
+      }
+    }
+  } catch (err) {}
 }
 
 var DEFAULT_CAFE_LOGO = '/pwa/Brand/Workplace-Roast-Logo-V4.svg';
@@ -162,17 +182,16 @@ function applyTheme() {
   root.style.setProperty('--theme-text', theme.textColor);
   root.style.setProperty('--theme-secondary', theme.secondaryColor);
   
-  // Update the document title
-  if (document.title !== theme.appName) {
-    document.title = theme.appName;
+  if (!cafeSlugPending) {
+    if (document.title !== theme.appName) {
+      document.title = theme.appName;
+    }
+    const pwaTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (pwaTitleMeta) {
+      pwaTitleMeta.setAttribute('content', theme.appName);
+    }
   }
-  
-  // Update PWA meta tags
-  const pwaTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-  if (pwaTitleMeta) {
-    pwaTitleMeta.setAttribute('content', theme.appName);
-  }
-  
+
   if (!cafeBrandLocked && !cafeSlugPending) {
     setStatusBarColor(theme.primaryColor);
   }
