@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workplace Roast - Cafe Owner Dashboard</title>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <script>
         (function () {
             var theme = localStorage.getItem('superDashTheme') || 'dark';
             document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
+            var v = '13';
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('cb') !== v) {
+                params.set('cb', v);
+                window.location.replace(window.location.pathname + '?' + params.toString() + window.location.hash);
+            }
         })();
     </script>
     
@@ -1407,6 +1414,9 @@
             document.getElementById('adminDashboard').classList.remove('hidden');
             applyCafeBrand(currentUser);
             updateOverview();
+            if (typeof ensureOwnerSession === 'function') {
+                ensureOwnerSession();
+            }
         }
 
         function hexLuma(hex) {
@@ -1937,7 +1947,7 @@
                     hideCategoryForm();
                     loadCategoriesFromDatabase(); // Reload categories from database
                 } else {
-                    showNotification('Error saving category: ' + (result.error || 'Unknown error'), 'error');
+                    notifyAuthError('saving category', response, result);
                 }
             } catch (error) {
                 console.error('Error saving category:', error);
@@ -1961,7 +1971,7 @@
                         showNotification('Category deleted successfully!', 'success');
                         loadCategoriesFromDatabase(); // Reload categories from database
                     } else {
-                        showNotification('Error deleting category: ' + (result.error || 'Unknown error'), 'error');
+                        notifyAuthError('deleting category', response, result);
                     }
                 } catch (error) {
                     console.error('Error deleting category:', error);
@@ -2126,10 +2136,8 @@
                     showNotification(editId ? 'Place updated' : 'Place added', 'success');
                     hidePlaceForm();
                     loadPlaces();
-                } else if (response.status === 401) {
-                    showNotification('Please log out and log back in, then save the place again.', 'error');
                 } else {
-                    showNotification('Error saving place: ' + (result.error || 'Unknown error'), 'error');
+                    notifyAuthError('saving place', response, result);
                 }
             } catch (error) {
                 console.error('Error saving place:', error);
@@ -2150,7 +2158,7 @@
                     showNotification('Place deleted', 'success');
                     loadPlaces();
                 } else {
-                    showNotification('Error deleting place: ' + (result.error || 'Unknown error'), 'error');
+                    notifyAuthError('deleting place', response, result);
                 }
             } catch (error) {
                 console.error('Error deleting place:', error);
@@ -3276,21 +3284,73 @@
             return payload;
         }
 
-        function cafeRequest(url, options) {
-            const opts = Object.assign({}, options || {});
-            opts.credentials = opts.credentials || 'same-origin';
-            opts.headers = Object.assign({}, getAuthHeaders(), opts.headers || {});
-            if (typeof opts.body === 'string') {
-                try {
-                    const parsed = JSON.parse(opts.body);
-                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-                        opts.body = JSON.stringify(withCafeAuth(parsed));
-                    }
-                } catch (err) {}
-            } else if (currentUser && opts.method && /^(POST|PUT|DELETE)$/i.test(opts.method) && opts.body == null) {
-                opts.body = JSON.stringify(withCafeAuth({}));
+        function notifyAuthError(action, response, result) {
+            if (response && response.status === 401) {
+                showNotification('Please log out and log back in, then try ' + action + ' again.', 'error');
+                return;
             }
-            return fetch(url, opts);
+            showNotification('Error ' + action + ': ' + ((result && result.error) || 'Unknown error'), 'error');
+        }
+
+        async function ensureOwnerSession() {
+            if (!currentUser) return false;
+            if (currentUser.ownerSession) return true;
+            if (!currentUser.accessCode || !currentUser.password) return false;
+            try {
+                const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
+                    ? CONFIG.API_BASE_URL
+                    : 'api';
+                const response = await fetch(apiBase + '/cafe-owner-login.php', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        access_code: currentUser.accessCode,
+                        password: currentUser.password
+                    })
+                });
+                const data = await readJsonResponse(response);
+                if (data && data.success && data.owner_session) {
+                    currentUser.ownerSession = data.owner_session;
+                    if (data.access_code) currentUser.accessCode = data.access_code;
+                    localStorage.setItem('cafeOwnerUser', JSON.stringify(currentUser));
+                    return true;
+                }
+            } catch (err) {}
+            return false;
+        }
+
+        async function cafeRequest(url, options) {
+            await ensureOwnerSession();
+            const send = function () {
+                const opts = Object.assign({}, options || {});
+                opts.credentials = 'same-origin';
+                opts.headers = Object.assign({}, getAuthHeaders(), opts.headers || {});
+                let requestUrl = url;
+                const session = currentUser && currentUser.ownerSession;
+                if (session && opts.method && /^(POST|PUT|DELETE)$/i.test(opts.method)) {
+                    requestUrl += (requestUrl.indexOf('?') >= 0 ? '&' : '?') + 'ow=' + encodeURIComponent(session);
+                }
+                if (typeof opts.body === 'string') {
+                    try {
+                        const parsed = JSON.parse(opts.body);
+                        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                            opts.body = JSON.stringify(withCafeAuth(parsed));
+                        }
+                    } catch (err) {}
+                } else if (currentUser && opts.method && /^(POST|PUT|DELETE)$/i.test(opts.method) && opts.body == null) {
+                    opts.body = JSON.stringify(withCafeAuth({}));
+                }
+                return fetch(requestUrl, opts);
+            };
+            let response = await send();
+            if (response.status === 401 && currentUser && currentUser.accessCode && currentUser.password) {
+                currentUser.ownerSession = '';
+                if (await ensureOwnerSession()) {
+                    response = await send();
+                }
+            }
+            return response;
         }
         window.getAuthHeaders = getAuthHeaders;
         window.cafeRequest = cafeRequest;
@@ -3349,7 +3409,7 @@
                     hideProductForm();
                     loadData();
                 } else {
-                    showNotification('Error saving product: ' + (result.error || 'Unknown error'), 'error');
+                    notifyAuthError('saving product', response, result);
                 }
             } catch (error) {
                 console.error('Error saving product:', error);
@@ -3372,7 +3432,7 @@
                     showNotification('Product deleted successfully!', 'success');
                     loadData(); // Reload products
                 } else {
-                    showNotification('Error deleting product: ' + (result.error || 'Unknown error'), 'error');
+                    notifyAuthError('deleting product', response, result);
                 }
             } catch (error) {
                 console.error('Error deleting product:', error);
@@ -3508,7 +3568,7 @@
                     hideAddonForm();
                     loadAddons();
                 } else {
-                    showNotification('Error saving add-on: ' + (result.error || 'Unknown error'), 'error');
+                    notifyAuthError('saving add-on', response, result);
                 }
             } catch (error) {
                 console.error('Error saving add-on:', error);
@@ -3531,7 +3591,7 @@
                     showNotification('Add-on deleted successfully!', 'success');
                     loadAddons();
                 } else {
-                    showNotification('Error deleting add-on: ' + (result.error || 'Unknown error'), 'error');
+                    notifyAuthError('deleting add-on', response, result);
                 }
             } catch (error) {
                 console.error('Error deleting add-on:', error);

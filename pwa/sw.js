@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teas-cs-v8';
+const CACHE_NAME = 'teas-cs-v9';
 const urlsToCache = [
   './',
   './index.html',
@@ -18,10 +18,14 @@ self.addEventListener('install', function(event) {
 
 // Fetch event - serve from cache when offline
 self.addEventListener('fetch', function(event) {
+  const url = event.request.url;
+  if (url.indexOf('/api/') !== -1 || url.indexOf('cafe-admin') !== -1 || url.indexOf('admin.html') !== -1) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
-        // Return cached version or fetch from network
         return response || fetch(event.request);
       }
     )
