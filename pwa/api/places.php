@@ -88,8 +88,57 @@ if ($method === 'GET') {
 
 $cafe = require_admin_or_cafe();
 
-if ($method === 'POST') {
+if ($method === 'POST' || $method === 'PUT') {
     $body = json_input();
+    $id = (int) ($body['id'] ?? $_GET['id'] ?? 0);
+    $isUpdate = $method === 'PUT' || $id > 0;
+
+    if ($isUpdate) {
+        if ($id < 1) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing id']);
+            exit;
+        }
+        $stmt = $pdo->prepare('SELECT * FROM places WHERE id = ? LIMIT 1');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Place not found']);
+            exit;
+        }
+        require_place_owner($cafe, $row);
+
+        $name = array_key_exists('name', $body) ? trim((string) $body['name']) : $row['name'];
+        if ($name === '') {
+            http_response_code(400);
+            echo json_encode(['error' => 'Name is required']);
+            exit;
+        }
+        $slugInput = array_key_exists('slug', $body) ? trim((string) $body['slug']) : $row['slug'];
+        $slug = unique_place_slug($pdo, $slugInput !== '' ? $slugInput : $name, $id, (int) $row['cafe_id']);
+        $spotNoun = array_key_exists('spot_noun', $body) ? trim((string) $body['spot_noun']) : $row['spot_noun'];
+        if ($spotNoun === '') {
+            $spotNoun = 'Chair';
+        }
+        $showSpots = array_key_exists('show_spots', $body) ? (!empty($body['show_spots']) ? 1 : 0) : (int) $row['show_spots'];
+        $isActive = array_key_exists('is_active', $body) ? (!empty($body['is_active']) ? 1 : 0) : (int) $row['is_active'];
+
+        $update = $pdo->prepare(
+            'UPDATE places SET name = ?, slug = ?, spot_noun = ?, show_spots = ?, is_active = ? WHERE id = ?'
+        );
+        $update->execute([$name, $slug, substr($spotNoun, 0, 80), $showSpots, $isActive, $id]);
+
+        if (array_key_exists('spots', $body) && is_array($body['spots'])) {
+            replace_place_spots($pdo, $id, $body['spots']);
+        }
+
+        $fresh = $pdo->prepare('SELECT * FROM places WHERE id = ? LIMIT 1');
+        $fresh->execute([$id]);
+        echo json_encode(['success' => true, 'place' => format_place($pdo, $fresh->fetch(), true)]);
+        exit;
+    }
+
     $name = trim((string) ($body['name'] ?? ''));
     if ($name === '') {
         http_response_code(400);
@@ -125,54 +174,6 @@ if ($method === 'POST') {
 
     $row = $pdo->query('SELECT * FROM places WHERE id = ' . $placeId)->fetch();
     echo json_encode(['success' => true, 'place' => format_place($pdo, $row, true)]);
-    exit;
-}
-
-if ($method === 'PUT') {
-    $body = json_input();
-    $id = (int) ($body['id'] ?? $_GET['id'] ?? 0);
-    if ($id < 1) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Missing id']);
-        exit;
-    }
-    $stmt = $pdo->prepare('SELECT * FROM places WHERE id = ? LIMIT 1');
-    $stmt->execute([$id]);
-    $row = $stmt->fetch();
-    if (!$row) {
-        http_response_code(404);
-        echo json_encode(['error' => 'Place not found']);
-        exit;
-    }
-    require_place_owner($cafe, $row);
-
-    $name = array_key_exists('name', $body) ? trim((string) $body['name']) : $row['name'];
-    if ($name === '') {
-        http_response_code(400);
-        echo json_encode(['error' => 'Name is required']);
-        exit;
-    }
-    $slugInput = array_key_exists('slug', $body) ? trim((string) $body['slug']) : $row['slug'];
-    $slug = unique_place_slug($pdo, $slugInput !== '' ? $slugInput : $name, $id, (int) $row['cafe_id']);
-    $spotNoun = array_key_exists('spot_noun', $body) ? trim((string) $body['spot_noun']) : $row['spot_noun'];
-    if ($spotNoun === '') {
-        $spotNoun = 'Chair';
-    }
-    $showSpots = array_key_exists('show_spots', $body) ? (!empty($body['show_spots']) ? 1 : 0) : (int) $row['show_spots'];
-    $isActive = array_key_exists('is_active', $body) ? (!empty($body['is_active']) ? 1 : 0) : (int) $row['is_active'];
-
-    $update = $pdo->prepare(
-        'UPDATE places SET name = ?, slug = ?, spot_noun = ?, show_spots = ?, is_active = ? WHERE id = ?'
-    );
-    $update->execute([$name, $slug, substr($spotNoun, 0, 80), $showSpots, $isActive, $id]);
-
-    if (array_key_exists('spots', $body) && is_array($body['spots'])) {
-        replace_place_spots($pdo, $id, $body['spots']);
-    }
-
-    $fresh = $pdo->prepare('SELECT * FROM places WHERE id = ? LIMIT 1');
-    $fresh->execute([$id]);
-    echo json_encode(['success' => true, 'place' => format_place($pdo, $fresh->fetch(), true)]);
     exit;
 }
 

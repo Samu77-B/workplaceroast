@@ -1674,52 +1674,48 @@
             }
         }
 
+        function slugifyValue(value) {
+            return String(value || '')
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
         async function saveCategory(event) {
             event.preventDefault();
             
             const editId = document.getElementById('categoryForm').getAttribute('data-edit-id');
+            const name = document.getElementById('categoryName').value.trim();
+            const slug = slugifyValue(document.getElementById('categorySlug').value) || slugifyValue(name);
             const categoryData = {
-                name: document.getElementById('categoryName').value,
-                slug: document.getElementById('categorySlug').value,
+                name,
+                slug,
                 description: document.getElementById('categoryDescription').value,
                 subtitle: document.getElementById('categorySubtitle').value,
                 icon: document.getElementById('categoryIcon').value
                     || (typeof suggestCategoryIcon === 'function'
-                        ? suggestCategoryIcon(document.getElementById('categorySlug').value, document.getElementById('categoryName').value)
+                        ? suggestCategoryIcon(slug, name)
                         : ''),
-                order: parseInt(document.getElementById('categoryOrder').value),
+                order: parseInt(document.getElementById('categoryOrder').value, 10) || 0,
                 active: document.getElementById('categoryActive').checked
             };
+            if (editId) categoryData.id = parseInt(editId, 10);
 
-            // Validate slug format
-            if (!/^[a-z0-9-]+$/.test(categoryData.slug)) {
+            if (!slug) {
                 showNotification('Category slug must contain only lowercase letters, numbers, and hyphens', 'error');
                 return;
             }
 
             try {
-                let response;
-                if (editId) {
-                    // Update existing category
-                    response = await fetch(`${CONFIG.API_BASE_URL}/categories.php?id=${editId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
-                        },
-                        body: JSON.stringify(categoryData)
-                    });
-                } else {
-                    // Create new category
-                    response = await fetch(`${CONFIG.API_BASE_URL}/categories.php`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
-                        },
-                        body: JSON.stringify(categoryData)
-                    });
-                }
+                const response = await fetch(`${CONFIG.API_BASE_URL}/categories.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CONFIG.ADMIN_TOKEN}`
+                    },
+                    body: JSON.stringify(categoryData)
+                });
 
                 const result = await response.json();
                 

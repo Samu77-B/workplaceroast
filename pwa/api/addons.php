@@ -127,53 +127,58 @@ if ($method === 'POST' && isset($body['product_id']) && array_key_exists('addon_
 }
 
 if ($method === 'POST' || $method === 'PUT') {
-    $name = trim((string) ($body['name'] ?? ''));
-    if ($name === '') {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Add-on name is required']);
-        exit;
-    }
-    $fields = [
-        'name' => $name,
-        'type' => trim((string) ($body['type'] ?? 'other')) ?: 'other',
-        'price' => (float) ($body['price'] ?? 0),
-    ];
-    if ($has('display_order')) {
-        $fields['display_order'] = (int) ($body['display_order'] ?? 0);
-    }
-    if ($has('is_available')) {
-        $fields['is_available'] = !empty($body['is_available']) ? 1 : 0;
-    }
-    if ($has('corporate_client_id') && $cafe) {
-        $fields['corporate_client_id'] = (int) $cafe['id'];
-    }
-
-    $editId = (int) ($body['id'] ?? $_GET['id'] ?? 0);
-    if ($method === 'PUT' || $editId > 0) {
-        if ($editId < 1) {
+    try {
+        $name = trim((string) ($body['name'] ?? ''));
+        if ($name === '') {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Missing id']);
+            echo json_encode(['success' => false, 'error' => 'Add-on name is required']);
             exit;
         }
-        $sets = [];
-        $params = [];
-        foreach ($fields as $col => $value) {
-            $sets[] = "`{$col}` = ?";
-            $params[] = $value;
+        $fields = [
+            'name' => $name,
+            'type' => trim((string) ($body['type'] ?? 'other')) ?: 'other',
+            'price' => (float) ($body['price'] ?? 0),
+        ];
+        if ($has('display_order')) {
+            $fields['display_order'] = (int) ($body['display_order'] ?? 0);
         }
-        if ($has('updated_at')) {
-            $sets[] = 'updated_at = NOW()';
+        if ($has('is_available')) {
+            $fields['is_available'] = !empty($body['is_available']) ? 1 : 0;
         }
-        $params[] = $editId;
-        $pdo->prepare('UPDATE addons SET ' . implode(', ', $sets) . ' WHERE id = ?')->execute($params);
-        echo json_encode(['success' => true, 'id' => $editId]);
-        exit;
-    }
+        if ($has('corporate_client_id') && $cafe) {
+            $fields['corporate_client_id'] = (int) $cafe['id'];
+        }
 
-    $colsSql = '`' . implode('`, `', array_keys($fields)) . '`';
-    $placeholders = implode(', ', array_fill(0, count($fields), '?'));
-    $pdo->prepare("INSERT INTO addons ({$colsSql}) VALUES ({$placeholders})")->execute(array_values($fields));
-    echo json_encode(['success' => true, 'id' => (int) $pdo->lastInsertId()]);
+        $editId = (int) ($body['id'] ?? $_GET['id'] ?? 0);
+        if ($method === 'PUT' || $editId > 0) {
+            if ($editId < 1) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Missing id']);
+                exit;
+            }
+            $sets = [];
+            $params = [];
+            foreach ($fields as $col => $value) {
+                $sets[] = "`{$col}` = ?";
+                $params[] = $value;
+            }
+            if ($has('updated_at')) {
+                $sets[] = 'updated_at = NOW()';
+            }
+            $params[] = $editId;
+            $pdo->prepare('UPDATE addons SET ' . implode(', ', $sets) . ' WHERE id = ?')->execute($params);
+            echo json_encode(['success' => true, 'id' => $editId]);
+            exit;
+        }
+
+        $colsSql = '`' . implode('`, `', array_keys($fields)) . '`';
+        $placeholders = implode(', ', array_fill(0, count($fields), '?'));
+        $pdo->prepare("INSERT INTO addons ({$colsSql}) VALUES ({$placeholders})")->execute(array_values($fields));
+        echo json_encode(['success' => true, 'id' => (int) $pdo->lastInsertId()]);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => public_sql_error($e, 'Could not save add-on')]);
+    }
     exit;
 }
 

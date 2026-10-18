@@ -289,6 +289,31 @@ function pick_column(array $columns, array $candidates): ?string
     return null;
 }
 
+function public_sql_error(Throwable $e, string $fallback): string
+{
+    $msg = $e->getMessage();
+    if (preg_match('/Duplicate entry/i', $msg)) {
+        return 'That slug is already in use';
+    }
+    if (preg_match("/Data too long for column '([^']+)'/i", $msg, $m)) {
+        return 'The ' . $m[1] . ' value is too long to save';
+    }
+    if (preg_match("/Unknown column '([^']+)'/i", $msg, $m)) {
+        return 'Missing database column: ' . $m[1];
+    }
+    if (preg_match('/ALTER command denied|Access denied/i', $msg)) {
+        return 'The category icon field is too short and could not be widened automatically';
+    }
+    return $fallback;
+}
+
+function slugify_url_token(string $value): string
+{
+    $slug = strtolower(trim($value));
+    $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+    return trim((string) $slug, '-');
+}
+
 function slugify(string $name): string
 {
     $slug = strtolower(trim($name));
@@ -481,18 +506,30 @@ function ensure_category_cafe_column(PDO $pdo): void
     if (!table_exists($pdo, 'categories')) {
         return;
     }
-    $cols = table_columns($pdo, 'categories');
-    if (!in_array('corporate_client_id', $cols, true)) {
-        $pdo->exec('ALTER TABLE categories ADD COLUMN corporate_client_id INT NULL');
-    }
-    $iconCol = $pdo->query("SHOW COLUMNS FROM categories LIKE 'icon'")->fetch(PDO::FETCH_ASSOC);
-    if (!$iconCol) {
-        $pdo->exec('ALTER TABLE categories ADD COLUMN icon VARCHAR(255) NULL');
-        return;
-    }
-    $type = strtolower((string) ($iconCol['Type'] ?? ''));
-    if (preg_match('/varchar\((\d+)\)/', $type, $m) && (int) $m[1] < 255) {
-        $pdo->exec('ALTER TABLE categories MODIFY COLUMN icon VARCHAR(255) NULL');
+    try {
+        $cols = table_columns($pdo, 'categories');
+        if (!in_array('corporate_client_id', $cols, true)) {
+            $pdo->exec('ALTER TABLE categories ADD COLUMN corporate_client_id INT NULL');
+        }
+        if (!in_array('subtitle', $cols, true)) {
+            $pdo->exec('ALTER TABLE categories ADD COLUMN subtitle VARCHAR(255) NULL');
+        }
+        $iconCol = $pdo->query("SHOW COLUMNS FROM categories LIKE 'icon'")->fetch(PDO::FETCH_ASSOC);
+        if (!$iconCol) {
+            $pdo->exec('ALTER TABLE categories ADD COLUMN icon VARCHAR(255) NULL');
+            return;
+        }
+        $type = strtolower((string) ($iconCol['Type'] ?? ''));
+        $len = 0;
+        if (preg_match('/(?:var)?char\((\d+)\)/', $type, $m)) {
+            $len = (int) $m[1];
+        }
+        $wideEnough = strpos($type, 'text') !== false || $len >= 255;
+        if (!$wideEnough) {
+            $pdo->exec('ALTER TABLE categories MODIFY COLUMN icon VARCHAR(255) NULL');
+        }
+    } catch (Throwable $e) {
+        error_log('ensure_category_cafe_column: ' . $e->getMessage());
     }
 }
 
