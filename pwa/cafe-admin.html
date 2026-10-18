@@ -852,7 +852,7 @@
                         </div>
                         <div class="form-group">
                             <label for="categorySlug">Category Slug (URL-friendly)</label>
-                            <input type="text" id="categorySlug" required pattern="[a-z0-9-]+" title="Use lowercase letters, numbers, and hyphens only">
+                            <input type="text" id="categorySlug" required pattern="[a-z0-9\-]+" title="Use lowercase letters, numbers, and hyphens only">
                         </div>
                     </div>
                     <div class="form-group">
@@ -907,7 +907,7 @@
                         </div>
                         <div class="form-group">
                             <label for="placeSlug">URL slug</label>
-                            <input type="text" id="placeSlug" required pattern="[a-z0-9-]+" placeholder="acme-salon">
+                            <input type="text" id="placeSlug" required pattern="[a-z0-9\-]+" placeholder="acme-salon">
                         </div>
                     </div>
                     <div class="form-row">
@@ -1364,6 +1364,7 @@
                         name: data.client_name,
                         accessCode: data.access_code || accessCode,
                         password: password,
+                        ownerSession: data.owner_session || '',
                         logo_url: data.logo_url || '',
                         brand_primary: data.brand_primary || '',
                         brand_accent: data.brand_accent || '',
@@ -2125,6 +2126,8 @@
                     showNotification(editId ? 'Place updated' : 'Place added', 'success');
                     hidePlaceForm();
                     loadPlaces();
+                } else if (response.status === 401) {
+                    showNotification('Please log out and log back in, then save the place again.', 'error');
                 } else {
                     showNotification('Error saving place: ' + (result.error || 'Unknown error'), 'error');
                 }
@@ -3250,17 +3253,25 @@
             return 'cafe.' + btoa(unescape(encodeURIComponent(payload)));
         }
 
+        function ownerAuthValue() {
+            if (!currentUser) return '';
+            return currentUser.ownerSession || cafeOwnerAuthToken();
+        }
+
         function getAuthHeaders() {
             const headers = { 'Content-Type': 'application/json' };
-            if (!currentUser) return headers;
-            headers['Authorization'] = 'Bearer ' + cafeOwnerAuthToken();
+            const token = ownerAuthValue();
+            if (token) {
+                headers['X-WR-Owner'] = token;
+            }
             return headers;
         }
 
         function withCafeAuth(data) {
             const payload = (data && typeof data === 'object') ? Object.assign({}, data) : {};
-            if (currentUser) {
-                payload._wr_owner = cafeOwnerAuthToken();
+            const token = ownerAuthValue();
+            if (token) {
+                payload._wr_owner = token;
             }
             return payload;
         }

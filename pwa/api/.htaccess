@@ -2,6 +2,7 @@
 # Do not use CGIPassAuth here — Hostinger rejects it and the whole /api folder returns HTTP 500.
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 SetEnvIf X-Cafe-Owner-Auth "(.*)" HTTP_X_CAFE_OWNER_AUTH=$1
+SetEnvIf X-WR-Owner "(.*)" HTTP_X_WR_OWNER=$1
 RewriteEngine On
 RewriteCond %{HTTP:Authorization} .
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
