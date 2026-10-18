@@ -9,7 +9,7 @@
         (function () {
             var theme = localStorage.getItem('superDashTheme') || 'dark';
             document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
-            var v = '17';
+            var v = '18';
             var params = new URLSearchParams(window.location.search);
             if (params.get('cb') !== v) {
                 params.set('cb', v);
@@ -773,7 +773,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="admin-theme.css?v=8">
+    <link rel="stylesheet" href="admin-theme.css?v=9">
 </head>
 <body>
     <button type="button" class="nav-btn theme-toggle theme-float" onclick="toggleTheme()">Light mode</button>
@@ -1005,10 +1005,10 @@
                     </div>
                     <div class="form-group">
                         <label>Available Add-ons</label>
-                        <div id="productAddonsContainer" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background: #f9f9f9;">
-                            <div style="text-align: center; color: #666; padding: 20px;">Loading add-ons...</div>
+                        <div id="productAddonsContainer" class="addons-picker">
+                            <div style="text-align: center; padding: 20px;">Loading add-ons...</div>
                         </div>
-                        <small style="color: #666;">Select which add-ons customers can choose for this product</small>
+                        <small>Select which add-ons customers can choose for this product</small>
                     </div>
                     <div class="form-group">
                         <button type="submit" class="btn">Save Product</button>
@@ -2328,13 +2328,13 @@
         
         async function loadProductAddons(productId = null) {
             const container = document.getElementById('productAddonsContainer');
-            container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Loading add-ons...</div>';
+            container.innerHTML = '<div style="text-align: center; padding: 20px;">Loading add-ons...</div>';
             
             try {
                 // Load all add-ons for this cafe
                 const cafeId = currentUser ? currentUser.id : null;
                 if (!cafeId) {
-                    container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Please login to manage add-ons</div>';
+                    container.innerHTML = '<div style="text-align: center; padding: 20px;">Please login to manage add-ons</div>';
                     return;
                 }
                 
@@ -2354,11 +2354,11 @@
                     
                     renderProductAddons(data.addons, selectedAddonIds);
                 } else {
-                    container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">No add-ons yet. Save this drink now, or create extras in Add-ons first.</div>';
+                    container.innerHTML = '<div style="text-align: center; padding: 20px;">No add-ons yet. Save this drink now, or create extras in Add-ons first.</div>';
                 }
             } catch (error) {
                 console.error('Error loading add-ons:', error);
-                container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Add-ons could not be loaded. You can still save this drink.</div>';
+                container.innerHTML = '<div style="text-align: center; padding: 20px;">Add-ons could not be loaded. You can still save this drink.</div>';
             }
         }
         

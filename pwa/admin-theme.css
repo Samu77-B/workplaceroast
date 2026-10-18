@@ -168,6 +168,43 @@ input, select, textarea {
     border: 1px solid var(--line) !important;
     border-radius: 6px !important;
 }
+.form-group input[type="checkbox"],
+.form-group input[type="radio"],
+input[type="checkbox"],
+input[type="radio"] {
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin-right: 8px;
+    accent-color: var(--accent);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+.form-group small {
+    color: var(--muted) !important;
+}
+.addons-picker {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--line) !important;
+    padding: 10px;
+    border-radius: 6px;
+    background: var(--input-bg) !important;
+    color: var(--text) !important;
+}
+.addons-picker label,
+.addons-picker strong,
+.addons-picker div {
+    color: var(--text) !important;
+}
+.addons-picker label {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    margin-bottom: 0;
+}
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus,
