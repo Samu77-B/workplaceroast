@@ -8,6 +8,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $body = json_input();
+if (!empty($body['logout'])) {
+    clear_cafe_owner_session();
+    echo json_encode(['success' => true]);
+    exit;
+}
+
 $accessCode = trim((string) ($body['access_code'] ?? ''));
 $password = (string) ($body['password'] ?? '');
 
@@ -42,6 +48,8 @@ if (!verify_owner_password($hash, $password)) {
     echo json_encode(['success' => false, 'error' => 'Invalid access code or password']);
     exit;
 }
+
+issue_cafe_owner_session($cafe);
 
 echo json_encode([
     'success' => true,

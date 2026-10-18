@@ -1362,7 +1362,7 @@
                         role: 'owner',
                         id: data.corporate_client_id, 
                         name: data.client_name,
-                        accessCode: data.access_code,
+                        accessCode: data.access_code || accessCode,
                         password: password,
                         logo_url: data.logo_url || '',
                         brand_primary: data.brand_primary || '',
@@ -1381,6 +1381,15 @@
         }
 
         function logout() {
+            const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL)
+                ? CONFIG.API_BASE_URL
+                : 'api';
+            fetch(apiBase + '/cafe-owner-login.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ logout: true })
+            }).catch(function () {});
             localStorage.removeItem('cafeOwnerUser');
             currentUser = null;
             showLogin();
@@ -3244,25 +3253,21 @@
         function getAuthHeaders() {
             const headers = { 'Content-Type': 'application/json' };
             if (!currentUser) return headers;
-            const token = cafeOwnerAuthToken();
-            headers['Authorization'] = 'Bearer ' + token;
-            headers['X-Cafe-Owner-Auth'] = token;
-            headers['X-Cafe-Access-Code'] = currentUser.accessCode || '';
-            headers['X-Cafe-Password'] = currentUser.password || '';
+            headers['Authorization'] = 'Bearer ' + cafeOwnerAuthToken();
             return headers;
         }
 
         function withCafeAuth(data) {
             const payload = (data && typeof data === 'object') ? Object.assign({}, data) : {};
             if (currentUser) {
-                payload._cafe_access_code = currentUser.accessCode || '';
-                payload._cafe_password = currentUser.password || '';
+                payload._wr_owner = cafeOwnerAuthToken();
             }
             return payload;
         }
 
         function cafeRequest(url, options) {
             const opts = Object.assign({}, options || {});
+            opts.credentials = opts.credentials || 'same-origin';
             opts.headers = Object.assign({}, getAuthHeaders(), opts.headers || {});
             if (typeof opts.body === 'string') {
                 try {

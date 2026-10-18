@@ -112,47 +112,127 @@ function find_cafe_by_access_code(string $accessCode): ?array
     return $row ?: null;
 }
 
+function find_cafe_by_id(int $id): ?array
+{
+    global $pdo;
+    if ($id < 1 || !table_exists($pdo, 'corporate_clients')) {
+        return null;
+    }
+    $stmt = $pdo->prepare('SELECT * FROM corporate_clients WHERE id = ? LIMIT 1');
+    $stmt->execute([$id]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function cafe_owner_secret(): string
+{
+    global $ADMIN_TOKEN;
+    return 'wr-owner-v1|' . trim((string) ($ADMIN_TOKEN ?? ''));
+}
+
+function cafe_cookie_secure(): bool
+{
+    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || ((string) ($_SERVER['SERVER_PORT'] ?? '') === '443');
+}
+
+function issue_cafe_owner_session(array $cafe): void
+{
+    $id = (int) ($cafe['id'] ?? 0);
+    if ($id < 1) {
+        return;
+    }
+    $exp = time() + 60 * 60 * 24 * 14;
+    $payload = $id . '.' . $exp;
+    $token = $payload . '.' . hash_hmac('sha256', $payload, cafe_owner_secret());
+    setcookie('wr_owner', $token, [
+        'expires' => $exp,
+        'path' => '/',
+        'secure' => cafe_cookie_secure(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
+
+function clear_cafe_owner_session(): void
+{
+    setcookie('wr_owner', '', [
+        'expires' => time() - 3600,
+        'path' => '/',
+        'secure' => cafe_cookie_secure(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
+
+function cafe_owner_from_cookie(): ?array
+{
+    $token = (string) ($_COOKIE['wr_owner'] ?? '');
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) {
+        return null;
+    }
+    $id = (int) $parts[0];
+    $exp = (int) $parts[1];
+    $sig = $parts[2];
+    if ($id < 1 || $exp < time() || $sig === '') {
+        return null;
+    }
+    $payload = $id . '.' . $exp;
+    if (!hash_equals(hash_hmac('sha256', $payload, cafe_owner_secret()), $sig)) {
+        return null;
+    }
+    $cafe = find_cafe_by_id($id);
+    if (!$cafe || empty($cafe['is_active'])) {
+        return null;
+    }
+    return $cafe;
+}
+
+function decode_cafe_owner_token(?string $value): array
+{
+    if ($value === null || $value === '') {
+        return ['', ''];
+    }
+    if (!preg_match('/(?:Bearer\s+)?cafe\.([A-Za-z0-9+\/=_-]+)/i', $value, $m)) {
+        return ['', ''];
+    }
+    $decoded = json_decode(base64_decode(strtr($m[1], '-_', '+/')), true);
+    if (!is_array($decoded)) {
+        return ['', ''];
+    }
+    return [
+        trim((string) ($decoded['c'] ?? '')),
+        (string) ($decoded['p'] ?? ''),
+    ];
+}
+
 function cafe_owner_credentials(): array
 {
-    $code = trim(request_header('X-Cafe-Access-Code'));
-    $password = (string) request_header('X-Cafe-Password');
-
     $bearer = request_header('Authorization');
     if ($bearer === '') {
         $bearer = (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
     }
-    $ownerAuth = request_header('X-Cafe-Owner-Auth');
-    foreach ([$bearer, $ownerAuth] as $value) {
-        if (!preg_match('/(?:Bearer\s+)?cafe\.([A-Za-z0-9+\/=_-]+)/i', (string) $value, $m)) {
-            continue;
-        }
-        $decoded = json_decode(base64_decode(strtr($m[1], '-_', '+/')), true);
-        if (!is_array($decoded)) {
-            continue;
-        }
-        if ($code === '') {
-            $code = trim((string) ($decoded['c'] ?? ''));
-        }
-        if ($password === '') {
-            $password = (string) ($decoded['p'] ?? '');
+    $candidates = [
+        $bearer,
+        request_header('X-Cafe-Owner-Auth'),
+        (string) (json_input()['_wr_owner'] ?? ''),
+    ];
+    foreach ($candidates as $value) {
+        [$code, $password] = decode_cafe_owner_token((string) $value);
+        if ($code !== '' && $password !== '') {
+            return [$code, $password];
         }
     }
-
-    if ($code === '' || $password === '') {
-        $body = json_input();
-        if ($code === '') {
-            $code = trim((string) ($body['_cafe_access_code'] ?? ''));
-        }
-        if ($password === '') {
-            $password = (string) ($body['_cafe_password'] ?? '');
-        }
-    }
-
-    return [$code, $password];
+    return ['', ''];
 }
 
 function cafe_owner_from_headers(): ?array
 {
+    $fromCookie = cafe_owner_from_cookie();
+    if ($fromCookie) {
+        return $fromCookie;
+    }
     [$code, $password] = cafe_owner_credentials();
     if ($code === '' || $password === '') {
         return null;
