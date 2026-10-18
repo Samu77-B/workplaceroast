@@ -9,7 +9,7 @@
         (function () {
             var theme = localStorage.getItem('superDashTheme') || 'dark';
             document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
-            var v = '14';
+            var v = '15';
             var params = new URLSearchParams(window.location.search);
             if (params.get('cb') !== v) {
                 params.set('cb', v);
@@ -773,7 +773,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="admin-theme.css?v=7">
+    <link rel="stylesheet" href="admin-theme.css?v=8">
 </head>
 <body>
     <button type="button" class="nav-btn theme-toggle theme-float" onclick="toggleTheme()">Light mode</button>
@@ -1270,6 +1270,14 @@
                 <!-- Content will be dynamically loaded -->
             </div>
         </div>
+
+        <footer class="app-footer">
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    <p>&copy; <span id="currentYear"></span> Workplace Roast. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <!-- Configuration -->
@@ -3608,37 +3616,26 @@
         };
     </script>
     
-    <!-- Footer Component -->
-    <footer class="app-footer">
-        <div class="footer-content">
-            <div class="footer-copyright">
-                <p>&copy; <span id="currentYear"></span> Workplace Roast. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-    
     <style>
         .app-footer {
-            /* Fallback for browsers that don't support color-mix */
-            background: var(--theme-primary);
-            /* Modern browsers with color-mix support */
-            background: linear-gradient(135deg, color-mix(in srgb, var(--theme-primary) 95%, transparent), color-mix(in srgb, var(--theme-primary) 85%, transparent));
-            color: white;
-            padding: 20px;
+            background: var(--header-bg, var(--theme-primary));
+            color: var(--header-muted, rgba(255, 255, 255, 0.8));
+            padding: 18px 24px;
             text-align: center;
-            margin-top: 40px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 24px;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .footer-content {
-            max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
         }
         
         .footer-copyright {
             font-size: 0.85rem;
-            opacity: 0.9;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--header-muted, rgba(255, 255, 255, 0.8));
         }
         
         .footer-copyright p {

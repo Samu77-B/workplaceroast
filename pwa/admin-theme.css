@@ -301,7 +301,21 @@ body:has(#adminDashboard:not(.hidden)) .theme-float {
 .app-footer {
     background: var(--header-bg) !important;
     color: var(--header-muted) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: none !important;
+    border-radius: 8px !important;
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+}
+.admin-container .app-footer {
+    max-width: none;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 .footer-copyright,
 .footer-copyright p {
