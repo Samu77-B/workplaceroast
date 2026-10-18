@@ -43,13 +43,13 @@
     right: 0;
     width: 100%;
     z-index: 50;
-    transform: translateY(0);
+    transform: translateY(calc(100% - 16px - env(safe-area-inset-bottom, 0px)));
     transition: transform 0.3s ease-in-out;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .app-footer.footer-hidden {
-    transform: translateY(100%);
+    transform: translateY(calc(100% - 16px - env(safe-area-inset-bottom, 0px)));
 }
 
 .app-footer.footer-visible {
@@ -177,10 +177,12 @@
 }
 
 /* Ensure footer appears on corporate login page */
-#corporateLoginPage .app-footer {
+#corporateLoginPage .app-footer,
+body.corporate-login-active .app-footer {
     position: fixed;
     bottom: 0;
     z-index: 1001;
+    transform: translateY(0);
 }
 </style>
 
@@ -254,54 +256,80 @@ function showInstallInstructions() {
     }
 }
 
-// Footer Scroll Behavior - Pin to bottom until user scrolls
+// Peek a sliver of the public footer until the user scrolls to the bottom
 (function() {
-    const footer = document.querySelector('.app-footer');
-    if (!footer) return;
-    
-    let lastScrollTop = 0;
-    let scrollThreshold = 50; // Pixels to scroll before hiding footer
-    let ticking = false;
-    
+    if (window.__wrFooterPeekInit) return;
+    window.__wrFooterPeekInit = true;
+
+    function footers() {
+        return Array.prototype.slice.call(document.querySelectorAll('.app-footer'));
+    }
+
+    function ensureRevealSpace(footer) {
+        let space = document.getElementById('footer-reveal-space');
+        if (!space) {
+            space = document.createElement('div');
+            space.id = 'footer-reveal-space';
+            space.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(space);
+        }
+        const peek = 16;
+        const extra = Math.max(80, (footer ? footer.offsetHeight : 120) - peek);
+        space.style.height = extra + 'px';
+        space.style.pointerEvents = 'none';
+    }
+
     function updateFooterVisibility() {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-        
-        // Check if we're at the bottom of the page
-        const isAtBottom = scrollTop + windowHeight >= documentHeight - 10;
-        
-        // Show footer if:
-        // 1. User is at the top of the page (scrollTop < threshold)
-        // 2. User is at the bottom of the page
-        // 3. User is scrolling up
-        if (scrollTop < scrollThreshold || isAtBottom || scrollTop < lastScrollTop) {
+        const list = footers();
+        if (!list.length) return;
+        list.forEach(function (footer, index) {
+            if (index > 0) footer.style.display = 'none';
+        });
+        const footer = list[0];
+        ensureRevealSpace(footer);
+
+        const loginActive = document.body.classList.contains('corporate-login-active');
+        if (loginActive) {
+            const space = document.getElementById('footer-reveal-space');
+            if (space) space.style.height = '0px';
+        }
+        const scrollRoot = loginActive
+            ? document.getElementById('corporateLoginPage')
+            : null;
+        const scrollTop = scrollRoot
+            ? scrollRoot.scrollTop
+            : (window.pageYOffset || document.documentElement.scrollTop);
+        const windowHeight = scrollRoot ? scrollRoot.clientHeight : window.innerHeight;
+        const documentHeight = scrollRoot ? scrollRoot.scrollHeight : document.documentElement.scrollHeight;
+        const isAtBottom = scrollTop + windowHeight >= documentHeight - 24;
+
+        if (loginActive || isAtBottom) {
             footer.classList.remove('footer-hidden');
             footer.classList.add('footer-visible');
-        } else if (scrollTop > lastScrollTop && scrollTop > scrollThreshold && !isAtBottom) {
-            // Hide footer when scrolling down
+        } else {
             footer.classList.remove('footer-visible');
             footer.classList.add('footer-hidden');
         }
-        
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-        ticking = false;
     }
-    
+
+    let ticking = false;
     function requestTick() {
         if (!ticking) {
-            window.requestAnimationFrame(updateFooterVisibility);
+            window.requestAnimationFrame(function () {
+                updateFooterVisibility();
+                ticking = false;
+            });
             ticking = true;
         }
     }
-    
-    // Listen for scroll events
+
     window.addEventListener('scroll', requestTick, { passive: true });
-    
-    // Initial check
-    updateFooterVisibility();
-    
-    // Also check on resize
     window.addEventListener('resize', updateFooterVisibility, { passive: true });
+    const loginPage = document.getElementById('corporateLoginPage');
+    if (loginPage) {
+        loginPage.addEventListener('scroll', requestTick, { passive: true });
+    }
+    updateFooterVisibility();
+    setTimeout(updateFooterVisibility, 300);
 })();
 </script>

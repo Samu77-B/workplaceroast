@@ -34,7 +34,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <!-- Configuration -->
-    <script src="config.js?v=13"></script>
+    <script src="config.js?v=14"></script>
     
     <!-- Theme Applier - Must load early to set CSS variables -->
     <script src="theme-applier.js?v=5"></script>
@@ -73,7 +73,7 @@
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
-            padding-bottom: 120px; /* Space for fixed footer */
+            padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px)); /* Peek of public footer */
         }
 
         /* Remove body padding when corporate login page is active */
@@ -647,6 +647,8 @@
             font-weight: 600;
             text-align: center;
             margin-top: 5px;
+            padding: 0 12px;
+            line-height: 1.25;
             animation: fadeInUp 0.8s ease-out;
         }
 
@@ -3657,37 +3659,42 @@
             return spot ? spot.label : String(chairNumber);
         }
 
-        // Display cafe name in header
+        function headerVenueTitle() {
+            const place = (typeof getActivePlace === 'function') ? getActivePlace() : ((typeof CONFIG !== 'undefined' && CONFIG.PLACE) ? CONFIG.PLACE : null);
+            const placeName = String((place && place.name) || localStorage.getItem('place_name') || '').trim();
+            const viaPlace = !!(typeof CONFIG !== 'undefined' && (CONFIG.ARRIVED_VIA_PLACE || (CONFIG.PLACE && CONFIG.PLACE.id)))
+                || (typeof getCafeSlugFromPath === 'function' && !!getCafeSlugFromPath());
+            if (viaPlace && placeName) {
+                return placeName;
+            }
+            const cafeId = (typeof CONFIG !== 'undefined' && CONFIG.CAFE_ID) || parseInt(localStorage.getItem('cafe_id'), 10);
+            const storedName = localStorage.getItem('cafe_name');
+            if (cafeId && typeof CONFIG !== 'undefined' && CONFIG.CAFE_NAMES && CONFIG.CAFE_NAMES[cafeId]) {
+                return CONFIG.CAFE_NAMES[cafeId];
+            }
+            return storedName || '';
+        }
+
+        // Display place (or cafe) name in header
         function displayCafeName() {
-            // Wait for CONFIG to be available
             if (typeof CONFIG === 'undefined') {
                 setTimeout(displayCafeName, 100);
                 return;
             }
-            
-            const cafeId = CONFIG.CAFE_ID || parseInt(localStorage.getItem('cafe_id'));
+
             const cafeNameDisplay = document.getElementById('cafeNameDisplay');
-            
-            const storedName = localStorage.getItem('cafe_name');
-            const cafeName = (cafeId && CONFIG.CAFE_NAMES && CONFIG.CAFE_NAMES[cafeId])
-                ? CONFIG.CAFE_NAMES[cafeId]
-                : storedName;
-            if (cafeName && cafeNameDisplay) {
-                cafeNameDisplay.textContent = cafeName;
+            const title = headerVenueTitle();
+            const logoName = localStorage.getItem('cafe_name') || title;
+            if (title && cafeNameDisplay) {
+                cafeNameDisplay.textContent = title;
                 cafeNameDisplay.style.display = 'block';
                 if (typeof applyCafeLogo === 'function') {
-                    applyCafeLogo(localStorage.getItem('cafe_logo_url'), cafeName);
+                    applyCafeLogo(localStorage.getItem('cafe_logo_url'), logoName);
                 }
-                
-                // Update page title if not already updated by config.js
-                if (document.title === 'Workplace Roast - Ordering') {
-                    document.title = cafeName + ' - Ordering';
-                }
-                
-                // Update PWA title meta tag
+                document.title = title + ' - Ordering';
                 const pwaTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-                if (pwaTitleMeta && pwaTitleMeta.getAttribute('content') === 'Workplace Roast') {
-                    pwaTitleMeta.setAttribute('content', cafeName);
+                if (pwaTitleMeta) {
+                    pwaTitleMeta.setAttribute('content', title);
                 }
             }
         }
@@ -4742,7 +4749,7 @@
 
         // Load footer component
         function loadFooterComponent() {
-            fetch('footer-component.html')
+            fetch('footer-component.html?v=10')
                 .then(response => response.text())
                 .then(html => {
                     // Replace all footer placeholders with the component

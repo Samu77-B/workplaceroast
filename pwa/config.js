@@ -100,7 +100,12 @@ async function hydrateCafeFromSlug() {
             if (typeof loadStorefrontMenu === 'function') {
                 loadStorefrontMenu();
             }
-            document.title = (data.name || 'Workplace Roast') + ' - Ordering';
+            if (typeof displayCafeName === 'function') {
+                displayCafeName();
+            } else {
+                const heading = (CONFIG.PLACE && CONFIG.PLACE.name) ? CONFIG.PLACE.name : (data.name || 'Workplace Roast');
+                document.title = heading + ' - Ordering';
+            }
             return CONFIG.CAFE_ID;
         }
     } catch (err) {
