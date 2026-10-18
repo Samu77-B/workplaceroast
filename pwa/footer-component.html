@@ -43,17 +43,13 @@
     right: 0;
     width: 100%;
     z-index: 50;
-    transform: translateY(calc(100% - 16px - env(safe-area-inset-bottom, 0px)));
+    transform: translateY(0);
     transition: transform 0.3s ease-in-out;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.app-footer.footer-hidden {
-    transform: translateY(calc(100% - 16px - env(safe-area-inset-bottom, 0px)));
-}
-
-.app-footer.footer-visible {
-    transform: translateY(0);
+.app-footer.is-peeking {
+    transform: translateY(calc(100% - 18px - env(safe-area-inset-bottom, 0px)));
 }
 
 .footer-content {
@@ -178,7 +174,8 @@
 
 /* Ensure footer appears on corporate login page */
 #corporateLoginPage .app-footer,
-body.corporate-login-active .app-footer {
+body.corporate-login-active .app-footer,
+body.corporate-login-active .app-footer.is-peeking {
     position: fixed;
     bottom: 0;
     z-index: 1001;
@@ -261,75 +258,97 @@ function showInstallInstructions() {
     if (window.__wrFooterPeekInit) return;
     window.__wrFooterPeekInit = true;
 
-    function footers() {
-        return Array.prototype.slice.call(document.querySelectorAll('.app-footer'));
+    function mainFooter() {
+        const list = document.querySelectorAll('.app-footer');
+        list.forEach(function (footer, index) {
+            if (index > 0) footer.style.display = 'none';
+        });
+        return list[0] || null;
     }
 
     function ensureRevealSpace(footer) {
         let space = document.getElementById('footer-reveal-space');
+        const host = document.querySelector('.container') || document.body;
         if (!space) {
             space = document.createElement('div');
             space.id = 'footer-reveal-space';
             space.setAttribute('aria-hidden', 'true');
-            document.body.appendChild(space);
+            host.appendChild(space);
+        } else if (space.parentNode !== host) {
+            host.appendChild(space);
         }
-        const peek = 16;
-        const extra = Math.max(80, (footer ? footer.offsetHeight : 120) - peek);
+        const extra = Math.max(120, footer ? footer.offsetHeight : 140);
         space.style.height = extra + 'px';
+        space.style.width = '100%';
         space.style.pointerEvents = 'none';
+        space.style.flexShrink = '0';
+        return space;
+    }
+
+    function isAtPageBottom() {
+        const loginPage = document.getElementById('corporateLoginPage');
+        const loginActive = document.body.classList.contains('corporate-login-active');
+        if (loginActive && loginPage) {
+            return loginPage.scrollTop + loginPage.clientHeight >= loginPage.scrollHeight - 32;
+        }
+        const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const viewport = window.innerHeight || document.documentElement.clientHeight;
+        const full = Math.max(
+            document.documentElement.scrollHeight,
+            document.body.scrollHeight,
+            document.documentElement.offsetHeight
+        );
+        return scrollTop + viewport >= full - 48;
     }
 
     function updateFooterVisibility() {
-        const list = footers();
-        if (!list.length) return;
-        list.forEach(function (footer, index) {
-            if (index > 0) footer.style.display = 'none';
-        });
-        const footer = list[0];
-        ensureRevealSpace(footer);
-
+        const footer = mainFooter();
+        if (!footer) return;
         const loginActive = document.body.classList.contains('corporate-login-active');
+        const space = ensureRevealSpace(footer);
         if (loginActive) {
-            const space = document.getElementById('footer-reveal-space');
-            if (space) space.style.height = '0px';
+            space.style.height = '0px';
+            footer.classList.remove('is-peeking');
+            return;
         }
-        const scrollRoot = loginActive
-            ? document.getElementById('corporateLoginPage')
-            : null;
-        const scrollTop = scrollRoot
-            ? scrollRoot.scrollTop
-            : (window.pageYOffset || document.documentElement.scrollTop);
-        const windowHeight = scrollRoot ? scrollRoot.clientHeight : window.innerHeight;
-        const documentHeight = scrollRoot ? scrollRoot.scrollHeight : document.documentElement.scrollHeight;
-        const isAtBottom = scrollTop + windowHeight >= documentHeight - 24;
-
-        if (loginActive || isAtBottom) {
-            footer.classList.remove('footer-hidden');
-            footer.classList.add('footer-visible');
+        if (isAtPageBottom()) {
+            footer.classList.remove('is-peeking');
         } else {
-            footer.classList.remove('footer-visible');
-            footer.classList.add('footer-hidden');
+            footer.classList.add('is-peeking');
         }
     }
 
     let ticking = false;
     function requestTick() {
-        if (!ticking) {
-            window.requestAnimationFrame(function () {
-                updateFooterVisibility();
-                ticking = false;
-            });
-            ticking = true;
-        }
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(function () {
+            updateFooterVisibility();
+            ticking = false;
+        });
     }
 
     window.addEventListener('scroll', requestTick, { passive: true });
     window.addEventListener('resize', updateFooterVisibility, { passive: true });
+    document.addEventListener('touchmove', requestTick, { passive: true });
     const loginPage = document.getElementById('corporateLoginPage');
     if (loginPage) {
         loginPage.addEventListener('scroll', requestTick, { passive: true });
     }
+
+    const space = ensureRevealSpace(mainFooter());
+    if (space && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver(function (entries) {
+            const footer = mainFooter();
+            if (!footer || document.body.classList.contains('corporate-login-active')) return;
+            const visible = entries.some(function (entry) { return entry.isIntersecting && entry.intersectionRatio > 0; });
+            footer.classList.toggle('is-peeking', !visible);
+        }, { root: null, threshold: 0.01, rootMargin: '0px 0px -8px 0px' });
+        io.observe(space);
+    }
+
     updateFooterVisibility();
-    setTimeout(updateFooterVisibility, 300);
+    setTimeout(updateFooterVisibility, 200);
+    setTimeout(updateFooterVisibility, 800);
 })();
 </script>

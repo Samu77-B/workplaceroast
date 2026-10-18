@@ -73,7 +73,7 @@
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
-            padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px)); /* Peek of public footer */
+            padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); /* Peek of public footer */
         }
 
         /* Remove body padding when corporate login page is active */
@@ -84,7 +84,7 @@
         
         @media (max-width: 480px) {
             body {
-                padding-bottom: 100px; /* Less padding on small screens */
+                padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
             }
         }
 
@@ -4749,25 +4749,34 @@
 
         // Load footer component
         function loadFooterComponent() {
-            fetch('footer-component.html?v=10')
+            fetch('footer-component.html?v=11')
                 .then(response => response.text())
                 .then(html => {
-                    // Replace all footer placeholders with the component
-                    const placeholders = document.querySelectorAll('#footer-placeholder, .footer-placeholder');
-                    placeholders.forEach(placeholder => {
-                        placeholder.outerHTML = html;
-                    });
-                    
-                    // Ensure footer appears on all pages (fixed position footer)
-                    // If no footer exists yet, append it to body
-                    if (document.querySelectorAll('.app-footer').length === 0) {
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = html;
-                        const footer = tempDiv.querySelector('.app-footer');
-                        if (footer) {
-                            document.body.appendChild(footer);
-                        }
+                    const parsed = new DOMParser().parseFromString(html, 'text/html');
+                    if (!document.getElementById('wr-footer-style')) {
+                        parsed.querySelectorAll('style').forEach(function (style) {
+                            const clone = document.createElement('style');
+                            clone.id = 'wr-footer-style';
+                            clone.textContent = style.textContent;
+                            document.head.appendChild(clone);
+                        });
                     }
+                    document.querySelectorAll('#footer-placeholder, .footer-placeholder, body > .app-footer').forEach(function (node) {
+                        if (node.classList && node.classList.contains('app-footer')) {
+                            node.remove();
+                        } else {
+                            node.innerHTML = '';
+                        }
+                    });
+                    const footerSrc = parsed.querySelector('.app-footer');
+                    if (footerSrc) {
+                        document.body.appendChild(document.importNode(footerSrc, true));
+                    }
+                    parsed.querySelectorAll('script').forEach(function (oldScript) {
+                        const script = document.createElement('script');
+                        script.textContent = oldScript.textContent;
+                        document.body.appendChild(script);
+                    });
                 })
                 .catch(error => {
                     console.error('Error loading footer component:', error);
